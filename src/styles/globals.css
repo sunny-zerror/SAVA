@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — the one place to re-skin a new brand.
+ * Every token becomes a Tailwind utility: --color-ink → text-ink / bg-ink,
+ * --spacing-section → py-section, --spacing-gutter → px-gutter, etc.
+ */
+@theme static {
+  /* Colour */
+  --color-ink: #111111; /* primary text, buttons */
+  --color-paper: #ffffff; /* page background */
+  --color-muted: #6b6b6b; /* secondary text */
+  --color-line: #e6e6e6; /* hairlines, borders */
+  --color-surface: #f5f5f3; /* cards, skeletons, image placeholders */
+  --color-accent: #b08d57; /* brand highlight */
+  --color-sale: #b42318; /* discounts, errors */
+  --color-success: #1f7a4d;
+
+  /* Spacing rhythm (mobile values; desktop overrides below) */
+  --spacing-section: 4rem; /* vertical padding of a page section */
+  --spacing-stack: 2.5rem; /* gap between blocks inside a section */
+  --spacing-grid: 1rem; /* product grid gap */
+  --spacing-gutter: 1rem; /* page side padding */
+  --spacing-header: 4rem; /* header height — use pt-header under a fixed header */
+
+  /* Layout */
+  --container-site: 90rem; /* max content width */
+
+  /* Easing */
+  --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (width >= 48rem) {
+  :root {
+    --spacing-section: 6rem;
+    --spacing-stack: 3.5rem;
+    --spacing-grid: 1.5rem;
+    --spacing-gutter: 2.5rem;
+    --spacing-header: 4.5rem;
+  }
+}
+
+/* Font families come from next/font in src/lib/fonts.ts */
+@theme inline {
+  --font-primary: var(--ff-primary), Georgia, serif; /* headings, display */
+  --font-secondary: var(--ff-secondary), system-ui, sans-serif; /* body, UI */
+}
+
+@theme {
+  --animate-fade-up: fade-up 0.6s var(--ease-out-expo) both;
+  --animate-skeleton: skeleton 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(0.75rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes skeleton {
+    to {
+      transform: translateX(100%);
+    }
+  }
+}
+
+/* ---------- Base ----------------------------------------------------------- */
+@layer base {
+  html {
+    /* Fluid root: 14px on phones → 16px on wide screens; every rem scales with it */
+    font-size: clamp(0.875rem, 0.83rem + 0.19vw, 1rem);
+    /* Reserve the scrollbar's space so locking scroll (drawers) doesn't shift the page */
+    scrollbar-gutter: stable;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-secondary);
+    line-height: 1.5;
+  }
+
+  /* Heading scale — in the base layer so utilities (text-sm, leading-*) still win */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-primary);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+  h2 {
+    font-size: 2.125rem;
+  }
+  h3 {
+    font-size: 1.75rem;
+  }
+  h4 {
+    font-size: 1.5rem;
+  }
+  h5 {
+    font-size: 1.25rem;
+  }
+  h6 {
+    font-size: 1.0625rem;
+  }
+
+  @media (width >= 48rem) {
+    h1 {
+      font-size: 3.75rem;
+    }
+    h2 {
+      font-size: 2.75rem;
+    }
+    h3 {
+      font-size: 2.25rem;
+    }
+    h4 {
+      font-size: 1.75rem;
+    }
+    h5 {
+      font-size: 1.375rem;
+    }
+    h6 {
+      font-size: 1.125rem;
+    }
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  button,
+  [role="button"] {
+    cursor: pointer;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-ink);
+    color: var(--color-paper);
+  }
+}
+
+/* ---------- Layout utilities ---------------------------------------------- */
+/* Extends Tailwind's container: centred, capped width, page gutters */
+@utility container {
+  width: 100%;
+  max-width: var(--container-site);
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+}
+
+@utility section {
+  position: relative;
+  padding-block: var(--spacing-section);
+}
+
+@utility center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@utility cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ---------- Type utilities (pair with the h1–h6 scale above) --------------- */
+@utility text-eyebrow {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+@utility text-body-lg {
+  font-size: 1.125rem;
+  line-height: 1.6;
+}
+
+@utility text-body {
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@utility text-caption {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@utility text-cta {
+  font-size: 0.8125rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ---------- Skeleton ------------------------------------------------------- */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--color-surface);
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.6) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: var(--animate-skeleton);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

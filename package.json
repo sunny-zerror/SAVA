@@ -1,0 +1,42 @@
+{
+  "name": "sava",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "check": "npm run typecheck && npm run lint && prettier --check ."
+  },
+  "dependencies": {
+    "@apollo/client": "^4.3.5",
+    "@apollo/client-integration-nextjs": "^0.14.5",
+    "@gsap/react": "^2.1.2",
+    "@remixicon/react": "^4.9.0",
+    "graphql": "^16.12.0",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.27",
+    "next": "16.4.3",
+    "nimbbl_sonic": "^6.3.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "rxjs": "^7.8.2",
+    "zustand": "^5.0.16"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^24",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.3",
+    "prettier": "^3.9.10",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  }
+}
