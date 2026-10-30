@@ -17,7 +17,7 @@ export default function AddressFields({ prefix, defaults }: AddressFieldsProps) 
   const k = defaults?._id ?? "new";
 
   return (
-    <div key={k} className="grid grid-cols-2 gap-4">
+    <div key={k} className="grid grid-cols-2 gap-x-3 gap-y-5 md:gap-x-4">
       <TextField
         label="First name"
         name={name("firstname")}
@@ -88,7 +88,7 @@ export default function AddressFields({ prefix, defaults }: AddressFieldsProps) 
         autoComplete={ac("country-name")}
         required
       />
-      <div className="col-span-2 grid grid-cols-[6rem_1fr] gap-3">
+      <div className="col-span-2 grid grid-cols-[5.5rem_1fr] gap-3">
         <TextField
           label="Code"
           name={name("countryCode")}

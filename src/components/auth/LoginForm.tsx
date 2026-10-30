@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { TextField, formValues } from "@/components/ui/form";
+import { FormAlert, TextField, formValues } from "@/components/ui/form";
 import { useAuth } from "@/hooks/useAuth";
 import { errorMessage } from "@/utils/errors";
 
@@ -31,12 +31,8 @@ export default function LoginForm({ next }: { next: string }) {
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <TextField label="Email" name="email" type="email" autoComplete="email" required />
       <TextField label="Password" name="password" type="password" autoComplete="current-password" required />
-      {error && (
-        <p role="alert" className="text-caption text-sale">
-          {error}
-        </p>
-      )}
-      <Button type="submit" size="lg" fullWidth loading={loading}>
+      {error && <FormAlert>{error}</FormAlert>}
+      <Button type="submit" size="lg" fullWidth loading={loading} className="mt-2">
         Sign in
       </Button>
     </form>

@@ -11,9 +11,5 @@ export const metadata: Metadata = createMetadata({
 // z-commerce redirects here after a successful Nimbbl payment: /checkout/thank-you?orderId=…
 export default async function ThankYouPage({ searchParams }: { searchParams: Promise<{ orderId?: string }> }) {
   const { orderId } = await searchParams;
-  return (
-    <section className="section container">
-      <OrderConfirmation orderId={orderId} />
-    </section>
-  );
+  return <OrderConfirmation orderId={orderId} />;
 }

@@ -56,10 +56,16 @@ export default function ProfileTab({ user }: { user: User }) {
   }
 
   return (
-    <div className="grid gap-section lg:grid-cols-2 lg:gap-stack">
-      <form onSubmit={onProfile} className="flex flex-col gap-5">
-        <h2 className="text-3xl">Your details</h2>
-        <div className="grid grid-cols-2 gap-4">
+    <div className="grid items-start gap-grid lg:grid-cols-2">
+      <form
+        onSubmit={onProfile}
+        aria-labelledby="profile-details"
+        className="flex flex-col gap-5 rounded-3xl border border-line p-5 md:p-8"
+      >
+        <h2 id="profile-details" className="text-2xl md:text-3xl">
+          Your details
+        </h2>
+        <div className="grid gap-4 sm:grid-cols-2">
           <TextField
             label="First name"
             name="firstName"
@@ -83,7 +89,7 @@ export default function ProfileTab({ user }: { user: User }) {
           disabled
           hint="Contact us to change your email."
         />
-        <div className="grid grid-cols-[6rem_1fr] gap-3">
+        <div className="grid grid-cols-[5.5rem_1fr] gap-3">
           <TextField label="Code" name="countryCode" defaultValue={user.countryCode ?? "+91"} />
           <TextField
             label="Phone"
@@ -93,13 +99,19 @@ export default function ProfileTab({ user }: { user: User }) {
             autoComplete="tel-national"
           />
         </div>
-        <Button type="submit" loading={savingProfile} className="self-start">
+        <Button type="submit" loading={savingProfile} className="mt-2 self-start">
           Save details
         </Button>
       </form>
 
-      <form onSubmit={onPassword} className="flex flex-col gap-5">
-        <h2 className="text-3xl">Password</h2>
+      <form
+        onSubmit={onPassword}
+        aria-labelledby="profile-password"
+        className="flex flex-col gap-5 rounded-3xl border border-line p-5 md:p-8"
+      >
+        <h2 id="profile-password" className="text-2xl md:text-3xl">
+          Password
+        </h2>
         <TextField
           label="Current password"
           name="currentPassword"
@@ -122,7 +134,7 @@ export default function ProfileTab({ user }: { user: User }) {
           autoComplete="new-password"
           required
         />
-        <Button type="submit" variant="outline" loading={savingPassword} className="self-start">
+        <Button type="submit" variant="ink" loading={savingPassword} className="mt-2 self-start">
           Change password
         </Button>
       </form>

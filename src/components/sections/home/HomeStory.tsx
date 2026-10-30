@@ -1,23 +1,28 @@
-import { ButtonLink } from "@/components/ui/Button";
-import { siteConfig } from "@/config/site";
+import BlobButton from "@/components/ui/BlobButton";
+import { Frame, FrameRule } from "@/components/ui/Frame";
+import Sparkle from "@/components/ui/Sparkle";
 
 export default function HomeStory() {
   return (
-    <section className="section bg-surface" aria-labelledby="home-story">
-      <div className="container grid gap-stack md:grid-cols-2 md:items-center">
-        <div className="aspect-[4/3] bg-line" aria-hidden="true" />
-        <div className="flex max-w-lg flex-col gap-6">
-          <p className="text-eyebrow text-muted">About {siteConfig.name}</p>
-          <h2 id="home-story">Made with intention, worn every day</h2>
-          <p className="text-body text-muted">
-            Use this space for the brand story — what you make, how you make it and why it matters. Swap the block on
-            the left for campaign imagery from public/images/home/.
+    <section aria-labelledby="home-story">
+      <Frame className="pt-section pb-24 lg:pb-32">
+        <FrameRule />
+
+        <div className="flex flex-col items-center px-inset pt-16 text-center">
+          <h2 id="home-story" className="flex items-center gap-2 text-kicker text-accent">
+            <Sparkle />
+            Sava Story
+          </h2>
+          <p data-heading-effect className="mt-4 max-w-232 text-lead text-muted">
+            SAVA combines advanced sweat-control technology with refined fragrance to redefine everyday personal care.
+            Our innovative formulations deliver reliable protection, lasting freshness, and confidence without
+            compromise.
           </p>
-          <ButtonLink href="/about" variant="outline" className="self-start">
-            Read our story
-          </ButtonLink>
+          <BlobButton href="/about" className="mt-12">
+            Read More
+          </BlobButton>
         </div>
-      </div>
+      </Frame>
     </section>
   );
 }

@@ -9,6 +9,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { next } = await searchParams;
   return (
     <AuthCard
+      eyebrow="Welcome back"
       title="Sign in"
       description="Track orders, save addresses and check out faster."
       footer={{ text: "New here?", linkLabel: "Create an account", href: "/signup" }}

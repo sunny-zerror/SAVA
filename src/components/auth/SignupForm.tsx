@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { Checkbox, TextField, formValues } from "@/components/ui/form";
+import { Checkbox, FormAlert, TextField, formValues } from "@/components/ui/form";
 import { useAuth } from "@/hooks/useAuth";
 import { errorMessage } from "@/utils/errors";
 
@@ -42,11 +42,11 @@ export default function SignupForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-5">
+    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-x-4 gap-y-5">
       <TextField label="First name" name="firstName" autoComplete="given-name" required />
       <TextField label="Last name" name="lastName" autoComplete="family-name" required />
       <TextField label="Email" name="email" type="email" autoComplete="email" required className="col-span-2" />
-      <div className="col-span-2 grid grid-cols-[6rem_1fr] gap-3">
+      <div className="col-span-2 grid grid-cols-[5.5rem_1fr] gap-3">
         <TextField label="Code" name="countryCode" defaultValue="+91" autoComplete="tel-country-code" required />
         <TextField label="Phone" name="phoneNumber" type="tel" autoComplete="tel-national" required />
       </div>
@@ -70,12 +70,8 @@ export default function SignupForm() {
         className="col-span-2"
       />
       <Checkbox name="newsletter" label="Email me about new arrivals and offers" className="col-span-2" />
-      {errors.form && (
-        <p role="alert" className="col-span-2 text-caption text-sale">
-          {errors.form}
-        </p>
-      )}
-      <Button type="submit" size="lg" fullWidth loading={loading} className="col-span-2">
+      {errors.form && <FormAlert className="col-span-2">{errors.form}</FormAlert>}
+      <Button type="submit" size="lg" fullWidth loading={loading} className="col-span-2 mt-2">
         Create account
       </Button>
     </form>

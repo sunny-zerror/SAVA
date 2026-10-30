@@ -33,7 +33,8 @@ export function Tabs<T extends string>({ tabs, active, onChange, label, classNam
     <div
       role="tablist"
       aria-label={label}
-      className={cn("no-scrollbar flex gap-6 overflow-x-auto border-b border-line", className)}
+      // Pill track: the selected tab fills with SAVA blue
+      className={cn("no-scrollbar flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-surface p-1", className)}
     >
       {tabs.map((tab, i) => {
         const selected = tab.id === active;
@@ -51,8 +52,8 @@ export function Tabs<T extends string>({ tabs, active, onChange, label, classNam
             onClick={() => onChange(tab.id)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
-              "-mb-px shrink-0 border-b-2 py-3 text-cta transition-colors",
-              selected ? "border-ink text-ink" : "border-transparent text-muted hover:text-ink",
+              "h-10 shrink-0 rounded-full px-4 text-sm font-bold transition-colors duration-300 focus-visible:-outline-offset-2 md:px-6",
+              selected ? "bg-accent text-paper" : "text-muted hover:bg-paper hover:text-ink",
             )}
           >
             {tab.label}

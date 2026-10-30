@@ -1,14 +1,12 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import ProductGrid from "@/components/product/ProductGrid";
+import ShopHero from "@/components/sections/shop/ShopHero";
+import ShopProducts from "@/components/sections/shop/ShopProducts";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import PageHeader from "@/components/ui/PageHeader";
-import Pagination from "@/components/ui/Pagination";
 import { productListSchema } from "@/lib/schema";
 import { createMetadata, createPageMetadata } from "@/lib/seo";
 import { getCategories, getCategoryProducts, getProducts, PAGE_SIZE } from "@/services/catalog";
-import { cn } from "@/utils/cn";
 
 type SearchParams = Promise<{ category?: string; page?: string }>;
 
@@ -40,6 +38,8 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   const totalPages = Math.ceil((listing?.totalCount ?? 0) / PAGE_SIZE);
   const activeCategory = listing && "category" in listing ? listing.category : null;
   const title = activeCategory?.name ?? "Shop all";
+  // The hero (and its h1) on the plain listing; filtered and later pages go straight to the products
+  const showHero = !category && page === 1;
 
   const query = (p: number) => {
     const params = new URLSearchParams();
@@ -50,48 +50,37 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   };
 
   return (
-    <section className="section container flex flex-col gap-stack">
-      <JsonLd data={productListSchema(products, title, query(page))} />
-      <div className="flex flex-col gap-6">
-        <Breadcrumbs
-          items={
-            activeCategory
-              ? [
-                  { name: "Shop", path: "/shop" },
-                  { name: activeCategory.name, path: query(1) },
-                ]
-              : [{ name: "Shop", path: "/shop" }]
-          }
+    <>
+      {showHero && <ShopHero productsId="products" />}
+      <section id="products" aria-label={title} className="pb-section">
+        <JsonLd data={productListSchema(products, title, query(page))} />
+        {showHero ? (
+          // The hero holds the h1; the listing still gets a heading for the outline
+          <h2 className="sr-only">{title}</h2>
+        ) : (
+          <div className="container flex flex-col gap-6 pt-section pb-stack">
+            <Breadcrumbs
+              items={
+                activeCategory
+                  ? [
+                      { name: "Shop", path: "/shop" },
+                      { name: activeCategory.name, path: query(1) },
+                    ]
+                  : [{ name: "Shop", path: "/shop" }]
+              }
+            />
+            <PageHeader title={title} description={activeCategory?.description ?? undefined} />
+          </div>
+        )}
+        <ShopProducts
+          categories={categories}
+          products={products}
+          activeCategory={category ?? ""}
+          page={page}
+          totalPages={totalPages}
+          href={query}
         />
-        <PageHeader title={title} description={activeCategory?.description ?? undefined} />
-      </div>
-
-      {categories.length > 0 && (
-        <nav aria-label="Categories" className="-mx-gutter no-scrollbar overflow-x-auto px-gutter">
-          <ul className="flex gap-2">
-            {[{ slug: "", name: "All" }, ...categories].map((c) => {
-              const active = (category ?? "") === c.slug;
-              return (
-                <li key={c.slug || "all"}>
-                  <Link
-                    href={c.slug ? `/shop?category=${c.slug}` : "/shop"}
-                    aria-current={active ? "page" : undefined}
-                    className={cn(
-                      "block border px-4 py-2 text-caption whitespace-nowrap transition-colors",
-                      active ? "border-ink bg-ink text-paper" : "border-line hover:border-ink",
-                    )}
-                  >
-                    {c.name}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      )}
-
-      <ProductGrid products={products} />
-      <Pagination page={page} totalPages={totalPages} href={query} />
-    </section>
+      </section>
+    </>
   );
 }

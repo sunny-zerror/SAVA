@@ -38,34 +38,34 @@ export default function OrderSummary({
   const [applying, setApplying] = useState(false);
 
   return (
-    <section aria-labelledby="order-summary" className="flex flex-col gap-6 bg-surface p-6 md:p-8">
-      <h2 id="order-summary" className="text-3xl">
+    <section aria-labelledby="order-summary" className="flex flex-col gap-6 rounded-3xl bg-surface p-5 md:p-8">
+      <h2 id="order-summary" className="text-2xl md:text-3xl">
         {title}
       </h2>
 
       <ul className="flex flex-col gap-5">
         {lines.map((line) => (
           <li key={`${line.productId}-${line.variantDetail?.variantDetailId ?? ""}`} className="flex gap-4">
-            <div className="relative h-20 w-16 shrink-0 bg-line">
+            <div className="relative h-20 w-16 shrink-0 rounded-xl bg-paper">
               <Image
                 src={mediaUrl(line.asset?.path)}
                 alt={line.asset?.altText || line.name}
                 fill
                 sizes="64px"
-                className="object-cover"
+                className="rounded-xl object-cover"
               />
-              <span className="absolute -top-2 -right-2 center size-5 rounded-full bg-ink text-[0.625rem] text-paper">
+              <span className="absolute -top-2 -right-2 center size-5 rounded-full bg-accent text-[0.625rem] font-bold text-paper">
                 {line.qty}
               </span>
             </div>
             <div className="flex flex-1 justify-between gap-4 text-caption">
               <div>
-                <p>{line.name}</p>
+                <p className="font-bold">{line.name}</p>
                 {Boolean(line.variantDetail?.selectedOptions?.length) && (
                   <p className="text-muted">{line.variantDetail?.selectedOptions.join(" / ")}</p>
                 )}
               </div>
-              <span>{formatPrice(line.finalPrice)}</span>
+              <span className="font-bold">{formatPrice(line.finalPrice)}</span>
             </div>
           </li>
         ))}
@@ -78,7 +78,11 @@ export default function OrderSummary({
               <span>
                 Coupon <strong>{coupon.code}</strong> applied
               </span>
-              <button type="button" onClick={coupon.onRemove} className="underline">
+              <button
+                type="button"
+                onClick={coupon.onRemove}
+                className="font-bold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
+              >
                 Remove
               </button>
             </div>
@@ -92,11 +96,11 @@ export default function OrderSummary({
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Coupon code"
-                className="h-11 flex-1 border border-line bg-paper px-4 text-caption outline-none focus:border-ink"
+                className="h-11 min-w-0 flex-1 rounded-full border border-line bg-paper px-5 text-caption uppercase transition-[border-color,box-shadow] outline-none placeholder:normal-case focus:border-accent focus:ring-4 focus:ring-accent/15"
               />
               <Button
                 type="button"
-                variant="outline"
+                variant="ink"
                 loading={applying}
                 disabled={!code}
                 onClick={async () => {
@@ -133,7 +137,7 @@ export default function OrderSummary({
             <dd>{formatPrice(tax)}</dd>
           </div>
         )}
-        <div className="flex justify-between border-t border-line pt-3 text-body">
+        <div className="flex items-baseline justify-between border-t border-line pt-4 text-lg font-bold">
           <dt>Total</dt>
           <dd>{formatPrice(total)}</dd>
         </div>

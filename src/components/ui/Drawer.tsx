@@ -8,14 +8,28 @@ import { cn } from "@/utils/cn";
 interface DrawerProps {
   open: boolean;
   onClose: () => void;
+  /** Accessible name of the dialog; also the visible heading unless `heading` is given */
   title: string;
+  /** Replaces the visible header content (e.g. the wordmark in the menu) */
+  heading?: React.ReactNode;
   side?: "left" | "right";
+  /** "lg" for full-bleed panels like the site menu */
+  size?: "md" | "lg";
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
 
 /** Side panel with overlay: Esc and overlay click close it, page scroll is paused while open */
-export default function Drawer({ open, onClose, title, side = "right", children, footer }: DrawerProps) {
+export default function Drawer({
+  open,
+  onClose,
+  title,
+  heading,
+  side = "right",
+  size = "md",
+  children,
+  footer,
+}: DrawerProps) {
   const lenis = useLenis();
   const panelRef = useRef<HTMLDivElement>(null);
   // The element that had focus before opening (usually the trigger button) gets it back on close
@@ -46,7 +60,10 @@ export default function Drawer({ open, onClose, title, side = "right", children,
     <div className={cn("fixed inset-0 z-50", !open && "pointer-events-none")} inert={!open}>
       <div
         onClick={onClose}
-        className={cn("absolute inset-0 bg-ink/40 transition-opacity duration-500", open ? "opacity-100" : "opacity-0")}
+        className={cn(
+          "absolute inset-0 bg-navy/40 backdrop-blur-[2px] transition-opacity duration-500",
+          open ? "opacity-100" : "opacity-0",
+        )}
       />
       <div
         ref={panelRef}
@@ -55,21 +72,26 @@ export default function Drawer({ open, onClose, title, side = "right", children,
         aria-label={title}
         tabIndex={-1}
         className={cn(
-          "absolute top-0 flex h-full w-full max-w-md flex-col bg-paper transition-transform duration-500 ease-out-expo outline-none",
-          side === "right" ? "right-0" : "left-0",
+          "absolute top-0 flex h-full w-full flex-col overflow-hidden bg-paper shadow-2xl shadow-navy/20 transition-transform duration-500 ease-out-expo outline-none",
+          size === "lg" ? "max-w-xl" : "max-w-md",
+          side === "right" ? "right-0 sm:rounded-l-3xl" : "left-0 sm:rounded-r-3xl",
           open ? "translate-x-0" : side === "right" ? "translate-x-full" : "-translate-x-full",
         )}
       >
-        <div className="flex h-header shrink-0 items-center justify-between border-b border-line px-6">
-          <h2 className="font-secondary text-cta">{title}</h2>
-          <button onClick={onClose} aria-label="Close" className="-mr-2 p-2">
-            <RiCloseLine className="size-5" />
+        <div className="flex h-header shrink-0 items-center justify-between gap-4 border-b border-line px-6 md:px-8">
+          {heading ?? <h2 className="text-lg">{title}</h2>}
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="-mr-1 center size-10 shrink-0 rounded-full bg-surface transition-colors hover:bg-mist"
+          >
+            <RiCloseLine aria-hidden="true" className="size-5" />
           </button>
         </div>
-        <div data-lenis-prevent className="flex-1 overflow-y-auto">
+        <div data-lenis-prevent className="flex-1 overflow-y-auto overscroll-contain">
           {children}
         </div>
-        {footer && <div className="shrink-0 border-t border-line p-6">{footer}</div>}
+        {footer && <div className="shrink-0 border-t border-line p-6 md:px-8">{footer}</div>}
       </div>
     </div>
   );

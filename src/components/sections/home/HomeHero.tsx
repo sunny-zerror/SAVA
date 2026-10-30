@@ -1,70 +1,69 @@
-"use client";
-
-import { useRef } from "react";
-import { ButtonLink } from "@/components/ui/Button";
+import Image from "next/image";
+import { Frame } from "@/components/ui/Frame";
 import { siteConfig } from "@/config/site";
-import { gsap, useGSAP } from "@/lib/gsap";
+import { getProduct } from "@/services/catalog";
+import { formatPrice } from "@/utils/format";
+import { displayPrice } from "@/utils/product";
+import HeroAddToCart from "./HeroAddToCart";
+import HeroCanvas from "./HeroCanvas";
+import HeroMotion from "./HeroMotion";
+import HomeIntro from "./HomeIntro";
+import StickBadge from "./StickBadge";
 
-// Drop a hero film at public/videos/hero.mp4 (and a poster in public/images/home/) to use it
-const HERO_VIDEO: string | null = null; // e.g. "/videos/hero.mp4"
+const highlights = [
+  {
+    icon: { src: "/icons/home/drop.svg", width: 17, height: 22 },
+    title: "Advanced sweat control",
+    text: "Stays fresh through every move, every commute, and everything in between.",
+  },
+  {
+    icon: { src: "/icons/home/shield.svg", width: 18, height: 21 },
+    title: "ISO 22716 certified",
+    text: "Made to cosmetic GMP standards with traceable batches.",
+  },
+];
 
-export default function HomeHero() {
-  const root = useRef<HTMLElement>(null);
-
-  useGSAP(
-    () => {
-      gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-hero-line]", {
-          yPercent: 100,
-          opacity: 0,
-          duration: 1.1,
-          stagger: 0.12,
-          ease: "expo.out",
-          delay: 0.15,
-        });
-        gsap.from("[data-hero-cta]", { opacity: 0, y: 12, duration: 0.8, delay: 0.6, ease: "power2.out" });
-      });
-    },
-    { scope: root },
-  );
+export default async function HomeHero() {
+  const product = await getProduct(siteConfig.featuredProductSlug);
 
   return (
-    <section
-      ref={root}
-      className="relative flex min-h-[calc(100svh-var(--spacing-header))] items-end overflow-hidden bg-surface"
-    >
-      {HERO_VIDEO && (
-        <video
-          className="absolute inset-0 cover"
-          src={HERO_VIDEO}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          aria-hidden="true"
-        />
-      )}
-      <div className="relative container pb-section">
-        <p className="mb-4 overflow-hidden text-eyebrow text-muted">
-          <span data-hero-line className="block">
-            New season
-          </span>
-        </p>
-        <h1 className="max-w-4xl overflow-hidden">
-          <span data-hero-line className="block">
-            {siteConfig.tagline}
-          </span>
-        </h1>
-        <div data-hero-cta className="mt-8 flex flex-wrap gap-3">
-          <ButtonLink href="/shop" size="lg">
-            Shop the collection
-          </ButtonLink>
-          <ButtonLink href="/about" size="lg" variant="outline">
-            Our story
-          </ButtonLink>
-        </div>
-      </div>
-    </section>
+    <>
+      {/* Outside the section: its isolate would trap the curtain under the sticky header */}
+      <HomeIntro />
+      {/* Pulled up under the absolute announcement bar and the sticky header (transparent over the hero until it pins) */}
+      <HeroMotion
+        aria-labelledby="home-hero"
+        className="relative isolate -mt-[calc(var(--spacing-header)+var(--spacing-announcement))] overflow-hidden bg-gradient-brand text-paper"
+      >
+        {/* Brand-blue gradient paints first (and stays for reduced motion / no WebGL); the live shader fades in over it */}
+        <HeroCanvas className="absolute inset-0 -z-10 size-full" />
+
+        {/* Top padding clears the bar and header that overlay this section */}
+        <Frame
+          tone="dark"
+          className="flex min-h-[min(100svh,58.75rem)] flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))] pb-12 md:pb-24"
+        >
+          <div className="relative grid flex-1 place-items-center py-16">
+            {/* data-heading-effect="intro": the lines rise once the intro clears, not on scroll */}
+            <h1 id="home-hero" data-heading-effect="intro" className="text-center text-display uppercase">
+              <span data-heading-line className="block">
+                Own Your
+              </span>
+              <span data-heading-line className="block">
+                Movement
+              </span>
+            </h1>
+            {/* Slot for the 3D model (HomeModel): same box as the stick, unrotated — the model takes the tilt */}
+            <div
+              data-model-anchor="hero"
+              data-model-tilt="-19.71"
+              data-model-fit="0.8"
+              data-model-drag
+              className="pointer-events-none absolute top-1/2 left-1/2 aspect-[1122/1402] w-[clamp(11rem,33vw,29.5rem)] -translate-1/2 touch-pan-y model-ready:pointer-events-auto model-ready:cursor-grab model-ready:active:cursor-grabbing"
+            />
+          </div>
+        </Frame>
+      </HeroMotion>
+    </>
   );
 }
