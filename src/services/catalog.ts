@@ -82,10 +82,3 @@ export const getCategoryProducts = cache(
     }
   },
 );
-
-/** Products sharing the first category, for "You may also like" */
-export const getRelatedProducts = cache(async (product: Product, limit = 4): Promise<ProductSummary[]> => {
-  const slug = product.categories?.[0]?.slug;
-  const pool = slug ? (await getCategoryProducts(slug))?.products : (await getProducts()).products;
-  return (pool ?? []).filter((p) => p._id !== product._id).slice(0, limit);
-});

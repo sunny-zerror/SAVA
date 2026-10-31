@@ -38,8 +38,7 @@ src/
 │   ├── page.tsx              Home
 │   ├── about/  contact/
 │   ├── shop/
-│   │   ├── (listing)/        /shop — all products (?category=, ?page=) + loading skeleton
-│   │   └── [slug]/           Product detail: gallery, options, add to bag, JSON-LD
+│   │   └── (listing)/        /shop — all products (?category=, ?page=) + loading skeleton
 │   ├── login/  signup/
 │   ├── account/              Tabs: overview · orders · addresses · profile (?tab=)
 │   ├── checkout/             Checkout → Nimbbl → thank-you/ or payment-failed/
@@ -49,8 +48,8 @@ src/
 ├── components/
 │   ├── layout/               Header, Footer, CartDrawer, MobileMenu, SiteLayout, Logo
 │   ├── providers/            Apollo, Lenis smooth scroll, store hydration
-│   ├── ui/                   Button, form fields, Tabs, Drawer, Price, Accordion…
-│   ├── product/              ProductCard, ProductGrid, ProductGallery, ProductPurchase
+│   ├── ui/                   Button, BlobButton, form fields, Tabs, Drawer, Price…
+│   ├── product/              ShopProductCard, BuyNowButton, ShopFilters, RangeStrip
 │   ├── sections/             Page sections: home/, about/, contact/
 │   ├── auth/  account/  checkout/
 │   └── seo/JsonLd.tsx

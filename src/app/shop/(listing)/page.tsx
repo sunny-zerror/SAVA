@@ -58,8 +58,11 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
       <section id="products" aria-label={title}>
         <JsonLd data={productListSchema(products, title, query(page))} />
         {showHero ? (
-          // The hero holds the h1; the listing still gets a heading for the outline
-          <h2 className="sr-only">{title}</h2>
+          // Section spacing below the banner, framed so the rails run down into the grid's frame;
+          // the hero holds the h1, the listing still gets a heading for the outline
+          <Frame className="pt-section">
+            <h2 className="sr-only">{title}</h2>
+          </Frame>
         ) : (
           // Framed, so the rails run on unbroken into the grid's frame below
           <Frame className="flex flex-col gap-6 px-inset pt-section pb-stack">

@@ -38,10 +38,12 @@ export default async function HomeHero() {
         {/* Brand-blue gradient paints first (and stays for reduced motion / no WebGL); the live shader fades in over it */}
         <HeroCanvas className="absolute inset-0 -z-10 size-full" />
 
-        {/* Top padding clears the bar and header that overlay this section */}
+        {/* Exactly one screen tall on every device (svh: the visible area, below a phone's URL bar),
+            growing only if a very short screen can't fit the headline. Top padding clears the bar and
+            header that overlay this section. */}
         <Frame
           tone="dark"
-          className="flex min-h-[min(100svh,58.75rem)] flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))] pb-12 md:pb-24"
+          className="flex h-svh min-h-fit flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))] pb-12 md:pb-24"
         >
           <div className="relative grid flex-1 place-items-center py-16">
             {/* data-heading-effect="intro": the lines rise once the intro clears, not on scroll */}

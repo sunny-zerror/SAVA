@@ -7,7 +7,7 @@ import { onIntroDone } from "@/lib/intro";
 /**
  * The shop hero's <section>, with its text intro: the headline's lines rise (the global
  * data-heading-effect), then the eyebrow, the line of copy and the button rise and fade in after it
- * (data-shop-intro, in order). The sticks drop in on their own (ShopHeroModel).
+ * (data-shop-intro, in order).
  */
 export default function ShopHeroMotion({ children, ...props }: React.ComponentProps<"section">) {
   const root = useRef<HTMLElement>(null);

@@ -24,23 +24,12 @@ interface DrawerProps {
   footer?: React.ReactNode;
 }
 
-/** The panel's slide time (duration-500 below) */
-const PANEL_MS = 500;
-
 /**
- * Staggered rise-in for a drawer's contents: spread the result on the i-th block. Each rises and
- * fades in a beat after the one before as the panel opens; on close they hold until the panel has
- * slid away, then reset instantly, ready for next time.
+ * The panel's glide, in and out: long and settling on the site's ease-out-expo, the way a lerp
+ * eases in on its target. Set inline below, so these stay the one source of the timing.
  */
-export function drawerRise(open: boolean, i: number) {
-  return {
-    className: cn(
-      "transition-[opacity,translate] ease-out-expo",
-      open ? "translate-y-0 opacity-100 duration-700" : "translate-y-4 opacity-0 duration-0",
-    ),
-    style: { transitionDelay: `${open ? 150 + i * 60 : PANEL_MS}ms` },
-  };
-}
+export const DRAWER_OPEN_MS = 900;
+const DRAWER_CLOSE_MS = 700;
 
 /** Side panel with overlay: Esc and overlay click close it, page scroll is paused while open */
 export default function Drawer({
@@ -80,6 +69,8 @@ export default function Drawer({
     };
   }, [open, lenis, onClose]);
 
+  const glide = { transitionDuration: `${open ? DRAWER_OPEN_MS : DRAWER_CLOSE_MS}ms` };
+
   return (
     <div
       className={cn("fixed inset-0 z-50 [view-transition-class:site-chrome]", !open && "pointer-events-none")}
@@ -88,8 +79,9 @@ export default function Drawer({
     >
       <div
         onClick={onClose}
+        style={glide}
         className={cn(
-          "absolute inset-0 bg-navy/40 backdrop-blur-[2px] transition-opacity duration-500",
+          "absolute inset-0 bg-navy/40 backdrop-blur-[2px] transition-opacity ease-out-expo",
           open ? "opacity-100" : "opacity-0",
         )}
       />
@@ -99,8 +91,9 @@ export default function Drawer({
         aria-modal="true"
         aria-label={title}
         tabIndex={-1}
+        style={glide}
         className={cn(
-          "absolute top-0 flex h-full w-full flex-col overflow-hidden bg-paper shadow-2xl shadow-navy/20 transition-transform duration-500 ease-out-expo outline-none",
+          "absolute top-0 flex h-full w-full flex-col overflow-hidden bg-paper shadow-2xl shadow-navy/20 transition-transform ease-out-expo outline-none",
           size === "lg" ? "max-w-xl" : "max-w-md",
           side === "right" ? "right-0 sm:rounded-l-3xl" : "left-0 sm:rounded-r-3xl",
           open ? "translate-x-0" : side === "right" ? "translate-x-full" : "-translate-x-full",

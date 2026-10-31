@@ -6,8 +6,8 @@ import { useEffect, ViewTransition } from "react";
 /**
  * Page transitions: the old page fades out, then the new one fades in (globals.css, "Page
  * transitions"). Keyed by pathname — Next keys a root template by the first URL segment only, so
- * /shop → /shop/[slug] wouldn't remount it. Search-param changes (shop filters, pagination) keep the
- * key, so they swap without a fade. Header, drawers and the footer's stick are anchored above the
+ * /checkout → /checkout/thank-you wouldn't remount it. Search-param changes (shop filters,
+ * pagination) keep the key, so they swap without a fade. Header, drawers and the footer's stick are anchored above the
  * page (view-transition-class site-chrome), so the fading snapshots never cover them.
  */
 export default function Template({ children }: { children: React.ReactNode }) {

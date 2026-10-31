@@ -1,18 +1,16 @@
 "use client";
 
 import { useRef } from "react";
-import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
+import { gsap, useGSAP } from "@/lib/gsap";
 
 /**
  * The review cards' grid, with two kinds of motion:
- *   – data-scroll-speed="1.5" (large screens): while the grid scrolls through, the cards move at
- *     that multiple of the page's scroll, gliding over the pinned summary on a faster layer. They
- *     start and end flush with the section, so no empty band opens at its top or bottom. (Below lg
- *     the grid stacks, and a faster card would slide up over the summary.) The distance they end
- *     raised by is published as --reviews-travel, so the summary unpins where they end.
- *   – Each card's photo (data-review-media / data-review-image) fades in as it arrives, settling
- *     from a slight zoom; then its play chip (data-review-chip) fades up. Kept quiet on purpose.
- *     Reverses when scrolled back below, to replay.
+ *   – data-scroll-speed="1"–"2.5" (large screens; on each card): the card drifts at that multiple of
+ *     the page's scroll as it passes through the viewport, centred on its place in the layout. (Below
+ *     lg the grid stacks, and a faster card would slide up over the summary.)
+ *   – Each card (data-review-card) makes an entrance as it arrives: the glass opens upward as it
+ *     tips up and grows, the photo settles from a zoom, then the stars, name and price, thumbnail
+ *     and play chip follow in turn. Reverses when scrolled back below, to replay.
  */
 export default function ReviewsMotion({ children, ...props }: React.ComponentProps<"div">) {
   const root = useRef<HTMLDivElement>(null);
@@ -25,44 +23,38 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
         const grid = root.current;
         if (!grid) return;
         const cards = gsap.utils.toArray<HTMLElement>("[data-scroll-speed]");
-        const speeds = cards.map((el) => Math.max(1, Number(el.dataset.scrollSpeed) || 1));
+        // How much of each card's speed it really takes: the full drift has a 2.5× card cross the
+        // screen in 40% of the time, leaving it sparse — at this share the speeds still read clearly
+        // apart, and three or four cards stay in view
+        const DRIFT = 0.45;
 
-        // The cards sit in place while the grid's top part (heading, summary) is in view. From the
-        // grid's top reaching the viewport's top they run at `speed`, over just the scroll D that
-        // brings their (raised) last row to the viewport's foot: H − vh = speed × D. They end raised
-        // by travel = (speed − 1) × D, and the grid gives that much back below it, so neither the
-        // top nor the bottom of the section is left with an empty band.
-        const overflow = () => Math.max(0, grid.offsetHeight - window.innerHeight);
-        const travelFor = (speed: number) => ((speed - 1) * overflow()) / speed;
-        const takeUpSlack = () => {
-          const travel = Math.max(0, ...speeds.map(travelFor));
-          grid.style.marginBottom = `${-travel}px`;
-          grid.style.setProperty("--reviews-travel", `${travel}px`);
-        };
-        takeUpSlack();
-        ScrollTrigger.addEventListener("refreshInit", takeUpSlack);
-
-        // Timed by the whole grid, not each card: cards with the same speed share one offset and
-        // keep their layout spacing instead of spreading apart.
-        cards.forEach((el, i) => {
-          gsap.to(el, {
-            y: () => -travelFor(speeds[i]),
-            ease: "none",
-            scrollTrigger: {
-              trigger: grid,
-              start: "top top",
-              end: () => `+=${Math.max(1, overflow() / speeds[i])}`,
-              scrub: true,
-              invalidateOnRefresh: true,
+        // Each card drifts at its own speed s around its place in the layout: there as its middle
+        // crosses the viewport's, (s − 1) × DRIFT × the scroll from that point off it either side — so it
+        // arrives faster (or slower) and leaves the same way, while the layout's spacing holds at the
+        // moment it's looked at. Timed by its own pass through the viewport, measured on its parent
+        // (the card itself moves, and would shift its own trigger).
+        cards.forEach((el) => {
+          const speed = Math.max(1, Number(el.dataset.scrollSpeed) || 1);
+          const parent = el.parentElement ?? grid;
+          // Half the scroll the card takes to cross the viewport, top edge in to bottom edge out
+          const half = () => ((window.innerHeight + el.offsetHeight) / 2) * DRIFT;
+          gsap.fromTo(
+            el,
+            { y: () => (speed - 1) * half() },
+            {
+              y: () => -(speed - 1) * half(),
+              ease: "none",
+              scrollTrigger: {
+                trigger: parent,
+                // offsetTop: the lane is the card's offsetParent
+                start: () => `top+=${el.offsetTop} bottom`,
+                end: () => `top+=${el.offsetTop + el.offsetHeight} top`,
+                scrub: true,
+                invalidateOnRefresh: true,
+              },
             },
-          });
+          );
         });
-
-        return () => {
-          ScrollTrigger.removeEventListener("refreshInit", takeUpSlack);
-          grid.style.marginBottom = "";
-          grid.style.removeProperty("--reviews-travel");
-        };
       });
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -83,16 +75,44 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
           { rootMargin: "0px 0px -12% 0px" },
         );
 
-        gsap.utils.toArray<HTMLElement>("[data-review-media]").forEach((media) => {
-          const image = media.querySelector("[data-review-image]");
-          const chip = media.querySelector("[data-review-chip]");
+        // The card's entrance: the glass opens upward from its foot as it tips up out of a lean and
+        // grows to size; the photo settles from a deeper zoom; then the stars pop in one by one, the
+        // name and price rise, and the stick thumbnail springs in with a twist, the play chip last.
+        // On the glass inside each card: the card itself carries the scroll drift (a second set of
+        // transforms on it would be overwritten as the drift refreshes), and it's the card, never
+        // clipped, that's watched — a fully clipped element doesn't register as coming into view.
+        gsap.utils.toArray<HTMLElement>("[data-review-card]").forEach((card) => {
+          const watched = card.parentElement ?? card;
+          const q = gsap.utils.selector(card);
           const tl = gsap
-            .timeline({ paused: true })
-            .from(media, { opacity: 0, duration: 0.9, ease: "power2.out" }, 0)
-            .from(image, { scale: 1.06, duration: 1.4, ease: "power2.out" }, 0)
-            .from(chip, { y: 6, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.5);
-          reveals.set(media, tl);
-          observer.observe(media);
+            .timeline({ paused: true, defaults: { ease: "expo.out" } })
+            .fromTo(
+              card,
+              {
+                clipPath: "inset(100% 0% 0% 0% round 1.5rem)",
+                rotateX: 24,
+                scale: 0.9,
+                transformPerspective: 1200,
+                transformOrigin: "50% 100%",
+              },
+              { clipPath: "inset(0% 0% 0% 0% round 1.5rem)", rotateX: 0, scale: 1, duration: 1.3 },
+              0,
+            )
+            .from(q("[data-review-image]"), { scale: 1.3, duration: 1.8 }, 0)
+            .from(
+              q("[data-review-stars] > *"),
+              { scale: 0, rotate: -45, duration: 0.6, stagger: 0.06, ease: "back.out(3)" },
+              0.45,
+            )
+            .from(q("[data-review-info] > *"), { y: 16, opacity: 0, duration: 0.9, stagger: 0.08 }, 0.55)
+            .from(
+              q("[data-review-thumb]"),
+              { scale: 0.5, rotate: -14, opacity: 0, duration: 0.9, ease: "back.out(2.2)" },
+              0.65,
+            )
+            .from(q("[data-review-chip]"), { y: 8, opacity: 0, duration: 0.7 }, 0.8);
+          reveals.set(watched, tl);
+          observer.observe(watched);
         });
 
         return () => observer.disconnect();

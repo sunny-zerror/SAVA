@@ -4,8 +4,6 @@
 @custom-variant model-ready (html[data-model="ready"] &);
 /* Set on <html> once the footer's 3D stick (FooterModel) is live — its static stand-in hides */
 @custom-variant footer-model-ready (html[data-footer-model="ready"] &);
-/* Set on <html> once the shop hero's 3D sticks (ShopHeroModel) are live — the photo's sticks hide */
-@custom-variant shop-model-ready (html[data-shop-model="ready"] &);
 /* Set on <html> once the shop grid's 3D sticks (ShopGridModel) are live — the product photos hide */
 @custom-variant grid-model-ready (html[data-grid-model="ready"] &);
 /* An accordion item that is, or is animating to be, open: FaqAccordion sets data-expanded the moment
@@ -22,7 +20,8 @@
   --color-ink: #33332e; /* primary text, buttons */
   --color-paper: #ffffff; /* page background */
   --color-muted: #5c5c58; /* secondary text (ink at 80%) */
-  --color-line: #efeeed; /* hairlines, borders, frame rails */
+  --color-line: #efeeed; /* hairlines, borders */
+  --color-rule: #dcd9d8; /* the frame's rails and rules — a stronger line, so the frame reads clearly */
   --color-surface: #f4f7fb; /* cards, skeletons, tinted sections */
   --color-accent: #709fcb; /* SAVA blue — labels, buttons, announcement bar */
   --color-mist: #d8e3ff; /* frame rail dots */
@@ -119,7 +118,9 @@
 
   body {
     min-height: 100dvh;
-    overflow-x: hidden;
+    /* clip, not hidden: hidden makes body a scroll container once a drawer locks <html>'s overflow,
+       and the sticky header then pins to body instead of the window — dropping out of view */
+    overflow-x: clip;
     background-color: var(--color-paper);
     color: var(--color-ink);
     @apply text-body;
@@ -445,12 +446,14 @@
 
 /*
  * data-heading-effect (src/lib/global.ts): hidden until split into lines, so the unsplit text never
- * flashes; data-frame-rule (same file): its line and dots wait for the draw-in. Only with scripting
+ * flashes; data-frame-rule / data-frame-rails (same file): the borders wait for their draw-in (a rule's dots
+ * show from the start). Only with scripting
  * on, and shown anyway after 4s if the script never gets to them (like the intro's fallback).
  */
 @media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
   [data-heading-effect]:not([data-heading-effect-ready]),
-  [data-frame-rule]:not([data-frame-rule-ready]) > *,
+  [data-frame-rule]:not([data-frame-rule-ready]) [data-frame-line],
+  [data-frame-rails]:not([data-frame-rails-ready]) [data-frame-rail],
   [data-reveal]:not([data-reveal-ready]) {
     visibility: hidden;
     animation: reveal-fallback 0s 4s forwards;

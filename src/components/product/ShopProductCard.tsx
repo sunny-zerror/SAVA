@@ -7,7 +7,6 @@ import type { ProductSummary } from "@/types";
 import { cn } from "@/utils/cn";
 import { mediaUrl, primaryImage } from "@/utils/media";
 import { displayPrice, isSoldOut } from "@/utils/product";
-import { productHref } from "@/utils/url";
 
 interface ShopProductCardProps {
   product: ProductSummary;
@@ -31,8 +30,8 @@ export default function ShopProductCard({ product, priority }: ShopProductCardPr
       className="group relative flex flex-col items-center gap-4 bg-paper px-5 pt-6 pb-5 text-center md:px-7"
     >
       <h3 className="text-h5">
-        {/* Stretched link: the card opens the product; the button sits above it */}
-        <Link href={productHref(product.slug)} className="after:absolute after:inset-0">
+        {/* Stretched link: the card opens the shop; the button sits above it */}
+        <Link href="/shop" className="after:absolute after:inset-0">
           {product.name}
         </Link>
       </h3>

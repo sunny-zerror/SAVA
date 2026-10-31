@@ -14,6 +14,3 @@ export function productImages(assets: Asset[] = []): Asset[] {
 }
 
 export const primaryImage = (assets: Asset[] = []) => productImages(assets)[0];
-
-/** The image to swap in on hover, if the client flagged one */
-export const hoverImage = (assets: Asset[] = []) => assets.find((a) => a.isHover && isImage(a));

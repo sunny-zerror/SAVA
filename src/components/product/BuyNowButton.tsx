@@ -10,7 +10,6 @@ import { useCart } from "@/hooks/useCart";
 import { isApiConfigured } from "@/lib/env";
 import { toast } from "@/store/toast-store";
 import { isOutOfStock, toVariantDetail } from "@/utils/product";
-import { productHref } from "@/utils/url";
 
 interface BuyNowButtonProps {
   slug: string;
@@ -21,16 +20,16 @@ interface BuyNowButtonProps {
 }
 
 /**
- * "Buy It Now" on a listing card — SAVA's BlobButton. It's a real link to the product (so it works
- * before JS, and for products with options); the click fetches the full product (listings don't
- * carry variant detail), adds its single variant to the bag and goes straight to checkout.
+ * "Buy It Now" on a listing card — SAVA's BlobButton (BlobButton is always a link, so it points at
+ * /shop). The click fetches the full product (listings don't carry variant detail), adds its single
+ * variant to the bag and goes straight to checkout. Products with options can't be bought from a
+ * card, so they get a toast instead.
  */
 export default function BuyNowButton({ slug, productId, categoryId, soldOut, className }: BuyNowButtonProps) {
   const client = useApolloClient();
   const router = useRouter();
   const { addItem, busy } = useCart();
   const [loading, setLoading] = useState(false);
-  const href = productHref(slug);
 
   const onBuy = async () => {
     // Demo catalogue: there's no cart to add to — useCart explains that
@@ -42,9 +41,17 @@ export default function BuyNowButton({ slug, productId, categoryId, soldOut, cla
     try {
       const { data } = await client.query({ query: GET_PRODUCT, variables: { slug } });
       const product = data?.getClientSideProductById;
-      const variant = (product?.productOptions ?? []).length === 0 ? product?.variants?.[0] : undefined;
-      if (!product || !variant) {
-        router.push(href);
+      if (!product) {
+        toast.error("Couldn't load this one. Please try again.");
+        return;
+      }
+      if ((product.productOptions ?? []).length > 0) {
+        toast.info("That one comes in options — it can't be bought from here yet.");
+        return;
+      }
+      const variant = product.variants?.[0];
+      if (!variant) {
+        toast.info("That one isn't available right now.");
         return;
       }
       if (isOutOfStock(variant)) {
@@ -54,7 +61,7 @@ export default function BuyNowButton({ slug, productId, categoryId, soldOut, cla
       const added = await addItem({ productId, categoryId, variant: toVariantDetail(variant) });
       if (added) router.push("/checkout");
     } catch {
-      router.push(href);
+      toast.error("Couldn't load this one. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -62,7 +69,7 @@ export default function BuyNowButton({ slug, productId, categoryId, soldOut, cla
 
   return (
     <BlobButton
-      href={href}
+      href="/shop"
       block
       icon={<RiShoppingBag3Line className="size-4" />}
       aria-disabled={soldOut || undefined}

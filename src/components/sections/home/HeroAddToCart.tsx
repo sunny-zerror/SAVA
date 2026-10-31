@@ -6,7 +6,6 @@ import { useCart } from "@/hooks/useCart";
 import { useCartStore } from "@/store/cart-store";
 import type { Product } from "@/types";
 import { isOutOfStock, toVariantDetail } from "@/utils/product";
-import { productHref } from "@/utils/url";
 
 const action = "group flex w-full items-center justify-between gap-4 text-cta disabled:opacity-60";
 
@@ -19,7 +18,7 @@ const icon = (
   </span>
 );
 
-/** Quick add for a single-variant product; products with options send shoppers to choose first */
+/** Quick add for a single-variant product; products with options send shoppers to the shop instead */
 export default function HeroAddToCart({ product }: { product: Product }) {
   const { addItem, busy } = useCart();
   const openCart = useCartStore((s) => s.open);
@@ -27,8 +26,8 @@ export default function HeroAddToCart({ product }: { product: Product }) {
 
   if (!variant) {
     return (
-      <Link href={productHref(product.slug)} className={action}>
-        Choose Options
+      <Link href="/shop" className={action}>
+        Shop Now
         {icon}
       </Link>
     );

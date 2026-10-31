@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Skeleton from "@/components/ui/Skeleton";
 import { cn } from "@/utils/cn";
@@ -16,29 +15,18 @@ function Line({ role, center, className }: { role: string; center?: boolean; cla
   );
 }
 
-/** The shop hero's layout (ShopHero): the headline's two lines and the button; the artwork itself */
+/** The shop hero's layout (ShopHero): the 22:9 banner, the headline's two lines and the button over it */
 function HeroSkeleton() {
   return (
-    <div className="overflow-hidden bg-surface">
-      <Frame className="grid items-center gap-10 px-inset py-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-6 lg:py-10">
-        {/* Mist-tinted: the default skeleton fill is the same surface colour as the hero */}
-        <div className="flex flex-col items-start gap-8">
+    <div className="grid aspect-22/9 overflow-hidden bg-ink">
+      <Frame tone="dark" className="flex h-full items-center px-inset">
+        {/* Paper-tinted: the film's banner is dark */}
+        <div className="flex w-full flex-col items-start gap-8">
           <div className="w-full max-w-xl">
-            <Line role="text-h1" className="w-11/12 bg-mist/50" />
-            <Line role="text-h1" className="w-3/5 bg-mist/50" />
+            <Line role="text-h1" className="w-11/12 bg-paper/15" />
+            <Line role="text-h1" className="w-3/5 bg-paper/15" />
           </div>
-          <Skeleton className="h-12 w-38 rounded-full bg-mist/50" />
-        </div>
-        {/* The real still life (the hero preloads it anyway); the sticks drop in once it's live */}
-        <div className="relative bleed-r aspect-1672/941">
-          <Image
-            src="/images/banners/shop-still-life.png"
-            alt=""
-            fill
-            priority
-            sizes="(min-width: 64rem) 65vw, 100vw"
-            className="object-contain"
-          />
+          <Skeleton className="h-12 w-38 rounded-full bg-paper/15" />
         </div>
       </Frame>
     </div>
@@ -90,7 +78,10 @@ export default function ShopSkeleton({ hero }: { hero: boolean }) {
   return (
     <div aria-busy="true" aria-label="Loading products">
       {hero ? (
-        <HeroSkeleton />
+        <>
+          <HeroSkeleton />
+          <Frame className="pt-section">{null}</Frame>
+        </>
       ) : (
         <Frame className="flex flex-col gap-6 px-inset pt-section pb-stack">
           <Line role="text-caption" className="w-28" />

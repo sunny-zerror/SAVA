@@ -63,7 +63,7 @@ export default function Header() {
           <div
             className={cn(
               "grid h-header grid-cols-[1fr_auto_1fr] items-center border-x transition-colors duration-300 md:px-inset",
-              stuck || !overlay ? "border-line" : "border-transparent",
+              stuck || !overlay ? "border-rule" : "border-transparent",
             )}
           >
             <div>
