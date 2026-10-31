@@ -27,7 +27,12 @@ export default async function HomeBestsellers() {
         />
         <FrameRule />
 
-        <ul className="grid gap-x-grid gap-y-12 px-inset pt-12 sm:grid-cols-3 sm:items-end lg:gap-x-11">
+        {/* Cards rise in one by one. Only a rise, never a clip: the 3D sticks are drawn over their image
+            slots by HomeModel's canvas, which follows the slots' moving rects but can't be clipped */}
+        <ul
+          data-reveal="stagger"
+          className="grid gap-x-grid gap-y-12 px-inset pt-12 sm:grid-cols-3 sm:items-end lg:gap-x-11"
+        >
           {products.map((product, i) => (
             <li key={product._id} className="max-sm:mx-auto max-sm:w-full max-sm:max-w-xs">
               {/* The middle product stands taller */}

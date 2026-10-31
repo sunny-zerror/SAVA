@@ -49,7 +49,8 @@ export default function ProductPurchase({ product }: { product: Product }) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    // Price, each option, then the button rise in turn under the heading's reveal
+    <div data-reveal="stagger" className="flex flex-col gap-6">
       <Price price={shownPrice} compareAt={compareAt} className="text-body-lg" />
 
       {options.map((option) => (

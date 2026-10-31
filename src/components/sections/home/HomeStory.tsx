@@ -9,7 +9,7 @@ export default function HomeStory() {
         <FrameRule />
 
         <div className="flex flex-col items-center px-inset pt-16 text-center">
-          <h2 id="home-story" className="flex items-center gap-2 text-kicker text-accent">
+          <h2 data-reveal id="home-story" className="flex items-center gap-2 text-kicker text-accent">
             <Sparkle />
             Sava Story
           </h2>
@@ -18,7 +18,7 @@ export default function HomeStory() {
             Our innovative formulations deliver reliable protection, lasting freshness, and confidence without
             compromise.
           </p>
-          <BlobButton href="/about" className="mt-12">
+          <BlobButton data-reveal href="/about" className="mt-12">
             Read More
           </BlobButton>
         </div>

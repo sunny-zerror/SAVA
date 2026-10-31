@@ -28,6 +28,16 @@ import { afterPageEnter, pageEntering } from "@/lib/page-transition";
  *     While the frame is in view, every few seconds a pulse of light runs down both rails. Each
  *     drawn rule it passes lights up: the dots flare and ripple, and a spark runs in along the rule
  *     from each rail to meet in the middle. Not tied to the scroll — it runs on its own.
+ *
+ *   The motion system for everything else — one easing and rhythm site-wide, each playing once as
+ *   it scrolls into view (hidden until then by globals.css, with the same 4s fallback):
+ *     data-reveal            the element rises and fades in
+ *     data-reveal="stagger"  its children do, one after another (lists, grids, link columns)
+ *     data-reveal="fade"     opacity only (things that mustn't move: overlays, big type)
+ *     data-reveal="image"    an image wrapper (overflow-hidden) opens upward from its foot while
+ *                            the image inside settles from a slight zoom
+ *   data-parallax="0.1"      scroll depth: the element drifts against the scroll by that fraction
+ *                            (an image inside an overflow-hidden wrapper; it's scaled to cover)
  */
 
 export const HEADING_EFFECT = "data-heading-effect";
@@ -152,8 +162,9 @@ function ripple(rule: Element) {
 
 function animateFrameRule(rule: HTMLElement) {
   const ready = () => rule.setAttribute("data-frame-rule-ready", "");
-  // A fixed panel has no scroll position to trigger on
-  if (rule.closest("[role=dialog]")) return ready();
+  // A fixed panel has no scroll position to trigger on; a loading placeholder (aria-busy) is gone
+  // before a draw-in would finish — the real content's rules draw instead
+  if (rule.closest("[role=dialog], [aria-busy=true]")) return ready();
 
   const draw = gsap
     .timeline({ scrollTrigger: { trigger: rule, start: "top 92%", toggleActions: "play none none reverse" } })
@@ -261,11 +272,53 @@ function animateFrameRails(rails: HTMLElement) {
   };
 }
 
+/** The site's entrance motion: one ease and rhythm everywhere */
+const ENTER = { duration: 1.1, ease: "expo.out" };
+/** Plays once, as the element's top passes 88% of the viewport */
+const onEnter = (trigger: Element) => ({ trigger, start: "top 88%", once: true });
+
+function animateReveal(el: HTMLElement) {
+  const ready = () => el.setAttribute("data-reveal-ready", "");
+  const kind = el.dataset.reveal;
+
+  if (kind === "image") {
+    const image = el.querySelector("img, canvas, video");
+    gsap
+      .timeline({ scrollTrigger: onEnter(el) })
+      .from(el, { clipPath: "inset(100% 0% 0% 0%)", duration: 1.3, ease: "expo.out" })
+      .from(image, { scale: 1.06, duration: 1.6, ease: "expo.out" }, 0);
+  } else if (kind === "stagger") {
+    gsap.from(el.children, { ...ENTER, y: 32, opacity: 0, stagger: 0.08, scrollTrigger: onEnter(el) });
+  } else if (kind === "fade") {
+    gsap.from(el, { ...ENTER, duration: 1.4, opacity: 0, scrollTrigger: onEnter(el) });
+  } else {
+    gsap.from(el, { ...ENTER, y: 32, opacity: 0, scrollTrigger: onEnter(el) });
+  }
+  ready();
+}
+
+function animateParallax(el: HTMLElement) {
+  const depth = Number(el.dataset.parallax) || 0.1;
+  // Scaled up just enough that the drift never shows an edge inside its wrapper
+  gsap.set(el, { scale: 1 + depth * 2 });
+  gsap.fromTo(
+    el,
+    { yPercent: -depth * 80 },
+    {
+      yPercent: depth * 80,
+      ease: "none",
+      scrollTrigger: { trigger: el.parentElement ?? el, start: "top bottom", end: "bottom top", scrub: true },
+    },
+  );
+}
+
 /** Data-attribute effects, scanned for across the page */
 const EFFECTS: [selector: string, animate: (el: HTMLElement) => void | (() => void)][] = [
   [HEADING_SELECTOR, animateHeading],
   ["[data-frame-rule]", animateFrameRule],
   ["[data-frame-rails]", animateFrameRails],
+  ["[data-reveal]", animateReveal],
+  ["[data-parallax]", animateParallax],
 ];
 
 export function useGlobalAnimations() {

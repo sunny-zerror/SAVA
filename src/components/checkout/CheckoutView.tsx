@@ -112,7 +112,12 @@ export default function CheckoutView() {
   const total = cart.discountedPrice || cart.totalprice;
 
   return (
-    <form onSubmit={onSubmit} className="grid items-start gap-stack lg:grid-cols-[1fr_28rem] xl:gap-16">
+    // A task flow, so just one rise each for the steps and the summary
+    <form
+      data-reveal="stagger"
+      onSubmit={onSubmit}
+      className="grid items-start gap-stack lg:grid-cols-[1fr_28rem] xl:gap-16"
+    >
       <div className="flex flex-col gap-grid">
         <fieldset className={step}>
           <legend className="sr-only">Contact</legend>
@@ -225,7 +230,10 @@ function StatePanel({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto flex max-w-2xl flex-col items-center gap-5 rounded-3xl bg-surface px-6 py-14 text-center md:px-12">
+    <div
+      data-reveal
+      className="mx-auto flex max-w-2xl flex-col items-center gap-5 rounded-3xl bg-surface px-6 py-14 text-center md:px-12"
+    >
       <span aria-hidden="true" className="center size-14 rounded-full bg-paper text-accent">
         {icon}
       </span>

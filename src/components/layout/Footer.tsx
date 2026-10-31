@@ -28,16 +28,16 @@ export default function Footer() {
               <br />
               Health Skin
             </h2>
-            <BlobButton href="/shop" tone="light">
+            <BlobButton href="/shop" tone="light" data-reveal>
               Explore Collection
             </BlobButton>
           </div>
 
           <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-9">
-            <ul className="flex flex-col gap-4 text-h4">
+            <ul data-reveal="stagger" className="flex flex-col gap-4 text-h4">
               {footerNav.map((item) => (
                 <li key={item.label}>
-                  <Link href={item.href} className="transition-opacity hover:opacity-70">
+                  <Link href={item.href} className="link-underline">
                     {item.label}
                   </Link>
                 </li>
@@ -46,15 +46,10 @@ export default function Footer() {
           </nav>
 
           <nav aria-label="Social" className="lg:col-span-1 lg:col-start-12">
-            <ul className="flex flex-col gap-2.5 text-body-lg whitespace-nowrap">
+            <ul data-reveal="stagger" className="flex flex-col gap-2.5 text-body-lg whitespace-nowrap">
               {socialNav.map((item) => (
                 <li key={item.label}>
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-opacity hover:opacity-70"
-                  >
+                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="link-underline">
                     {item.label}
                   </a>
                 </li>
@@ -64,18 +59,18 @@ export default function Footer() {
         </div>
 
         <FrameRule tone="dark" />
-        {/* Band for the SAVA watermark */}
-        <div aria-hidden="true" className="relative h-56 md:h-78">
+        {/* Band for the SAVA watermark: big type, so it only fades in */}
+        <div aria-hidden="true" data-reveal="fade" className="relative h-56 md:h-78">
           <span className="absolute inset-x-[2%] inset-y-[12%] bg-paper/15 mask-[url(/images/brand/wordmark.png)] mask-contain mask-center mask-no-repeat" />
         </div>
         <FrameRule tone="dark" />
 
         <div className="grid gap-8 px-inset pt-14 pb-12 lg:grid-cols-12">
           <nav aria-label="Legal" className="lg:col-span-2 lg:col-start-7">
-            <ul className="flex flex-col gap-2.5 text-body-lg">
+            <ul data-reveal="stagger" className="flex flex-col gap-2.5 text-body-lg">
               {legalNav.map((item) => (
                 <li key={item.label}>
-                  <Link href={item.href} className="transition-opacity hover:opacity-70">
+                  <Link href={item.href} className="link-underline">
                     {item.label}
                   </Link>
                 </li>
@@ -83,12 +78,18 @@ export default function Footer() {
             </ul>
           </nav>
 
-          <address className="flex flex-col gap-5 text-h5 not-italic lg:col-span-4 lg:col-start-9">
+          <address
+            data-reveal="stagger"
+            className="flex flex-col gap-5 text-h5 not-italic lg:col-span-4 lg:col-start-9"
+          >
+            {/* The link wraps only the address, so its underline runs under the text, not the sparkle */}
             {email && (
-              <a href={`mailto:${email}`} className="flex items-center gap-4 transition-opacity hover:opacity-70">
+              <p className="flex items-center gap-4">
                 <Sparkle className="size-4.5" />
-                {email}
-              </a>
+                <a href={`mailto:${email}`} className="link-underline">
+                  {email}
+                </a>
+              </p>
             )}
             {address && (
               <p className="flex items-center gap-4">

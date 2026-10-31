@@ -22,10 +22,10 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <h1 data-heading-effect className="max-w-3xl">
           Something went wrong
         </h1>
-        <p className="max-w-xl text-body-lg text-muted">
+        <p data-reveal className="max-w-xl text-body-lg text-muted">
           Please try again. If it keeps happening, contact us and we&apos;ll sort it out.
         </p>
-        <div className="mt-2 flex flex-wrap justify-center gap-3">
+        <div data-reveal className="mt-2 flex flex-wrap justify-center gap-3">
           <Button onClick={reset} size="lg">
             <RiRefreshLine aria-hidden="true" className="size-4" />
             Try again

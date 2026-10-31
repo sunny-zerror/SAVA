@@ -37,7 +37,9 @@ export default function ShopFilters({ categories, active }: ShopFiltersProps) {
   const range = [{ slug: "", name: "All" }, ...categories];
 
   return (
-    <aside aria-label="Filters" className="flex flex-col">
+    // Staggered as two blocks (heading, then the groups), not group by group: FaqAccordion tweens
+    // each <details> itself and would cut a reveal on one short if it were toggled mid-way
+    <aside aria-label="Filters" data-reveal="stagger" className="flex flex-col">
       <h2 className="border-b border-line pb-5 text-h4">Filter</h2>
 
       <FaqAccordion exclusive={false}>
@@ -50,7 +52,10 @@ export default function ShopFilters({ categories, active }: ShopFiltersProps) {
                   <Link
                     href={c.slug ? `/shop?category=${c.slug}` : "/shop"}
                     aria-current={current ? "page" : undefined}
-                    className={cn("transition-colors hover:text-accent", current ? "text-accent" : "text-ink")}
+                    className={cn(
+                      "link-underline transition-colors hover:text-accent",
+                      current ? "text-accent" : "text-ink",
+                    )}
                   >
                     {c.name}
                   </Link>

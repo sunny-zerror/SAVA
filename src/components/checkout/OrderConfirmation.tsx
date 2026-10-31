@@ -69,12 +69,12 @@ export default function OrderConfirmation({ orderId }: { orderId?: string }) {
             <h1 data-heading-effect id="order-confirmed" className="max-w-3xl">
               Thank you for your order
             </h1>
-            <p className="max-w-xl text-body-lg text-paper/80">
+            <p data-reveal className="max-w-xl text-body-lg text-paper/80">
               {order
                 ? `Order ${order.orderNo} is confirmed — we've emailed your receipt.`
                 : "Your order is confirmed — we've emailed your receipt and details."}
             </p>
-            <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            <div data-reveal className="mt-2 flex flex-wrap items-center justify-center gap-3">
               <BlobButton href="/shop" tone="light">
                 Continue shopping
               </BlobButton>
@@ -89,7 +89,12 @@ export default function OrderConfirmation({ orderId }: { orderId?: string }) {
 
       <Frame className="py-section">
         {(loading || order) && (
-          <div className="grid items-start gap-stack px-inset pb-section lg:grid-cols-[1fr_28rem]">
+          // Revealed once the order is in (the attribute arrives with it), so the rise is the
+          // addresses and summary, not the skeletons
+          <div
+            data-reveal={loading ? undefined : "stagger"}
+            className="grid items-start gap-stack px-inset pb-section lg:grid-cols-[1fr_28rem]"
+          >
             {loading ? (
               <>
                 <Skeleton className="h-56 rounded-3xl" />
@@ -122,7 +127,7 @@ export default function OrderConfirmation({ orderId }: { orderId?: string }) {
           What happens next
         </h2>
         <FrameRule />
-        <ol className="grid gap-grid px-inset pt-10 md:grid-cols-3">
+        <ol data-reveal="stagger" className="grid gap-grid px-inset pt-10 md:grid-cols-3">
           {nextSteps.map(({ Icon, title, body }, i) => (
             <li key={title} className="flex flex-col gap-4 rounded-3xl bg-surface p-6 md:p-8">
               <span className="flex items-center justify-between">

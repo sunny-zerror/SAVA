@@ -4,6 +4,7 @@ import { useLenis } from "lenis/react";
 import { useEffect, useRef, useState } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { finishIntro, INTRO_ATTR, introPlayed, onIntroDone } from "@/lib/intro";
+import { afterPageEnter, pageEntering } from "@/lib/page-transition";
 
 /**
  * The home page intro, once per page load: the SAVA wordmark fades in from left to right on white,
@@ -33,21 +34,31 @@ export default function HomeIntro() {
         const header = document.querySelector<HTMLElement>("[data-site-header]");
         window.scrollTo(0, 0);
         document.documentElement.style.overflow = "hidden";
-        gsap.set([announcement, header], { yPercent: -100, autoAlpha: 0 });
+        // Arriving by a page transition, the chrome (shown live above the fade) eases out with the
+        // old page rather than vanishing at once; on a first load it simply starts hidden
+        if (pageEntering()) {
+          gsap.to([announcement, header], { yPercent: -100, autoAlpha: 0, duration: 0.28, ease: "power2.in" });
+        } else {
+          gsap.set([announcement, header], { yPercent: -100, autoAlpha: 0 });
+        }
+        gsap.set(el, { animation: "none" }); // JS is running — the CSS fallback isn't needed
         // While WebGL warms up behind the curtain the main thread can stall; with lag smoothing a stall
         // pauses the intro instead of skipping it. Off again after (SmoothScroll keeps Lenis in sync with it off).
         gsap.ticker.lagSmoothing(500, 33);
 
+        // Held until the page has fully faded in (when arriving by a page transition), so the
+        // wordmark's sweep is seen from its start
         const tl = gsap.timeline({
+          paused: true,
           onComplete: () => {
             gsap.ticker.lagSmoothing(0);
             document.documentElement.style.overflow = "";
             el.style.display = "none";
           },
         });
-        tl.set(el, { animation: "none" }) // JS is running — the CSS fallback isn't needed
-          // Wordmark: a soft edge sweeps across left → right to show it, then again to clear it
-          .to(el, { "--intro-in": "130%", duration: 1.1, ease: "power2.inOut" }, 0.25)
+        const offEnter = afterPageEnter(() => tl.play());
+        // Wordmark: a soft edge sweeps across left → right to show it, then again to clear it
+        tl.to(el, { "--intro-in": "130%", duration: 1.1, ease: "power2.inOut" }, 0.25)
           .to(el, { "--intro-out": "130%", duration: 0.9, ease: "power2.inOut" }, "+=0.35")
           // Curtain wipes up to reveal the hero
           .to(el, { clipPath: "inset(0% 0% 100% 0%)", duration: 1.1, ease: "expo.inOut" }, "-=0.2")
@@ -58,6 +69,7 @@ export default function HomeIntro() {
           .to(header, { yPercent: 0, autoAlpha: 1, duration: 1, ease: "expo.out" }, "<0.3");
 
         return () => {
+          offEnter();
           gsap.ticker.lagSmoothing(0);
           document.documentElement.style.overflow = "";
           // Only a real unmount (navigating away mid-intro) ends it early. Strict Mode's dev-only

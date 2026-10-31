@@ -20,7 +20,7 @@ export default function Breadcrumbs({ items }: { items: Crumb[] }) {
                 </span>
               ) : (
                 <>
-                  <Link href={crumb.path} className="hover:text-ink">
+                  <Link href={crumb.path} className="link-underline hover:text-ink">
                     {crumb.name}
                   </Link>
                   <span aria-hidden="true">/</span>

@@ -34,7 +34,12 @@ export default function PageHeader({
       <Heading data-heading-effect className="max-w-4xl">
         {title}
       </Heading>
-      {description && <p className="max-w-2xl text-body-lg text-muted">{description}</p>}
+      {/* The heading reveals itself; the description rises in under it */}
+      {description && (
+        <p data-reveal className="max-w-2xl text-body-lg text-muted">
+          {description}
+        </p>
+      )}
     </header>
   );
 }

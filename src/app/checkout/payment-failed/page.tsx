@@ -27,10 +27,10 @@ export default function PaymentFailedPage() {
         <h1 data-heading-effect className="max-w-3xl">
           Your payment didn&apos;t go through
         </h1>
-        <p className="max-w-xl text-body-lg text-muted">
+        <p data-reveal className="max-w-xl text-body-lg text-muted">
           You haven&apos;t been charged and your bag is saved. Please try again or use another payment method.
         </p>
-        <div className="mt-2 flex flex-wrap justify-center gap-3">
+        <div data-reveal className="mt-2 flex flex-wrap justify-center gap-3">
           <ButtonLink href="/checkout" size="lg">
             Try again
           </ButtonLink>

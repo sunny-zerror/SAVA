@@ -30,7 +30,7 @@ export default function ContactDetails() {
   return (
     <div className="flex flex-col gap-10">
       {rows.length > 0 ? (
-        <dl className="flex flex-col gap-6">
+        <dl data-reveal="stagger" className="flex flex-col gap-6">
           {rows.map(({ label, value, href, Icon }) => (
             <div key={label} className="flex items-center gap-4">
               <span aria-hidden="true" className="center size-12 shrink-0 rounded-full bg-surface text-accent">
@@ -40,7 +40,7 @@ export default function ContactDetails() {
                 <dt className="text-caption text-muted">{label}</dt>
                 <dd className="text-h5 wrap-break-word">
                   {href ? (
-                    <a href={href} className="transition-colors hover:text-accent">
+                    <a href={href} className="link-underline transition-colors hover:text-accent">
                       {value}
                     </a>
                   ) : (
@@ -60,7 +60,7 @@ export default function ContactDetails() {
       )}
 
       {/* Social card on the brand gradient */}
-      <div className="relative isolate overflow-hidden rounded-3xl bg-navy p-6 text-paper md:p-8">
+      <div data-reveal className="relative isolate overflow-hidden rounded-3xl bg-navy p-6 text-paper md:p-8">
         <Image
           src="/images/home/hero-bg.png"
           alt=""

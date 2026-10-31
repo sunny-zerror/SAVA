@@ -12,7 +12,9 @@ export default function ProductGallery({ assets, name }: { assets: Asset[]; name
       {list.map((image, i) => (
         <div
           key={`${image.path}-${i}`}
-          className="relative aspect-[3/4] w-full shrink-0 snap-start bg-surface md:first:col-span-2"
+          // Plain photos (no 3D slot), so each can open from its foot as it scrolls in
+          data-reveal="image"
+          className="relative aspect-[3/4] w-full shrink-0 snap-start overflow-hidden bg-surface md:first:col-span-2"
         >
           <Image
             src={mediaUrl(image.path)}

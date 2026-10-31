@@ -17,7 +17,8 @@ export default function NotFound() {
       <Frame tone="dark" className="py-section">
         <FrameRule tone="dark" />
         <div className="flex flex-col items-center gap-6 px-inset py-12 text-center md:py-16">
-          <div aria-hidden="true" className="relative grid place-items-center">
+          {/* Big type, so it fades in rather than rising */}
+          <div data-reveal="fade" aria-hidden="true" className="relative grid place-items-center">
             <p className="text-gradient-sky text-display">404</p>
             <Image
               src="/images/home/hero-stick.png"
@@ -35,10 +36,10 @@ export default function NotFound() {
           <h1 data-heading-effect id="not-found" className="max-w-3xl">
             Page not found
           </h1>
-          <p className="max-w-md text-body-lg text-paper/80">
+          <p data-reveal className="max-w-md text-body-lg text-paper/80">
             The page you&apos;re looking for has moved or no longer exists.
           </p>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
+          <div data-reveal className="mt-2 flex flex-wrap items-center justify-center gap-3">
             <BlobButton href="/" tone="light">
               Back home
             </BlobButton>

@@ -94,6 +94,7 @@ export default function HomeFaq() {
         <FrameRule />
         <div className="flex justify-center pt-12 pb-section">
           <BlobButton
+            data-reveal
             href={instagram?.href ?? "/"}
             target="_blank"
             rel="noopener noreferrer"

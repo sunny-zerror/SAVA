@@ -51,8 +51,9 @@ export default function ShopProducts({
           {products.length === 0 ? (
             <p className="py-section text-center text-body text-muted">No products here yet.</p>
           ) : (
-            // gap-px over a line-coloured ground: hairlines between the cells
-            <div className="grid grid-cols-2 gap-px bg-line md:grid-cols-3">
+            // gap-px over a line-coloured ground: hairlines between the cells. The cards rise in turn
+            // (a rise only — each holds a [data-grid-slot], which the 3D canvas follows by its rect)
+            <div data-reveal="stagger" className="grid grid-cols-2 gap-px bg-line md:grid-cols-3">
               {cards.map(({ product, key }, i) => (
                 <ShopProductCard key={key} product={product} priority={i < 3} />
               ))}

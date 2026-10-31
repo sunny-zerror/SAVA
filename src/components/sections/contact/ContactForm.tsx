@@ -49,7 +49,8 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} aria-labelledby="contact-form" className="grid gap-5 md:grid-cols-2">
+    // The form rises in as one block, not field by field
+    <form data-reveal onSubmit={onSubmit} aria-labelledby="contact-form" className="grid gap-5 md:grid-cols-2">
       <h2 id="contact-form" className="text-h3 md:col-span-2">
         Send us a message
       </h2>

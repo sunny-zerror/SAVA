@@ -69,14 +69,18 @@ export default async function ProductPage({ params }: { params: Params }) {
               <h1 data-heading-effect>{product.name}</h1>
             </header>
             <ProductPurchase product={product} />
-            {details.length > 0 && <Accordion items={details} />}
+            {details.length > 0 && (
+              <div data-reveal>
+                <Accordion items={details} />
+              </div>
+            )}
           </div>
         </div>
       </section>
 
       {related.length > 0 && (
         <section className="section container border-t border-line" aria-labelledby="related">
-          <h2 id="related" className="mb-stack">
+          <h2 id="related" data-reveal className="mb-stack">
             You may also like
           </h2>
           <ProductGrid products={related} priorityCount={0} />

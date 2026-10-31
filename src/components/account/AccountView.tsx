@@ -74,7 +74,8 @@ export default function AccountView({ tab }: { tab: AccountTab }) {
       </header>
       <FrameRule />
 
-      <div className="flex flex-col gap-8 px-inset pt-8 md:gap-10 md:pt-10">
+      {/* One rise for the tabs and their panel, on arrival only — switching tabs stays instant */}
+      <div data-reveal className="flex flex-col gap-8 px-inset pt-8 md:gap-10 md:pt-10">
         <Tabs
           label="Account sections"
           tabs={[...ACCOUNT_TABS]}

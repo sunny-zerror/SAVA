@@ -25,7 +25,11 @@ export default function SectionHeading({
     <div
       className={cn("flex flex-col gap-4", align === "center" ? "items-center text-center" : "items-start", className)}
     >
-      <p className={cn("flex items-center gap-2 text-kicker", tone === "dark" ? "text-paper" : "text-accent")}>
+      {/* The kicker rises in; the h2 has its own line reveal */}
+      <p
+        data-reveal
+        className={cn("flex items-center gap-2 text-kicker", tone === "dark" ? "text-paper" : "text-accent")}
+      >
         <Sparkle />
         {eyebrow}
       </p>

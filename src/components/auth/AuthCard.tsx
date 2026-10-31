@@ -25,7 +25,11 @@ export default function AuthCard({ title, description, eyebrow = "Your account",
       <FrameRule />
 
       <div className="grid gap-10 px-inset py-10 md:py-14 lg:grid-cols-2 lg:gap-14">
-        <aside className="relative isolate hidden min-h-[34rem] flex-col justify-between overflow-hidden rounded-3xl bg-navy p-10 text-paper lg:flex">
+        {/* The brand panel opens upward as its gradient settles; the form beside it rises in as one block */}
+        <aside
+          data-reveal="image"
+          className="relative isolate hidden min-h-[34rem] flex-col justify-between overflow-hidden rounded-3xl bg-navy p-10 text-paper lg:flex"
+        >
           <Image src="/images/home/hero-bg.png" alt="" fill sizes="45vw" className="-z-10 object-cover" />
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20" />
           <Image
@@ -53,7 +57,7 @@ export default function AuthCard({ title, description, eyebrow = "Your account",
           </div>
         </aside>
 
-        <div className="mx-auto flex w-full max-w-md flex-col justify-center gap-8 lg:py-6">
+        <div data-reveal className="mx-auto flex w-full max-w-md flex-col justify-center gap-8 lg:py-6">
           {children}
           <p className="border-t border-line pt-6 text-center text-caption text-muted">
             {footer.text}{" "}

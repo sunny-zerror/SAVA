@@ -105,7 +105,7 @@ export default async function HomeReviews() {
             align="start"
             tone="dark"
           />
-          <div className="flex max-w-sm flex-col items-start gap-6">
+          <div data-reveal className="flex max-w-sm flex-col items-start gap-6">
             <p className="text-body-lg">
               Advanced sweat control meets lasting fragrance for reliable protection and all-day freshness.
             </p>
