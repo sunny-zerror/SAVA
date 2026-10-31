@@ -46,8 +46,6 @@ export default function HomeIntro() {
         // pauses the intro instead of skipping it. Off again after (SmoothScroll keeps Lenis in sync with it off).
         gsap.ticker.lagSmoothing(500, 33);
 
-        // Held until the page has fully faded in (when arriving by a page transition), so the
-        // wordmark's sweep is seen from its start
         const tl = gsap.timeline({
           paused: true,
           onComplete: () => {
@@ -56,7 +54,6 @@ export default function HomeIntro() {
             el.style.display = "none";
           },
         });
-        const offEnter = afterPageEnter(() => tl.play());
         // Wordmark: a soft edge sweeps across left → right to show it, then again to clear it
         tl.to(el, { "--intro-in": "130%", duration: 1.1, ease: "power2.inOut" }, 0.25)
           .to(el, { "--intro-out": "130%", duration: 0.9, ease: "power2.inOut" }, "+=0.35")
@@ -67,6 +64,11 @@ export default function HomeIntro() {
           // Top chrome last: announcement bar first, the header following it down
           .to(announcement, { yPercent: 0, autoAlpha: 1, duration: 0.9, ease: "expo.out" }, "+=0.9")
           .to(header, { yPercent: 0, autoAlpha: 1, duration: 1, ease: "expo.out" }, "<0.3");
+
+        // Played once the page has fully faded in (straight away on a first load), so the sweep is
+        // seen from its start. Only after the timeline is built: playing it empty would complete it
+        // at once, and its onComplete would hide the curtain before anything ran.
+        const offEnter = afterPageEnter(() => tl.play());
 
         return () => {
           offEnter();
