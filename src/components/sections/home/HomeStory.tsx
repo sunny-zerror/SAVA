@@ -9,7 +9,7 @@ export default function HomeStory() {
         <FrameRule />
 
         <div className="flex flex-col items-center px-inset pt-16 text-center">
-          <h2 data-reveal id="home-story" className="flex items-center gap-2 text-kicker text-accent">
+          <h2 id="home-story" className="flex items-center gap-2 text-kicker text-accent">
             <Sparkle />
             Sava Story
           </h2>

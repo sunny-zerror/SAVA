@@ -12,8 +12,9 @@ export default function ProductGallery({ assets, name }: { assets: Asset[]; name
       {list.map((image, i) => (
         <div
           key={`${image.path}-${i}`}
-          // Plain photos (no 3D slot), so each can open from its foot as it scrolls in
-          data-reveal="image"
+          // Plain photos (no 3D slot), so the later ones open from their foot as they scroll in. Not
+          // the first: it's the page's LCP, above the fold, so it shows straight away
+          data-reveal={i === 0 ? undefined : "image"}
           className="relative aspect-[3/4] w-full shrink-0 snap-start overflow-hidden bg-surface md:first:col-span-2"
         >
           <Image
