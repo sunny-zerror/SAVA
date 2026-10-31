@@ -8,6 +8,8 @@ export default function StickBadge({ className }: { className?: string }) {
         <defs>
           <path id="stick-badge-ring" d="M42 42m-34 0a34 34 0 1 1 68 0a34 34 0 1 1-68 0" />
         </defs>
+        {/* No type role: its size is in the viewBox's units and fitted round the ring by textLength,
+            and a role's font-size would override fontSize */}
         <text fontSize="7.5" className="uppercase">
           <textPath href="#stick-badge-ring" textLength="212" lengthAdjust="spacing">
             Sweat and odor defense · action ·

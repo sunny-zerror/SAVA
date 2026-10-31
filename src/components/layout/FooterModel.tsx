@@ -134,5 +134,12 @@ export default function FooterModel() {
     };
   }, []);
 
-  return <canvas ref={ref} aria-hidden="true" className="pointer-events-none fixed inset-0 z-30 size-full" />;
+  return (
+    <canvas
+      ref={ref}
+      aria-hidden="true"
+      // Anchored above the page during route fades (globals.css, "Page transitions")
+      className="pointer-events-none fixed inset-0 z-30 size-full [view-transition-class:site-chrome] [view-transition-name:footer-model]"
+    />
+  );
 }

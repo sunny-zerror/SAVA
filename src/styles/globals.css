@@ -8,6 +8,9 @@
 @custom-variant shop-model-ready (html[data-shop-model="ready"] &);
 /* Set on <html> once the shop grid's 3D sticks (ShopGridModel) are live — the product photos hide */
 @custom-variant grid-model-ready (html[data-grid-model="ready"] &);
+/* An accordion item that is, or is animating to be, open: FaqAccordion sets data-expanded the moment
+   it's toggled (`open` stays set while it collapses); before that, and without JS, `open` counts */
+@custom-variant expanded (&:is([data-expanded="true"], [open]:not([data-expanded])));
 
 /*
  * Design tokens — the one place to re-skin a new brand.
@@ -58,12 +61,12 @@
 }
 
 /*
- * Font families. SAVA is set in Helvetica — until licensed files are wired up in
- * src/lib/fonts.ts (which defines --ff-primary / --ff-secondary), the system stack is used.
+ * Font families, loaded by src/lib/fonts.ts (which defines --ff-primary / --ff-secondary):
+ * Inter Tight for display and headings, Inter for text. Use them through the type roles below.
  */
 @theme inline {
-  --font-primary: var(--ff-primary, "Helvetica Neue", Helvetica, Arial, sans-serif); /* headings, display */
-  --font-secondary: var(--ff-secondary, "Helvetica Neue", Helvetica, Arial, sans-serif); /* body, UI */
+  --font-primary: var(--ff-primary, "Helvetica Neue", Helvetica, Arial, sans-serif); /* display, headings */
+  --font-secondary: var(--ff-secondary, "Helvetica Neue", Helvetica, Arial, sans-serif); /* text, UI */
 }
 
 @theme {
@@ -119,69 +122,47 @@
     overflow-x: hidden;
     background-color: var(--color-paper);
     color: var(--color-ink);
-    font-family: var(--font-secondary);
-    line-height: 1.5;
+    @apply text-body;
   }
 
-  /* Heading scale — in the base layer so utilities (text-sm, leading-*) still win */
+  /* Headings take their role by default — in the base layer, so a role class on the element
+     (<h2 class="text-h4">) still wins */
+  h1 {
+    @apply text-h1;
+  }
+  h2 {
+    @apply text-h2;
+  }
+  h3 {
+    @apply text-h3;
+  }
+  h4 {
+    @apply text-h4;
+  }
+  h5 {
+    @apply text-h5;
+  }
+  h6 {
+    @apply text-h6;
+  }
+
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: var(--font-primary);
-    font-weight: 700;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
     text-wrap: balance;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-  }
-  h2 {
-    font-size: 2rem;
-    letter-spacing: -0.02em;
-  }
-  h3 {
-    font-size: 1.375rem;
-  }
-  h4 {
-    font-size: 1.25rem;
-  }
-  h5 {
-    font-size: 1.125rem;
-  }
-  h6 {
-    font-size: 1rem;
-  }
-
-  @media (width >= 48rem) {
-    h1 {
-      font-size: 3.75rem;
-    }
-    h2 {
-      font-size: 3.25rem;
-      line-height: 1.12;
-    }
-    h3 {
-      font-size: 1.75rem;
-      line-height: 1.3;
-    }
-    h4 {
-      font-size: 1.5rem;
-    }
-    h5 {
-      font-size: 1.25rem;
-    }
-    h6 {
-      font-size: 1.125rem;
-    }
   }
 
   p {
     text-wrap: pretty;
+  }
+
+  /* Prices, counts and dates line up */
+  data,
+  time {
+    font-variant-numeric: tabular-nums;
   }
 
   button,
@@ -214,6 +195,14 @@
   padding-block: var(--spacing-section);
 }
 
+/* Pulls a framed element's right edge out to the window edge: past the frame's inset, its rail,
+   the page gutter and, on screens wider than the container, the centring space */
+@utility bleed-r {
+  margin-right: calc(
+    -1 * (var(--spacing-inset) + 1px + var(--spacing-gutter) + max(0px, (100vw - var(--container-site)) / 2))
+  );
+}
+
 @utility center {
   display: flex;
   align-items: center;
@@ -233,64 +222,166 @@
   }
 }
 
-/* ---------- Type utilities (pair with the h1–h6 scale above) --------------- */
-@utility text-eyebrow {
-  font-size: 0.75rem;
-  line-height: 1.4;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+/* Hairline scrollbar for inner scroll areas (drawers): a faint thumb in the text colour, no track */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, currentColor 22%, transparent) transparent;
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: color-mix(in srgb, currentColor 22%, transparent);
+  }
 }
 
+/* ---------- Type roles ------------------------------------------------------ */
+/*
+ * The type system: every piece of text takes one role. h1–h6 elements get theirs by default (see
+ * Base); put a role on any other element that needs one, or on a heading to restyle its level
+ * (<h3 class="text-h5">). Each role sets family, size, weight, tracking and leading together, so
+ * don't stack raw sizes (text-sm/lg/xl…), weights, tracking or leading on top — the one exception
+ * is font-medium for emphasis. font-bold isn't used. Sizes are fluid from phone to 1440px, on top
+ * of the fluid root.
+ *
+ *   text-display   hero line, 404                      Inter Tight 600, ~52 → 198px
+ *   text-h1 – h4   page / section / block headings     Inter Tight 500, tracked tight
+ *   text-h5 – h6   item titles: products, cards, rows  Inter 500
+ *   text-lead      large intro paragraph               Inter Tight 400
+ *   text-body-lg · text-body · text-caption · text-micro   running text, 18 / 16 / 14 / 12px
+ *   text-kicker    uppercase label: "✦ OUR BESTSELLERS", nav, table heads
+ *   text-eyebrow   smaller uppercase label: badges, field-group labels
+ *   text-cta       buttons and action links            Inter 500
+ *   text-input     form fields — never under 16px, so phones don't zoom on focus
+ *
+ * Numbers that line up (prices, counts, totals) also take tabular-nums.
+ */
+@utility text-display {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: clamp(3.5rem, 13.75vw, 12.375rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+}
+
+@utility text-h1 {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: clamp(2.5rem, 1.25rem + 3.8vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+@utility text-h2 {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: clamp(2.125rem, 1.1rem + 2.8vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.035em;
+}
+
+@utility text-h3 {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: clamp(1.5rem, 1.1rem + 0.9vw, 1.875rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+@utility text-h4 {
+  font-family: var(--font-primary);
+  font-weight: 500;
+  font-size: clamp(1.25rem, 1rem + 0.55vw, 1.5rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@utility text-h5 {
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  font-size: 1.125rem;
+  line-height: 1.35;
+  letter-spacing: -0.014em;
+}
+
+@utility text-h6 {
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  font-size: 1rem;
+  line-height: 1.4;
+  letter-spacing: -0.011em;
+}
+
+@utility text-lead {
+  font-family: var(--font-primary);
+  font-weight: 400;
+  font-size: clamp(1.375rem, 0.9rem + 1.6vw, 2.125rem);
+  line-height: 1.24;
+  letter-spacing: -0.025em;
+}
+
+/* Running text keeps the weight it inherits, so a parent's font-medium carries through */
 @utility text-body-lg {
+  font-family: var(--font-secondary);
   font-size: 1.125rem;
   line-height: 1.6;
+  letter-spacing: -0.014em;
 }
 
 @utility text-body {
+  font-family: var(--font-secondary);
   font-size: 1rem;
   line-height: 1.6;
+  letter-spacing: -0.011em;
 }
 
 @utility text-caption {
+  font-family: var(--font-secondary);
   font-size: 0.875rem;
   line-height: 1.5;
+  letter-spacing: -0.006em;
+}
+
+@utility text-micro {
+  font-family: var(--font-secondary);
+  font-size: max(11px, 0.75rem);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+@utility text-kicker {
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  font-size: max(11px, 0.8125rem);
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-feature-settings: "case";
+}
+
+@utility text-eyebrow {
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  font-size: max(10px, 0.6875rem);
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-feature-settings: "case";
 }
 
 @utility text-cta {
-  font-size: 0.8125rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-family: var(--font-secondary);
+  font-weight: 500;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  letter-spacing: -0.011em;
 }
 
-/* Section label above a heading: "✦ OUR BESTSELLERS" */
-@utility text-kicker {
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.375;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  @media (width >= 48rem) {
-    font-size: 1rem;
-  }
-}
-
-/* Large intro paragraph (home story) */
-@utility text-lead {
-  font-size: 1.375rem;
-  line-height: 1.3;
-  @media (width >= 48rem) {
-    font-size: 2.25rem;
-    line-height: 1.22;
-  }
-}
-
-/* Oversized hero line — 198px on a 1440px canvas */
-@utility text-display {
-  font-family: var(--font-primary);
-  font-weight: 700;
-  font-size: clamp(3.5rem, 13.75vw, 12.375rem);
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+@utility text-input {
+  font-family: var(--font-secondary);
+  font-size: max(16px, 1rem);
+  line-height: 1.4;
+  letter-spacing: -0.011em;
 }
 
 /* ---------- Brand surfaces ------------------------------------------------- */
@@ -338,10 +429,79 @@
   }
 }
 
-/* data-heading-effect (src/lib/global.ts): hidden until split into lines, so the unsplit text never flashes */
-@media (prefers-reduced-motion: no-preference) {
-  [data-heading-effect]:not([data-heading-effect-ready]) {
+/*
+ * data-heading-effect (src/lib/global.ts): hidden until split into lines, so the unsplit text never
+ * flashes; data-frame-rule (same file): its line and dots wait for the draw-in. Only with scripting
+ * on, and shown anyway after 4s if the script never gets to them (like the intro's fallback).
+ */
+@media (prefers-reduced-motion: no-preference) and (scripting: enabled) {
+  [data-heading-effect]:not([data-heading-effect-ready]),
+  [data-frame-rule]:not([data-frame-rule-ready]) > * {
     visibility: hidden;
+    animation: reveal-fallback 0s 4s forwards;
+  }
+}
+
+@keyframes reveal-fallback {
+  to {
+    visibility: visible;
+  }
+}
+
+/* ---------- Page transitions ---------------------------------------------- */
+/*
+ * src/app/template.tsx: on a route change the outgoing page fades out, then the incoming one fades
+ * in (the browser's View Transitions API, through React's <ViewTransition>). Everything else — the
+ * header, the footer — is the root snapshot, and switches without animating.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+/* Clicks go to the live page underneath while it plays */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Header, announcement bar, drawers, the footer's stick: their own groups above the page, shown
+   live (the old snapshot hidden), so the fading page never covers them */
+::view-transition-group(.site-chrome) {
+  animation: none;
+  z-index: 100;
+}
+
+::view-transition-old(.site-chrome) {
+  display: none;
+}
+
+::view-transition-new(.site-chrome) {
+  animation: none;
+}
+
+/* A swipe gesture already animated the navigation (template.tsx sets data-ua-nav) */
+:root[data-ua-nav]::view-transition-group(*),
+:root[data-ua-nav]::view-transition-old(*),
+:root[data-ua-nav]::view-transition-new(*) {
+  animation: none !important;
+}
+
+/* Out quick and accelerating; in slower and settling, starting as the old page is all but gone —
+   a 40ms overlap, so the two never double-expose */
+::view-transition-old(.page-out) {
+  animation: page-fade 280ms cubic-bezier(0.4, 0, 1, 1) both reverse;
+}
+
+::view-transition-new(.page-in) {
+  animation: page-fade 520ms cubic-bezier(0.25, 0.1, 0.25, 1) 240ms both;
+}
+
+@keyframes page-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
@@ -353,6 +513,12 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

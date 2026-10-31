@@ -27,7 +27,7 @@ export default function OverviewTab({ user }: { user: User }) {
         {details.map((row) => (
           <div key={row.label} className="flex min-w-0 flex-col gap-1">
             <dt className="text-caption text-muted">{row.label}</dt>
-            <dd className="text-lg font-bold wrap-break-word">{row.value}</dd>
+            <dd className="text-h5 wrap-break-word">{row.value}</dd>
           </div>
         ))}
       </dl>
@@ -50,7 +50,7 @@ export default function OverviewTab({ user }: { user: User }) {
                 />
               </span>
               <span className="flex flex-col gap-1">
-                <span className="font-primary text-2xl font-bold">{title}</span>
+                <span className="text-h4">{title}</span>
                 <span className="text-caption text-muted">{body}</span>
               </span>
             </Link>

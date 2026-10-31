@@ -53,7 +53,7 @@ export default function HomeDifference() {
         <FrameRule />
 
         <div className="overflow-x-auto">
-          <table data-diff-table className="w-full min-w-160 border-collapse text-left text-lg text-muted">
+          <table data-diff-table className="w-full min-w-160 border-collapse text-left text-body-lg text-muted">
             <caption className="sr-only">How SAVA compares with standard perfume</caption>
             <colgroup>
               <col className="w-[30%]" />
@@ -62,12 +62,12 @@ export default function HomeDifference() {
             </colgroup>
             <thead>
               <tr className="border-b border-line">
-                <th scope="col" className="px-inset py-10 text-2xl font-bold text-ink">
+                <th scope="col" className="px-inset py-10 text-h4 text-ink">
                   <span data-diff-head className="block">
                     Comparison Point
                   </span>
                 </th>
-                <th scope="col" className="border-x border-line px-6 py-10 text-xl font-bold text-ink">
+                <th scope="col" className="border-x border-line px-6 py-10 text-h5 text-ink">
                   <span data-diff-head className="flex flex-col items-center gap-3">
                     <span data-diff-product>
                       <CroppedImage
@@ -83,7 +83,7 @@ export default function HomeDifference() {
                   </span>
                 </th>
                 {/* isolate: keeps the fill's -z-10 inside the cell */}
-                <th scope="col" className="relative isolate px-6 py-10 text-xl font-bold text-ink">
+                <th scope="col" className="relative isolate px-6 py-10 text-h5 text-ink">
                   <SavaFill />
                   <span data-diff-head className="flex flex-col items-center gap-3">
                     <span data-diff-product>
@@ -101,6 +101,7 @@ export default function HomeDifference() {
                   data-diff-row
                   className="border-b border-line transition-colors duration-300 last:border-b-0 hover:bg-paper/60"
                 >
+                  {/* font-normal undoes the browser's bold <th>: row labels read as body text */}
                   <th scope="row" className="px-inset py-7 font-normal">
                     <span className="flex items-center gap-4">
                       <span data-diff-badge className="center size-12 shrink-0 rounded-full bg-gradient-badge">

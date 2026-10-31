@@ -6,12 +6,13 @@ import { gsap, ScrollTrigger, useGSAP } from "@/lib/gsap";
 /**
  * The review cards' grid, with two kinds of motion:
  *   – data-scroll-speed="1.5" (large screens): while the grid scrolls through, the cards move at
- *     that multiple of the page's scroll, gliding past the static summary on a faster layer. They
+ *     that multiple of the page's scroll, gliding over the pinned summary on a faster layer. They
  *     start and end flush with the section, so no empty band opens at its top or bottom. (Below lg
- *     the grid stacks, and a faster card would slide up over the summary.)
- *   – Each card's photo (data-review-media / data-review-image) opens out from a point at its
- *     centre, rounded, as the image settles from a zoom; then its play chip (data-review-chip)
- *     fades up. Reverses when scrolled back below, to replay.
+ *     the grid stacks, and a faster card would slide up over the summary.) The distance they end
+ *     raised by is published as --reviews-travel, so the summary unpins where they end.
+ *   – Each card's photo (data-review-media / data-review-image) fades in as it arrives, settling
+ *     from a slight zoom; then its play chip (data-review-chip) fades up. Kept quiet on purpose.
+ *     Reverses when scrolled back below, to replay.
  */
 export default function ReviewsMotion({ children, ...props }: React.ComponentProps<"div">) {
   const root = useRef<HTMLDivElement>(null);
@@ -34,7 +35,9 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
         const overflow = () => Math.max(0, grid.offsetHeight - window.innerHeight);
         const travelFor = (speed: number) => ((speed - 1) * overflow()) / speed;
         const takeUpSlack = () => {
-          grid.style.marginBottom = `${-Math.max(0, ...speeds.map(travelFor))}px`;
+          const travel = Math.max(0, ...speeds.map(travelFor));
+          grid.style.marginBottom = `${-travel}px`;
+          grid.style.setProperty("--reviews-travel", `${travel}px`);
         };
         takeUpSlack();
         ScrollTrigger.addEventListener("refreshInit", takeUpSlack);
@@ -58,6 +61,7 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
         return () => {
           ScrollTrigger.removeEventListener("refreshInit", takeUpSlack);
           grid.style.marginBottom = "";
+          grid.style.removeProperty("--reviews-travel");
         };
       });
 
@@ -72,7 +76,7 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
               if (entry.isIntersecting) tl?.play();
               // Rewind when it drops back out below, so it replays on the way down
               else if (entry.boundingClientRect.top > 0) tl?.reverse();
-              // Jumped clean past it (fling, anchor link, reload mid-page): show it open
+              // Jumped clean past it (fling, anchor link, reload mid-page): show it in place
               else tl?.progress(1);
             }
           },
@@ -84,14 +88,9 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
           const chip = media.querySelector("[data-review-chip]");
           const tl = gsap
             .timeline({ paused: true })
-            .fromTo(
-              media,
-              { clipPath: "inset(50% 50% 50% 50% round 0.75rem)" },
-              { clipPath: "inset(0% 0% 0% 0% round 0.75rem)", duration: 1.4, ease: "expo.inOut" },
-              0,
-            )
-            .from(image, { scale: 1.5, duration: 1.9, ease: "expo.out" }, 0.15)
-            .from(chip, { y: 12, opacity: 0, duration: 0.8, ease: "power3.out" }, 1);
+            .from(media, { opacity: 0, duration: 0.9, ease: "power2.out" }, 0)
+            .from(image, { scale: 1.06, duration: 1.4, ease: "power2.out" }, 0)
+            .from(chip, { y: 6, opacity: 0, duration: 0.6, ease: "power2.out" }, 0.5);
           reveals.set(media, tl);
           observer.observe(media);
         });

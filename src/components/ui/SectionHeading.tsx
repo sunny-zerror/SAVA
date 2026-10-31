@@ -12,7 +12,7 @@ interface SectionHeadingProps {
   className?: string;
 }
 
-/** Section label + heading: "✦ OUR BESTSELLERS" over a bold h2 */
+/** Section label + heading: "✦ OUR BESTSELLERS" over an h2 */
 export default function SectionHeading({
   eyebrow,
   title,

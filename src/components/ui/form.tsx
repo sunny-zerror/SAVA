@@ -4,7 +4,7 @@ import { cn } from "@/utils/cn";
 
 // Soft tinted fields that turn white with a blue ring on focus; errors swap the ring to sale red
 const fieldClass =
-  "h-12 w-full rounded-2xl border border-transparent bg-surface px-4 text-body text-ink outline-none transition-[background-color,border-color,box-shadow] duration-300 placeholder:text-muted/60 hover:border-line focus:border-accent focus:bg-paper focus:ring-4 focus:ring-accent/15 disabled:cursor-not-allowed disabled:text-muted aria-[invalid=true]:border-sale aria-[invalid=true]:bg-paper aria-[invalid=true]:focus:ring-sale/15";
+  "h-12 w-full rounded-2xl border border-transparent bg-surface px-4 text-input text-ink outline-none transition-[background-color,border-color,box-shadow] duration-300 placeholder:text-muted/60 hover:border-line focus:border-accent focus:bg-paper focus:ring-4 focus:ring-accent/15 disabled:cursor-not-allowed disabled:text-muted aria-[invalid=true]:border-sale aria-[invalid=true]:bg-paper aria-[invalid=true]:focus:ring-sale/15";
 
 interface FieldShellProps {
   label: string;
@@ -19,7 +19,7 @@ function FieldShell({ label, error, hint, className, children }: FieldShellProps
   const describedBy = error || hint ? `${id}-note` : undefined;
   return (
     <div className={cn("flex min-w-0 flex-col gap-2", className)}>
-      <label htmlFor={id} className="text-caption font-bold text-ink">
+      <label htmlFor={id} className="text-caption font-medium text-ink">
         {label}
       </label>
       {children(id, describedBy)}

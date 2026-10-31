@@ -29,7 +29,7 @@ export default function AboutContent() {
           <ul className="grid gap-stack md:grid-cols-3">
             {values.map((v) => (
               <li key={v.title} className="flex flex-col gap-3 border-t border-ink pt-6">
-                <h3 className="text-2xl">{v.title}</h3>
+                <h3 className="text-h4">{v.title}</h3>
                 <p className="text-body text-muted">{v.body}</p>
               </li>
             ))}

@@ -52,10 +52,7 @@ export default function BlobButton({ tone = "accent", icon, block, className, ch
   if (block) {
     const hovered = "group-hover:right-14 group-focus-visible:right-14";
     return (
-      <Link
-        className={cn("group relative flex h-12 w-full items-center text-base font-bold", t.text, className)}
-        {...props}
-      >
+      <Link className={cn("group relative flex h-12 w-full items-center text-cta", t.text, className)} {...props}>
         {/* Liquid layer, inside the box: the pill gives up its right end and the disc fills it */}
         <span aria-hidden="true" className="pointer-events-none absolute inset-0 filter-[url(#blob-button-goo)]">
           <span
@@ -96,10 +93,7 @@ export default function BlobButton({ tone = "accent", icon, block, className, ch
   }
 
   return (
-    <Link
-      className={cn("group relative inline-flex h-12 items-center text-base font-bold", t.text, className)}
-      {...props}
-    >
+    <Link className={cn("group relative inline-flex h-12 items-center text-cta", t.text, className)} {...props}>
       {/* Liquid layer: pill + disc share the goo filter. It's wider than the link (gap + disc) so the filter doesn't clip */}
       <span
         aria-hidden="true"

@@ -45,7 +45,9 @@ export default function ShopHero({ productsId }: { productsId: string }) {
           </div>
         </div>
 
-        <div className="relative aspect-1672/941">
+        {/* The tote bag runs off the artwork's right edge, so the stage bleeds to the window edge
+            (clipped by the section) and the bag reads as running off the page, not cut short */}
+        <div className="relative bleed-r aspect-1672/941">
           {/* Wood blocks and the tote bag (with their floor shadows) */}
           <Image
             src="/images/banners/shop-still-life.png"

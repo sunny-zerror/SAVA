@@ -5,7 +5,7 @@ type THREE = typeof Three;
 /*
  * The SAVA stick, built in code from the product photo (public/images/products/sava-balanced.jpg).
  * Profiles are the photo's measured half-widths in photo pixels (1 unit = 1000 px), used as the radius of a
- * round (cylindrical) cross-section. The label is the photo's own printing, lifted onto a transparent
+ * oval cross-section (see DEPTH). The label is the photo's own printing, lifted onto a transparent
  * texture (public/models/sava-balanced-label.png) and wrapped around the front like a printed sleeve.
  */
 
@@ -33,7 +33,7 @@ export function stickVariantFor(slug: string): SavaStickVariant | null {
 
 const CENTER_X = 559.5; // photo x of the stick's axis
 const BOTTOM_Y = 1240; // photo y of the base
-const DEPTH = 1; // half-depth ÷ half-width: 1 = round
+const DEPTH = 0.65; // half-depth ÷ half-width: 1 = round, < 1 = oval (flatter front to back)
 const ROUNDNESS = 2; // superellipse exponent: 2 = circle/ellipse, higher = boxier
 const LABEL_RADIUS = 265; // photo px: the label's flat width wraps around a cylinder this size
 const RING = 192; // segments around

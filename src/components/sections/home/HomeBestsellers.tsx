@@ -70,13 +70,13 @@ function BestsellerCard({ product, featured }: { product: ProductSummary; featur
         />
       </div>
       <div className="flex flex-col items-center gap-1.5">
-        <h3 className="font-secondary text-xl">
+        <h3 className="text-h5">
           {/* Stretched link: the whole card is clickable, one link for screen readers */}
           <Link href={productHref(product.slug)} className="after:absolute after:inset-0">
             {product.name}
           </Link>
         </h3>
-        <div className="flex items-baseline gap-1.5 text-lg text-muted">
+        <div className="flex items-baseline gap-1.5 text-body-lg text-muted">
           <span>MRP</span>
           <Price price={price} compareAt={compareAt} />
         </div>

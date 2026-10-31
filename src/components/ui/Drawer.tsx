@@ -10,6 +10,11 @@ interface DrawerProps {
   onClose: () => void;
   /** Accessible name of the dialog; also the visible heading unless `heading` is given */
   title: string;
+  /**
+   * Unique view-transition name: during a route fade the drawer is its own layer above the page
+   * (globals.css, "Page transitions"), so a link inside it can close it without the page covering it
+   */
+  name: string;
   /** Replaces the visible header content (e.g. the wordmark in the menu) */
   heading?: React.ReactNode;
   side?: "left" | "right";
@@ -19,11 +24,30 @@ interface DrawerProps {
   footer?: React.ReactNode;
 }
 
+/** The panel's slide time (duration-500 below) */
+const PANEL_MS = 500;
+
+/**
+ * Staggered rise-in for a drawer's contents: spread the result on the i-th block. Each rises and
+ * fades in a beat after the one before as the panel opens; on close they hold until the panel has
+ * slid away, then reset instantly, ready for next time.
+ */
+export function drawerRise(open: boolean, i: number) {
+  return {
+    className: cn(
+      "transition-[opacity,translate] ease-out-expo",
+      open ? "translate-y-0 opacity-100 duration-700" : "translate-y-4 opacity-0 duration-0",
+    ),
+    style: { transitionDelay: `${open ? 150 + i * 60 : PANEL_MS}ms` },
+  };
+}
+
 /** Side panel with overlay: Esc and overlay click close it, page scroll is paused while open */
 export default function Drawer({
   open,
   onClose,
   title,
+  name,
   heading,
   side = "right",
   size = "md",
@@ -57,7 +81,11 @@ export default function Drawer({
   }, [open, lenis, onClose]);
 
   return (
-    <div className={cn("fixed inset-0 z-50", !open && "pointer-events-none")} inert={!open}>
+    <div
+      className={cn("fixed inset-0 z-50 [view-transition-class:site-chrome]", !open && "pointer-events-none")}
+      style={{ viewTransitionName: name }}
+      inert={!open}
+    >
       <div
         onClick={onClose}
         className={cn(
@@ -79,16 +107,19 @@ export default function Drawer({
         )}
       >
         <div className="flex h-header shrink-0 items-center justify-between gap-4 border-b border-line px-6 md:px-8">
-          {heading ?? <h2 className="text-lg">{title}</h2>}
+          {heading ?? <h2 className="text-h5">{title}</h2>}
           <button
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1 center size-10 shrink-0 rounded-full bg-surface transition-colors hover:bg-mist"
+            className="group -mr-1 center size-10 shrink-0 rounded-full bg-surface transition-colors hover:bg-mist"
           >
-            <RiCloseLine aria-hidden="true" className="size-5" />
+            <RiCloseLine
+              aria-hidden="true"
+              className="size-5 transition-transform duration-500 ease-out-expo group-hover:rotate-90"
+            />
           </button>
         </div>
-        <div data-lenis-prevent className="flex-1 overflow-y-auto overscroll-contain">
+        <div data-lenis-prevent className="scrollbar-thin flex-1 overflow-y-auto overscroll-contain">
           {children}
         </div>
         {footer && <div className="shrink-0 border-t border-line p-6 md:px-8">{footer}</div>}

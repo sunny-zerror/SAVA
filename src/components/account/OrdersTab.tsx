@@ -32,7 +32,7 @@ export default function OrdersTab({ userId }: { userId: string }) {
           <RiBox3Line className="size-6" />
         </span>
         <div className="flex flex-col gap-1">
-          <h2 className="text-2xl md:text-3xl">No orders yet</h2>
+          <h2 className="text-h3">No orders yet</h2>
           <p className="text-body text-muted">When you place an order, you can track it here.</p>
         </div>
         <ButtonLink href="/shop">Start shopping</ButtonLink>
@@ -45,10 +45,10 @@ export default function OrdersTab({ userId }: { userId: string }) {
       {orders.map((order) => (
         <li key={order._id}>
           <details className="group overflow-hidden rounded-3xl border border-line transition-colors open:border-accent/40">
-            <summary className="grid cursor-pointer list-none grid-cols-2 items-center gap-4 p-5 text-caption md:grid-cols-[repeat(4,1fr)_auto] md:p-6 [&::-webkit-details-marker]:hidden">
+            <summary className="grid cursor-pointer list-none grid-cols-2 items-center gap-4 p-5 text-caption tabular-nums md:grid-cols-[repeat(4,1fr)_auto] md:p-6 [&::-webkit-details-marker]:hidden">
               <span>
                 <span className="block text-muted">Order</span>
-                <span className="font-bold">{order.orderNo}</span>
+                <span className="font-medium">{order.orderNo}</span>
               </span>
               <span>
                 <span className="block text-muted">Placed</span>
@@ -56,15 +56,15 @@ export default function OrdersTab({ userId }: { userId: string }) {
               </span>
               <span>
                 <span className="block text-muted">Status</span>
-                <span className="mt-1 inline-flex rounded-full bg-mist/60 px-3 py-0.5 font-bold text-navy">
+                <span className="mt-1 inline-flex rounded-full bg-mist/60 px-3 py-0.5 text-eyebrow text-navy">
                   {humanize(order.shipmentStatus || order.fulfillmentStatus || order.paymentStatus)}
                 </span>
               </span>
               <span>
                 <span className="block text-muted">Total</span>
-                <span className="font-bold">{formatPrice(order.orderPrice ?? order.totalprice)}</span>
+                <span className="font-medium">{formatPrice(order.orderPrice ?? order.totalprice)}</span>
               </span>
-              <span className="col-span-2 flex items-center justify-end gap-2 font-bold md:col-span-1">
+              <span className="col-span-2 flex items-center justify-end gap-2 text-cta md:col-span-1">
                 <span className="group-open:hidden">View</span>
                 <span className="hidden group-open:inline">Hide</span>
                 <span
@@ -90,14 +90,15 @@ export default function OrdersTab({ userId }: { userId: string }) {
                       className="object-cover"
                     />
                   </div>
-                  <div className="flex flex-1 justify-between gap-4">
+                  {/* items-baseline: the name (h6) and price (body) have different leading */}
+                  <div className="flex flex-1 items-baseline justify-between gap-4">
                     <div>
-                      <p className="font-bold">{line.name}</p>
-                      <p className="text-muted">
+                      <p className="text-h6">{line.name}</p>
+                      <p className="text-muted tabular-nums">
                         {line.variantDetail?.selectedOptions?.join(" / ")} · Qty {line.qty}
                       </p>
                     </div>
-                    <span className="font-bold">{formatPrice(line.finalPrice)}</span>
+                    <span className="text-body font-medium tabular-nums">{formatPrice(line.finalPrice)}</span>
                   </div>
                 </div>
               ))}

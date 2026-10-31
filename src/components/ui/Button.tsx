@@ -12,7 +12,7 @@ type Variant = "primary" | "ink" | "outline" | "light" | "outline-light" | "ghos
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-bold transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-cta transition-colors duration-300 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50";
 
 const variants: Record<Variant, string> = {
   primary: "bg-accent text-paper hover:bg-navy",
@@ -24,8 +24,8 @@ const variants: Record<Variant, string> = {
 };
 
 const sizes: Record<Size, string> = {
-  md: "h-11 px-6 text-sm",
-  lg: "h-13 px-8 text-base",
+  md: "h-11 px-6",
+  lg: "h-13 px-8",
 };
 
 interface StyleProps {

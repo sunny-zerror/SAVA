@@ -52,7 +52,7 @@ export function Tabs<T extends string>({ tabs, active, onChange, label, classNam
             onClick={() => onChange(tab.id)}
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
-              "h-10 shrink-0 rounded-full px-4 text-sm font-bold transition-colors duration-300 focus-visible:-outline-offset-2 md:px-6",
+              "h-10 shrink-0 rounded-full px-4 text-cta transition-colors duration-300 focus-visible:-outline-offset-2 md:px-6",
               selected ? "bg-accent text-paper" : "text-muted hover:bg-paper hover:text-ink",
             )}
           >

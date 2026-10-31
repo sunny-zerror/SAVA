@@ -66,9 +66,7 @@ export default async function ProductPage({ params }: { params: Params }) {
           <div className="flex flex-col gap-8 md:sticky md:top-[calc(var(--spacing-header)+1.5rem)] md:self-start">
             <header className="flex flex-col gap-3">
               {product.ribbon?.name && <p className="text-eyebrow text-accent">{product.ribbon.name}</p>}
-              <h1 data-heading-effect className="text-4xl md:text-5xl">
-                {product.name}
-              </h1>
+              <h1 data-heading-effect>{product.name}</h1>
             </header>
             <ProductPurchase product={product} />
             {details.length > 0 && <Accordion items={details} />}

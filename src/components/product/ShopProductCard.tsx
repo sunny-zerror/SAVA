@@ -30,7 +30,7 @@ export default function ShopProductCard({ product, priority }: ShopProductCardPr
       data-grid-hover
       className="group relative flex flex-col items-center gap-4 bg-paper px-5 pt-6 pb-5 text-center md:px-7"
     >
-      <h3 className="font-secondary text-xl">
+      <h3 className="text-h5">
         {/* Stretched link: the card opens the product; the button sits above it */}
         <Link href={productHref(product.slug)} className="after:absolute after:inset-0">
           {product.name}
@@ -55,7 +55,7 @@ export default function ShopProductCard({ product, priority }: ShopProductCardPr
           )}
         />
       </div>
-      <Price price={price} compareAt={compareAt} className="text-lg font-bold" />
+      <Price price={price} compareAt={compareAt} className="text-body-lg" />
       <BuyNowButton
         slug={product.slug}
         productId={product._id}

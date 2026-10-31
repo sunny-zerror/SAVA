@@ -19,7 +19,7 @@ export default function Pagination({ page, totalPages, href }: PaginationProps) 
           href={href(p)}
           aria-current={p === page ? "page" : undefined}
           className={cn(
-            "center size-10 border text-caption transition-colors",
+            "center size-10 border text-caption font-medium tabular-nums transition-colors",
             p === page ? "border-ink bg-ink text-paper" : "border-line hover:border-ink",
           )}
         >

@@ -46,13 +46,13 @@ export default function ProductCard({ product, priority }: ProductCardProps) {
         )}
       </div>
       <div className="flex flex-col gap-1">
-        <h3 className="font-secondary text-body">
+        <h3 className="text-h5">
           {/* Stretched link: the whole card is clickable, one link for screen readers */}
           <Link href={productHref(product.slug)} className="after:absolute after:inset-0">
             {product.name}
           </Link>
         </h3>
-        <Price price={price} compareAt={compareAt} className="text-caption" />
+        <Price price={price} compareAt={compareAt} className="text-body-lg" />
       </div>
     </article>
   );

@@ -10,7 +10,7 @@ import { useCart } from "@/hooks/useCart";
 import { useCartStore } from "@/store/cart-store";
 import { cn } from "@/utils/cn";
 
-const action = "flex items-center gap-2.5 p-2 text-lg uppercase transition-opacity hover:opacity-70";
+const action = "flex items-center gap-2.5 p-2 text-kicker transition-opacity hover:opacity-70";
 
 export default function Header() {
   const pathname = usePathname();
@@ -50,7 +50,7 @@ export default function Header() {
         // The home intro drops the header in once the curtain clears
         data-site-header
         className={cn(
-          "sticky top-0 z-40 mt-announcement border-b transition-[background-color,border-color,color] duration-300",
+          "sticky top-0 z-40 mt-announcement border-b transition-[background-color,border-color,color] duration-300 [view-transition-class:site-chrome] [view-transition-name:site-header]",
           stuck
             ? "border-line bg-paper text-ink"
             : overlay
@@ -90,8 +90,9 @@ export default function Header() {
                 <span aria-hidden="true" className="max-md:hidden">
                   Cart
                 </span>
+                {/* text-micro, shrunk to 0.625rem so two digits still fit the size-4 circle */}
                 {count > 0 && (
-                  <span className="absolute top-0.5 left-5 center size-4 rounded-full bg-accent text-[0.625rem] text-paper">
+                  <span className="absolute top-0.5 left-5 center size-4 rounded-full bg-accent text-micro text-[0.625rem] text-paper tabular-nums">
                     {count}
                   </span>
                 )}

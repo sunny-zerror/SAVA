@@ -120,7 +120,7 @@ export default function CheckoutView() {
             {!isLoggedIn && (
               <Link
                 href="/login?next=/checkout"
-                className="text-caption font-bold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
+                className="text-cta text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
               >
                 Sign in
               </Link>
@@ -191,8 +191,8 @@ const step = "flex min-w-0 flex-col gap-5 rounded-3xl border border-line p-5 md:
 function StepTitle({ n, title, children }: { n: number; title: string; children?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <p aria-hidden="true" className="flex items-center gap-3 font-primary text-xl font-bold md:text-2xl">
-        <span className="center size-8 shrink-0 rounded-full bg-accent text-sm text-paper">{n}</span>
+      <p aria-hidden="true" className="flex items-center gap-3 text-h4">
+        <span className="center size-8 shrink-0 rounded-full bg-accent text-micro text-paper tabular-nums">{n}</span>
         {title}
       </p>
       {children}
@@ -230,7 +230,7 @@ function StatePanel({
         {icon}
       </span>
       <div className="flex flex-col gap-2">
-        <h2 className="text-2xl md:text-3xl">{title}</h2>
+        <h2 className="text-h3">{title}</h2>
         <p className="text-body text-muted">{body}</p>
       </div>
       {children}

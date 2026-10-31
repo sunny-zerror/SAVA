@@ -36,7 +36,8 @@ export default function ShopProducts({
   ).flat();
 
   return (
-    <Frame>
+    // The section's bottom space sits inside the frame, so the rails run on down to the footer
+    <Frame className="pb-section">
       <FrameRule />
       <div className="grid lg:grid-cols-[minmax(0,1fr)_minmax(0,3.3fr)]">
         <div className="px-inset py-8 max-lg:border-b max-lg:border-line lg:border-r lg:border-line">

@@ -34,7 +34,7 @@ export default function Footer() {
           </div>
 
           <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-9">
-            <ul className="flex flex-col gap-4 text-2xl font-bold">
+            <ul className="flex flex-col gap-4 text-h4">
               {footerNav.map((item) => (
                 <li key={item.label}>
                   <Link href={item.href} className="transition-opacity hover:opacity-70">
@@ -46,7 +46,7 @@ export default function Footer() {
           </nav>
 
           <nav aria-label="Social" className="lg:col-span-1 lg:col-start-12">
-            <ul className="flex flex-col gap-2.5 text-lg whitespace-nowrap">
+            <ul className="flex flex-col gap-2.5 text-body-lg whitespace-nowrap">
               {socialNav.map((item) => (
                 <li key={item.label}>
                   <a
@@ -72,7 +72,7 @@ export default function Footer() {
 
         <div className="grid gap-8 px-inset pt-14 pb-12 lg:grid-cols-12">
           <nav aria-label="Legal" className="lg:col-span-2 lg:col-start-7">
-            <ul className="flex flex-col gap-2.5 text-lg">
+            <ul className="flex flex-col gap-2.5 text-body-lg">
               {legalNav.map((item) => (
                 <li key={item.label}>
                   <Link href={item.href} className="transition-opacity hover:opacity-70">
@@ -83,7 +83,7 @@ export default function Footer() {
             </ul>
           </nav>
 
-          <address className="flex flex-col gap-5 text-xl font-bold not-italic lg:col-span-4 lg:col-start-9">
+          <address className="flex flex-col gap-5 text-h5 not-italic lg:col-span-4 lg:col-start-9">
             {email && (
               <a href={`mailto:${email}`} className="flex items-center gap-4 transition-opacity hover:opacity-70">
                 <Sparkle className="size-4.5" />
@@ -104,8 +104,9 @@ export default function Footer() {
         The rock ledge, flush with the bottom-left corner (in flow below the content on small screens).
         The SAVA stick stands on it: FooterModel drops its 3D stick into this slot as the footer
         scrolls in, landing as the footer bottoms out; for reduced motion / no WebGL, the static one.
+        z-30 keeps it in front of the frame's rail pulses (z-20), which run down behind it.
       */}
-      <div className="relative w-[min(70vw,24rem)] lg:absolute lg:bottom-0 lg:left-0 lg:w-[clamp(15rem,30vw,27rem)]">
+      <div className="relative z-30 w-[min(70vw,24rem)] lg:absolute lg:bottom-0 lg:left-0 lg:w-[clamp(15rem,30vw,27rem)]">
         <Image
           src="/images/home/footer-rock.png"
           alt=""

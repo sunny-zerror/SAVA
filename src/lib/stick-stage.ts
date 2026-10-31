@@ -75,6 +75,22 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
   const render = () => renderer.render(scene, camera);
   const clear = () => renderer.clear();
 
+  /**
+   * Uploads the built sticks' textures and compiles their shaders ahead of the first visible frame
+   * (in parallel, off the main thread, where the browser supports it), so that frame doesn't stall
+   */
+  const warm = async () => {
+    for (const model of models) {
+      model.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        for (const material of [object.material].flat()) {
+          for (const value of Object.values(material)) if (value instanceof THREE.Texture) renderer.initTexture(value);
+        }
+      });
+    }
+    await renderer.compileAsync(scene, camera);
+  };
+
   const dispose = () => {
     window.removeEventListener("resize", resize);
     for (const model of models) {
@@ -92,7 +108,7 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
     renderer.dispose();
   };
 
-  return { build, fitScale, render, clear, dispose };
+  return { build, warm, fitScale, render, clear, dispose };
 }
 
 export type StickStage = NonNullable<Awaited<ReturnType<typeof createStickStage>>>;

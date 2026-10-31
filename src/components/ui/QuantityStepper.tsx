@@ -21,7 +21,7 @@ export default function QuantityStepper({ value, onIncrement, onDecrement, disab
       >
         <RiSubtractLine className="size-4" />
       </button>
-      <span className="w-8 text-center text-caption" aria-live="polite">
+      <span className="w-8 text-center text-caption tabular-nums" aria-live="polite">
         {value}
       </span>
       <button

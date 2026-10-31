@@ -8,7 +8,7 @@ import type { Product } from "@/types";
 import { isOutOfStock, toVariantDetail } from "@/utils/product";
 import { productHref } from "@/utils/url";
 
-const action = "group flex w-full items-center justify-between gap-4 text-base font-bold disabled:opacity-60";
+const action = "group flex w-full items-center justify-between gap-4 text-cta disabled:opacity-60";
 
 const icon = (
   <span

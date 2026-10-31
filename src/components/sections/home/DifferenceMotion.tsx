@@ -18,10 +18,13 @@ export default function DifferenceMotion({ children, ...props }: React.Component
   useGSAP(
     () => {
       gsap.matchMedia().add("(prefers-reduced-motion: no-preference)", () => {
-        const tl = gsap.timeline({
-          defaults: { ease: "expo.out" },
-          scrollTrigger: { trigger: "[data-diff-table]", start: "top 75%", toggleActions: "play none none reverse" },
-        });
+        const tl = gsap
+          .timeline({
+            defaults: { ease: "expo.out" },
+            scrollTrigger: { trigger: "[data-diff-table]", start: "top 75%", toggleActions: "play none none reverse" },
+          })
+          // Plays the whole choreography below 30% faster; timings are written at 1×
+          .timeScale(1.3);
 
         tl.from("[data-diff-head]", { y: 30, opacity: 0, duration: 1, stagger: 0.1 }, 0)
           .from(

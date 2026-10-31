@@ -81,18 +81,13 @@ export default async function HomeReviews() {
     : null;
 
   return (
-    <section aria-labelledby="home-reviews" className="relative isolate overflow-hidden bg-accent text-paper">
-      {/* Live aurora; the section's bg-accent shows beneath it for reduced motion / no WebGL */}
-      <ReviewsCanvas className="absolute inset-0 -z-10 size-full" />
+    <section aria-labelledby="home-reviews" className="relative isolate overflow-clip bg-accent text-paper">
+      {/* Live aurora, one viewport tall and pinned while the section scrolls past; the section's
+          bg-accent shows beneath it for reduced motion / no WebGL */}
+      <div aria-hidden="true" className="absolute inset-0 -z-10">
+        <ReviewsCanvas className="sticky top-0 block h-lvh w-full" />
+      </div>
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-15 mix-blend-overlay" />
-      <Image
-        src="/images/home/reviews-glow.svg"
-        alt=""
-        width={2397}
-        height={2397}
-        unoptimized
-        className="pointer-events-none absolute top-[4.9%] left-[-64.6%] -z-10 w-[166.5%] max-w-none"
-      />
 
       <Frame tone="dark" className="py-section">
         <FrameRule tone="dark" />
@@ -111,7 +106,7 @@ export default async function HomeReviews() {
             tone="dark"
           />
           <div className="flex max-w-sm flex-col items-start gap-6">
-            <p className="text-lg">
+            <p className="text-body-lg">
               Advanced sweat control meets lasting fragrance for reliable protection and all-day freshness.
             </p>
             <BlobButton href="/shop" tone="light">
@@ -121,7 +116,9 @@ export default async function HomeReviews() {
         </div>
         <FrameRule tone="dark" />
 
-        {/* ReviewsMotion: cards drift at their data-scroll-speed and unmask their photos as they arrive */}
+        {/* ReviewsMotion: cards drift at their data-scroll-speed over the pinned summary and fade their
+            photos in as they arrive. The section clips with overflow-clip, not overflow-hidden, which
+            would stop the summary sticking to the viewport. */}
         <ReviewsMotion className="grid gap-8 px-inset pt-16 md:grid-cols-2 lg:grid-cols-[460fr_133fr_299fr_39fr_299fr_54fr] lg:gap-0">
           <RatingSummary />
           {reviews.map((review) => (
@@ -137,17 +134,21 @@ function RatingSummary() {
   const full = Math.floor(summary.rating);
 
   return (
-    // RatingMotion: the score and shares count up, the hearts pop in and the bars fill as it scrolls in
-    <RatingMotion className="flex max-w-87 flex-col gap-4.5 md:col-span-2 lg:col-span-1 lg:row-start-1">
+    // RatingMotion: the score and shares count up, the hearts pop in and the bars fill as it scrolls in.
+    // Pinned (lg) down the whole first column, under the landscape cards that pass over it — placed by
+    // column explicitly, or auto-placement would shift it right to dodge them. Its bottom margin is the
+    // cards' drift (--reviews-travel, set by ReviewsMotion), so it lets go where the raised cards end.
+    <RatingMotion className="flex max-w-87 flex-col gap-4.5 md:col-span-2 lg:sticky lg:top-[calc(var(--spacing-header)+2.5rem)] lg:col-[1/2] lg:row-[1/5] lg:mb-(--reviews-travel,0px) lg:self-start">
       <div className="flex flex-col gap-2">
-        <h3 className="font-secondary text-xl">Customer Reviews</h3>
+        <h3 className="text-h5">Customer Reviews</h3>
         <div className="flex items-start gap-4">
-          <p className="text-5xl font-bold tracking-tight">
+          {/* tabular-nums: the score holds its width while it counts up */}
+          <p className="text-h2 tabular-nums">
             <span data-rating-score>{summary.rating}</span>
             <span className="sr-only"> out of 5</span>
           </p>
           <div className="flex flex-col gap-0.5 pt-1">
-            <p>{summary.count.toLocaleString("en-IN")} reviews</p>
+            <p className="tabular-nums">{summary.count.toLocaleString("en-IN")} reviews</p>
             <span aria-hidden="true" className="flex text-star">
               {Array.from({ length: 5 }, (_, i) => (
                 <span key={i} data-rating-heart className="flex">
@@ -169,7 +170,7 @@ function RatingSummary() {
                 style={{ width: `${share}%` }}
               />
             </span>
-            <span>
+            <span className="tabular-nums">
               <span data-rating-share>{share}</span>%
             </span>
           </li>
@@ -187,10 +188,11 @@ interface ReviewCardProps {
 
 function ReviewCard({ review, product, className }: ReviewCardProps) {
   return (
-    // data-scroll-speed: moves at 1.5× the page's scroll (large screens; see ReviewsMotion)
+    // data-scroll-speed: moves at 1.5× the page's scroll (large screens; see ReviewsMotion).
+    // z-10 keeps it above the pinned summary as it passes over.
     <article
       data-scroll-speed="1.5"
-      className={cn("flex flex-col gap-4 self-start rounded-3xl glass p-3.5", className)}
+      className={cn("relative z-10 flex flex-col gap-4 self-start rounded-3xl glass p-3.5", className)}
     >
       <div
         data-review-media
@@ -209,7 +211,11 @@ function ReviewCard({ review, product, className }: ReviewCardProps) {
           style={{ objectPosition: review.objectPosition }}
         />
         {/* Video length chip — wire up the review films here when they arrive */}
-        <span data-review-chip aria-hidden="true" className="absolute right-3.5 bottom-3.5 flex items-center gap-2">
+        <span
+          data-review-chip
+          aria-hidden="true"
+          className="absolute right-3.5 bottom-3.5 flex items-center gap-2 text-caption font-medium tabular-nums"
+        >
           {review.duration}
           <span className="center size-8 rounded-full bg-paper/25 backdrop-blur-sm">
             <RiPlayFill className="size-3.5" />
@@ -226,12 +232,12 @@ function ReviewCard({ review, product, className }: ReviewCardProps) {
           </span>
           {product && (
             <div>
-              <h3 className="font-secondary text-xl">
+              <h3 className="text-h5">
                 <Link href={product.href} className="after:absolute after:inset-0">
                   {product.name}
                 </Link>
               </h3>
-              <p className="text-lg">{product.price}</p>
+              <p className="text-body-lg tabular-nums">{product.price}</p>
             </div>
           )}
         </div>

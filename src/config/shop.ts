@@ -1,3 +1,10 @@
+/** The three SAVA sticks, by catalogue slug (sava-<variant>) — the menu's and the empty bag's range strip */
+export const stickRange = [
+  { name: "Balanced", slug: "sava-balanced" },
+  { name: "Kinetic", slug: "sava-kinetic" },
+  { name: "Renewed", slug: "sava-renewed" },
+];
+
 /*
  * Extra filter groups for the shop listing's sidebar. "Range" comes from the catalogue's categories;
  * these groups have no catalogue attribute behind them yet, so their options show as labels only.

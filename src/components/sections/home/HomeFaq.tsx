@@ -1,4 +1,4 @@
-import { RiAddLine, RiInstagramLine, RiSubtractLine } from "@remixicon/react";
+import { RiInstagramLine } from "@remixicon/react";
 import Image from "next/image";
 import JsonLd from "@/components/seo/JsonLd";
 import BlobButton from "@/components/ui/BlobButton";
@@ -6,6 +6,7 @@ import { Frame, FrameRule } from "@/components/ui/Frame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { socialNav } from "@/config/navigation";
 import FaqAccordion from "./FaqAccordion";
+import FaqBackdrop from "./FaqBackdrop";
 
 const faqs = [
   {
@@ -63,26 +64,29 @@ export default function HomeFaq() {
               key={faq.question}
               name="home-faq"
               open={i === 0}
-              className="group relative isolate overflow-hidden border-b border-line transition-[background-color,border-color,border-radius] duration-500 last:border-b-0 open:rounded-3xl open:border-transparent open:bg-navy"
+              // expanded: / group-expanded: (not open:) so the styles change as the item animates
+              className="group relative isolate overflow-hidden border-b border-line transition-[background-color,border-color,border-radius] duration-500 last:border-b-0 expanded:rounded-3xl expanded:border-transparent expanded:bg-navy"
             >
-              <Image
-                src="/images/home/hero-bg.png"
-                alt=""
-                fill
-                sizes="(min-width: 64rem) 1000px, 100vw"
-                className="-z-10 object-cover opacity-0 transition-opacity duration-500 group-open:opacity-100"
-              />
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-8 group-open:pb-4.5 md:px-10 md:py-12 group-open:md:pb-4.5 [&::-webkit-details-marker]:hidden">
-                <h3 className="transition-colors group-open:text-paper">{faq.question}</h3>
+              {/* The live aurora over that static backdrop, mounted only while this item is open */}
+              <FaqBackdrop />
+              {/* Same padding open or shut, so nothing jumps; the answer tucks up into it instead */}
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-8 md:px-10 md:py-12 [&::-webkit-details-marker]:hidden">
+                <h3 className="transition-colors duration-500 group-expanded:text-paper">{faq.question}</h3>
                 <span
                   aria-hidden="true"
-                  className="center size-10 shrink-0 rounded-full bg-accent text-paper group-open:border group-open:border-paper group-open:bg-transparent"
+                  className="relative center size-10 shrink-0 rounded-full border border-transparent bg-accent text-paper transition-colors duration-500 group-expanded:border-paper group-expanded:bg-transparent"
                 >
-                  <RiAddLine className="size-4 group-open:hidden" />
-                  <RiSubtractLine className="hidden size-4 group-open:block" />
+                  {/* A plus whose upright turns flat into a minus */}
+                  <span className="absolute h-0.5 w-3.5 rounded-full bg-current" />
+                  <span className="absolute h-3.5 w-0.5 rounded-full bg-current transition-transform duration-500 ease-out-expo group-expanded:rotate-90" />
                 </span>
               </summary>
-              <p className="max-w-3xl px-6 pb-8 text-lg text-paper md:px-10 md:pb-12">{faq.answer}</p>
+              <p
+                data-accordion-content
+                className="-mt-3.5 max-w-3xl px-6 pb-8 text-body-lg text-paper md:-mt-7.5 md:px-10 md:pb-12"
+              >
+                {faq.answer}
+              </p>
             </details>
           ))}
         </FaqAccordion>

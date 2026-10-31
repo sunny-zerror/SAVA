@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import { gsap, useGSAP } from "@/lib/gsap";
+import { onIntroDone } from "@/lib/intro";
 
 /**
  * The hero's <section>, with its entrance animation and parallax depth:
@@ -17,15 +18,12 @@ export default function HeroMotion({ children, ...props }: React.ComponentProps<
       const mm = gsap.matchMedia();
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-hero-stick]", { y: 80, opacity: 0, duration: 1.4, ease: "expo.out", delay: 0.25 });
-        gsap.from("[data-hero-strip] > *", {
-          y: 16,
-          opacity: 0,
-          duration: 0.8,
-          stagger: 0.08,
-          ease: "power2.out",
-          delay: 0.6,
-        });
+        // Entrance: held (hidden) until the home intro and any page fade-in are done, so it's seen
+        const entrance = gsap
+          .timeline({ paused: true })
+          .from("[data-hero-stick]", { y: 80, opacity: 0, duration: 1.4, ease: "expo.out" }, 0.25)
+          .from("[data-hero-strip] > *", { y: 16, opacity: 0, duration: 0.8, stagger: 0.08, ease: "power2.out" }, 0.6);
+        const offEntrance = onIntroDone(() => entrance.play());
 
         // Scroll parallax, scrubbed across the hero leaving the viewport. Percent-based on the headline,
         // so it adds to (not fights) the pointer's pixel offsets below.
@@ -42,6 +40,8 @@ export default function HeroMotion({ children, ...props }: React.ComponentProps<
           })
           .to("canvas", { y: () => (root.current?.offsetHeight ?? 0) * 0.4 }, 0)
           .to("h1", { yPercent: 70 }, 0);
+
+        return offEntrance;
       });
 
       mm.add("(prefers-reduced-motion: no-preference) and (pointer: fine)", () => {

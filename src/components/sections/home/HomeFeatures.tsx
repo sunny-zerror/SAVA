@@ -61,7 +61,7 @@ export default function HomeFeatures() {
                 className={cn("flex items-center gap-5", (i === 1 || i === 2) && "lg:mr-26")}
               >
                 <div className="flex max-w-83 flex-col gap-2">
-                  <h3 className="text-xl">{feature.title}</h3>
+                  <h3 className="text-h5 font-semibold">{feature.title}</h3>
                   <p className="text-muted">{feature.text}</p>
                 </div>
                 <span className="center size-25.5 shrink-0 rounded-full bg-surface max-lg:order-first max-lg:size-20">
@@ -116,7 +116,9 @@ export default function HomeFeatures() {
                   <circle cx={DISC.cx} cy={DISC.cy} r={DISC.r} className="fill-paper" />
                   <circle cx={DISC.cx} cy={DISC.cy} r={DISC.r} fill="url(#features-disc-fill)" />
                 </g>
-                <text fill="url(#features-line-fill)" fontSize={76} className="font-primary font-bold">
+                {/* No type role: its size is in the artwork's units, and a role's font-size would override
+                    fontSize. Medium, like the headings */}
+                <text fill="url(#features-line-fill)" fontSize={76} className="font-primary font-medium">
                   {/* 50% = its resting place on the doubled path (FeaturesMotion orbits it from there) */}
                   <textPath data-features-text href="#features-line-path" startOffset="50%">
                     Performance Meets Personal Care

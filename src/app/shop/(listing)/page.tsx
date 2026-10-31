@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { ViewTransition } from "react";
 import ShopHero from "@/components/sections/shop/ShopHero";
 import ShopProducts from "@/components/sections/shop/ShopProducts";
 import JsonLd from "@/components/seo/JsonLd";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { Frame } from "@/components/ui/Frame";
 import PageHeader from "@/components/ui/PageHeader";
 import { productListSchema } from "@/lib/schema";
 import { createMetadata, createPageMetadata } from "@/lib/seo";
@@ -50,15 +52,17 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   };
 
   return (
-    <>
+    // Fades in over the skeleton as it leaves (loading.tsx) when the listing streams in
+    <ViewTransition enter="page-in" default="none">
       {showHero && <ShopHero productsId="products" />}
-      <section id="products" aria-label={title} className="pb-section">
+      <section id="products" aria-label={title}>
         <JsonLd data={productListSchema(products, title, query(page))} />
         {showHero ? (
           // The hero holds the h1; the listing still gets a heading for the outline
           <h2 className="sr-only">{title}</h2>
         ) : (
-          <div className="container flex flex-col gap-6 pt-section pb-stack">
+          // Framed, so the rails run on unbroken into the grid's frame below
+          <Frame className="flex flex-col gap-6 px-inset pt-section pb-stack">
             <Breadcrumbs
               items={
                 activeCategory
@@ -70,7 +74,7 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
               }
             />
             <PageHeader title={title} description={activeCategory?.description ?? undefined} />
-          </div>
+          </Frame>
         )}
         <ShopProducts
           categories={categories}
@@ -81,6 +85,6 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
           href={query}
         />
       </section>
-    </>
+    </ViewTransition>
   );
 }

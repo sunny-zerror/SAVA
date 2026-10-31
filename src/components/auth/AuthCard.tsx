@@ -41,8 +41,8 @@ export default function AuthCard({ title, description, eyebrow = "Your account",
             {siteConfig.name} Club
           </p>
           <div className="flex flex-col gap-6">
-            <p className="max-w-xs font-primary text-4xl leading-tight font-bold">{siteConfig.tagline}</p>
-            <ul className="flex max-w-xs flex-col gap-3 text-lg">
+            <p className="max-w-xs text-h2">{siteConfig.tagline}</p>
+            <ul className="flex max-w-xs flex-col gap-3 text-body-lg">
               {perks.map((perk) => (
                 <li key={perk} className="flex items-center gap-3">
                   <Sparkle className="size-3.5 text-mint" />
@@ -59,7 +59,7 @@ export default function AuthCard({ title, description, eyebrow = "Your account",
             {footer.text}{" "}
             <Link
               href={footer.href}
-              className="font-bold text-accent underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
+              className="font-medium text-accent underline decoration-accent/30 underline-offset-4 transition-colors hover:decoration-accent"
             >
               {footer.linkLabel}
             </Link>

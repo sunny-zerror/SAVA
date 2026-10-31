@@ -12,7 +12,7 @@ interface PageHeaderProps {
 }
 
 /**
- * The h1 block at the top of a page — one per page, for SEO. Same "✦ KICKER over bold heading"
+ * The h1 block at the top of a page — one per page, for SEO. Same "✦ KICKER over heading"
  * look as SectionHeading; on framed pages sit it between two FrameRules with px-inset py-10.
  */
 export default function PageHeader({

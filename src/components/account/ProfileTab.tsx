@@ -62,7 +62,7 @@ export default function ProfileTab({ user }: { user: User }) {
         aria-labelledby="profile-details"
         className="flex flex-col gap-5 rounded-3xl border border-line p-5 md:p-8"
       >
-        <h2 id="profile-details" className="text-2xl md:text-3xl">
+        <h2 id="profile-details" className="text-h3">
           Your details
         </h2>
         <div className="grid gap-4 sm:grid-cols-2">
@@ -109,7 +109,7 @@ export default function ProfileTab({ user }: { user: User }) {
         aria-labelledby="profile-password"
         className="flex flex-col gap-5 rounded-3xl border border-line p-5 md:p-8"
       >
-        <h2 id="profile-password" className="text-2xl md:text-3xl">
+        <h2 id="profile-password" className="text-h3">
           Password
         </h2>
         <TextField

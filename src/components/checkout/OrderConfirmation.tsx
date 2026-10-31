@@ -23,12 +23,12 @@ function AddressBlock({ title, address }: { title: string; address?: Address | n
   if (!address) return null;
   return (
     <div className="flex flex-col gap-3 rounded-3xl border border-line p-6 text-caption md:p-8">
-      <h3 className="flex items-center gap-2 font-secondary text-kicker text-accent">
+      <h2 className="flex items-center gap-2 text-kicker text-accent">
         <Sparkle />
         {title}
-      </h3>
+      </h2>
       <p className="text-muted">
-        <span className="font-bold text-ink">
+        <span className="font-medium text-ink">
           {address.firstname} {address.lastname}
         </span>
         <br />
@@ -129,12 +129,12 @@ export default function OrderConfirmation({ orderId }: { orderId?: string }) {
                 <span aria-hidden="true" className="center size-12 rounded-full bg-gradient-badge text-paper">
                   <Icon className="size-5" />
                 </span>
-                <span aria-hidden="true" className="text-sm font-bold text-muted tabular-nums">
+                <span aria-hidden="true" className="text-caption font-medium text-muted tabular-nums">
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </span>
               <span className="flex flex-col gap-1">
-                <span className="font-primary text-xl font-bold">{title}</span>
+                <span className="text-h4">{title}</span>
                 <span className="text-caption text-muted">{body}</span>
               </span>
             </li>

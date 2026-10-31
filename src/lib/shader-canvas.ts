@@ -142,6 +142,11 @@ export function mountShaderCanvas(
       geometry.dispose();
       material.dispose();
       renderer.dispose();
+      // Free the context now, not at GC: browsers cap live WebGL contexts (~16) and kill the oldest
+      // past that, and backgrounds that mount on demand (the open FAQ item's) come and go. Only once
+      // the canvas is really gone — a lost context stays with its canvas, so an effect re-run on the
+      // same element (Fast Refresh, StrictMode) would be left blank.
+      if (!canvas.isConnected) renderer.forceContextLoss();
     };
   });
 

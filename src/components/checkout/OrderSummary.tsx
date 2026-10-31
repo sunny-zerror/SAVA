@@ -39,7 +39,7 @@ export default function OrderSummary({
 
   return (
     <section aria-labelledby="order-summary" className="flex flex-col gap-6 rounded-3xl bg-surface p-5 md:p-8">
-      <h2 id="order-summary" className="text-2xl md:text-3xl">
+      <h2 id="order-summary" className="text-h3">
         {title}
       </h2>
 
@@ -54,18 +54,19 @@ export default function OrderSummary({
                 sizes="64px"
                 className="rounded-xl object-cover"
               />
-              <span className="absolute -top-2 -right-2 center size-5 rounded-full bg-accent text-[0.625rem] font-bold text-paper">
+              <span className="absolute -top-2 -right-2 center size-5 rounded-full bg-accent text-micro font-medium text-paper tabular-nums">
                 {line.qty}
               </span>
             </div>
-            <div className="flex flex-1 justify-between gap-4 text-caption">
+            {/* items-baseline: the name (h6) and price (body) have different leading */}
+            <div className="flex flex-1 items-baseline justify-between gap-4 text-caption">
               <div>
-                <p className="font-bold">{line.name}</p>
+                <p className="text-h6">{line.name}</p>
                 {Boolean(line.variantDetail?.selectedOptions?.length) && (
                   <p className="text-muted">{line.variantDetail?.selectedOptions.join(" / ")}</p>
                 )}
               </div>
-              <span className="font-bold">{formatPrice(line.finalPrice)}</span>
+              <span className="text-body font-medium tabular-nums">{formatPrice(line.finalPrice)}</span>
             </div>
           </li>
         ))}
@@ -76,12 +77,12 @@ export default function OrderSummary({
           {coupon.code ? (
             <div className="flex items-center justify-between text-caption">
               <span>
-                Coupon <strong>{coupon.code}</strong> applied
+                Coupon <strong className="font-medium">{coupon.code}</strong> applied
               </span>
               <button
                 type="button"
                 onClick={coupon.onRemove}
-                className="font-bold text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
+                className="text-cta text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
               >
                 Remove
               </button>
@@ -96,7 +97,7 @@ export default function OrderSummary({
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Coupon code"
-                className="h-11 min-w-0 flex-1 rounded-full border border-line bg-paper px-5 text-caption uppercase transition-[border-color,box-shadow] outline-none placeholder:normal-case focus:border-accent focus:ring-4 focus:ring-accent/15"
+                className="h-11 min-w-0 flex-1 rounded-full border border-line bg-paper px-5 text-input uppercase transition-[border-color,box-shadow] outline-none placeholder:normal-case focus:border-accent focus:ring-4 focus:ring-accent/15"
               />
               <Button
                 type="button"
@@ -116,7 +117,7 @@ export default function OrderSummary({
         </div>
       )}
 
-      <dl className="flex flex-col gap-3 border-t border-line pt-6 text-caption">
+      <dl className="flex flex-col gap-3 border-t border-line pt-6 text-caption tabular-nums">
         <div className="flex justify-between">
           <dt>Subtotal</dt>
           <dd>{formatPrice(subtotal)}</dd>
@@ -137,7 +138,7 @@ export default function OrderSummary({
             <dd>{formatPrice(tax)}</dd>
           </div>
         )}
-        <div className="flex items-baseline justify-between border-t border-line pt-4 text-lg font-bold">
+        <div className="flex items-baseline justify-between border-t border-line pt-4 text-h5">
           <dt>Total</dt>
           <dd>{formatPrice(total)}</dd>
         </div>

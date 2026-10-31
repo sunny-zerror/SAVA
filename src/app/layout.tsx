@@ -20,7 +20,9 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang={siteConfig.language} className={fontVariables}>
-      <body>
+      {/* Browser extensions (ColorZilla, Grammarly…) stamp attributes on <body> before React loads;
+          this ignores attribute mismatches on <body> itself only, not on anything inside it */}
+      <body suppressHydrationWarning>
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <SiteLayout>{children}</SiteLayout>
       </body>

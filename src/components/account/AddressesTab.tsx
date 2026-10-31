@@ -61,7 +61,7 @@ export default function AddressesTab({ userId }: { userId: string }) {
         aria-labelledby="address-form"
         className="flex max-w-3xl flex-col gap-6 rounded-3xl border border-line p-5 md:p-8"
       >
-        <h2 id="address-form" className="text-2xl md:text-3xl">
+        <h2 id="address-form" className="text-h3">
           {current ? "Edit address" : "New address"}
         </h2>
         <TextField
@@ -93,16 +93,14 @@ export default function AddressesTab({ userId }: { userId: string }) {
       {addresses.map((a) => (
         <li key={a._id} className="flex flex-col gap-4 rounded-3xl border border-line p-6 text-caption md:p-8">
           <div className="flex items-center justify-between gap-3">
-            <p className="flex items-center gap-2 font-bold">
+            <p className="flex items-center gap-2 text-h5">
               <RiMapPin2Line aria-hidden="true" className="size-4 text-accent" />
               {a.addressType || "Address"}
             </p>
-            {a.primary && (
-              <span className="rounded-full bg-accent px-3 py-0.5 text-xs font-bold text-paper">Default</span>
-            )}
+            {a.primary && <span className="rounded-full bg-accent px-3 py-0.5 text-eyebrow text-paper">Default</span>}
           </div>
           <p className="text-muted">
-            <span className="font-bold text-ink">
+            <span className="font-medium text-ink">
               {a.firstname} {a.lastname}
             </span>
             <br />
@@ -115,7 +113,7 @@ export default function AddressesTab({ userId }: { userId: string }) {
           <button
             onClick={() => setEditing(a)}
             aria-label={`Edit ${a.addressType || "address"}: ${a.addressline1}`}
-            className="mt-auto inline-flex items-center gap-1.5 self-start font-bold transition-colors hover:text-accent"
+            className="mt-auto inline-flex items-center gap-1.5 self-start text-cta transition-colors hover:text-accent"
           >
             <RiEditLine aria-hidden="true" className="size-4" />
             Edit
@@ -134,8 +132,8 @@ export default function AddressesTab({ userId }: { userId: string }) {
           >
             <RiAddLine className="size-5" />
           </span>
-          <span className="font-bold">Add address</span>
-          {addresses.length === 0 && <span className="text-caption text-muted">No saved addresses yet.</span>}
+          <span className="text-h5">Add address</span>
+          {addresses.length === 0 && <span className="text-body text-muted">No saved addresses yet.</span>}
         </button>
       </li>
     </ul>

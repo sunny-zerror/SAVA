@@ -19,7 +19,7 @@ function Group({ title, open, children }: { title: string; open?: boolean; child
   return (
     // overflow-hidden: while its height animates, the list is clipped to it instead of spilling out
     <details open={open} className="group overflow-hidden border-b border-line py-5">
-      <summary className="flex cursor-pointer list-none items-center justify-between text-lg font-bold [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between text-h6 [&::-webkit-details-marker]:hidden">
         {title}
         <RiAddLine aria-hidden="true" className="size-4 group-open:hidden" />
         <RiSubtractLine aria-hidden="true" className="hidden size-4 text-accent group-open:block" />
@@ -38,11 +38,11 @@ export default function ShopFilters({ categories, active }: ShopFiltersProps) {
 
   return (
     <aside aria-label="Filters" className="flex flex-col">
-      <h2 className="border-b border-line pb-5 text-2xl">Filter</h2>
+      <h2 className="border-b border-line pb-5 text-h4">Filter</h2>
 
       <FaqAccordion exclusive={false}>
         <Group title="Range" open>
-          <ul className="flex flex-col gap-2 text-sm">
+          <ul className="flex flex-col gap-2 text-caption">
             {range.map((c) => {
               const current = active === c.slug;
               return (
@@ -62,7 +62,7 @@ export default function ShopFilters({ categories, active }: ShopFiltersProps) {
 
         {shopFilterGroups.map((group) => (
           <Group key={group.title} title={group.title}>
-            <ul className="flex flex-col gap-2 text-sm text-muted">
+            <ul className="flex flex-col gap-2 text-caption text-muted">
               {group.options.map((option) => (
                 <li key={option}>{option}</li>
               ))}

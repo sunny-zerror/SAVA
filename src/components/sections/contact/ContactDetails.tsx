@@ -38,7 +38,7 @@ export default function ContactDetails() {
               </span>
               <div className="flex min-w-0 flex-col gap-0.5">
                 <dt className="text-caption text-muted">{label}</dt>
-                <dd className="text-lg font-bold wrap-break-word md:text-xl">
+                <dd className="text-h5 wrap-break-word">
                   {href ? (
                     <a href={href} className="transition-colors hover:text-accent">
                       {value}
@@ -72,9 +72,7 @@ export default function ContactDetails() {
           <Sparkle />
           {siteConfig.name} Club
         </p>
-        <p className="mt-3 max-w-xs font-primary text-2xl leading-tight font-bold md:text-3xl">
-          Follow along for drops, routines and stories
-        </p>
+        <p className="mt-3 max-w-xs text-h3">Follow along for drops, routines and stories</p>
         <ul aria-label="Social" className="mt-6 flex flex-wrap gap-2">
           {socialNav.map((item) => (
             <li key={item.label}>
@@ -82,7 +80,7 @@ export default function ContactDetails() {
                 href={item.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 items-center rounded-full border border-paper/40 px-5 text-sm font-bold transition-colors hover:bg-paper hover:text-ink"
+                className="inline-flex h-10 items-center rounded-full border border-paper/40 px-5 text-cta transition-colors hover:bg-paper hover:text-ink"
               >
                 {item.label}
               </a>
