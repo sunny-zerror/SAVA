@@ -29,9 +29,10 @@ const notes = {
 
 // overflow-clip, not -hidden: a clipping box that isn't a scroll container keeps aspect-ratio's
 // automatic minimum, so a note grows past its shape when its copy needs the room instead of cutting it
-// off. self-stretch: grid items with an aspect ratio don't stretch by default, so a photo would stop
-// short of the taller note beside it
-const cell = "relative aspect-5/6 self-stretch overflow-clip rounded-2xl md:aspect-square";
+// off. md:self-stretch: grid items with an aspect ratio don't stretch by default, so a photo would stop
+// short of the taller note beside it. Only once they're side by side: a stretched photo has no content
+// to size its row by, so alone on a row it would collapse to nothing
+const cell = "relative aspect-5/6 overflow-clip rounded-2xl md:aspect-square md:self-stretch";
 
 /**
  * Below the product: the headline, then a checkerboard of two photos and two notes (how to apply it,
@@ -48,12 +49,13 @@ export default function ProductStory() {
           Helping Modern Skin Recover from the Pressures of Everyday Living
         </h2>
         <FrameRule />
-        {/* As each cell scrolls in: the photos fade in; the notes' blue fades in, then their rules
-            and title, and the copy rises */}
+        {/* A checkerboard from md; one column below it, photo then note twice over (the second note
+            moves to the end). As each cell scrolls in: the photos fade in; the notes' blue fades in,
+            then their rules and title, and the copy rises */}
         <div className="grid gap-3 px-inset py-10 md:grid-cols-2 md:gap-4">
           <Photo {...photos.holding} />
           <Note {...notes.application} />
-          <Note {...notes.formula} />
+          <Note {...notes.formula} className="max-md:order-last" />
           <Photo {...photos.active} />
         </div>
         <FrameRule />
@@ -70,9 +72,9 @@ function Photo({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-function Note({ title, text, glow }: { title: string; text: string; glow: string }) {
+function Note({ title, text, glow, className }: { title: string; text: string; glow: string; className?: string }) {
   return (
-    <article data-reveal="fade" className={cn(cell, "isolate flex flex-col bg-navy text-paper")}>
+    <article data-reveal="fade" className={cn(cell, "isolate flex flex-col bg-navy text-paper", className)}>
       <div aria-hidden="true" className={cn("absolute inset-0 -z-10", glow)} />
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20 mix-blend-overlay" />
       <Rules />

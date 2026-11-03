@@ -9,6 +9,8 @@ interface ShopProductsProps {
   products: ProductSummary[];
   /** Slug of the active category ("" for all) */
   activeCategory: string;
+  /** The search term, "" when not searching */
+  search: string;
   page: number;
   totalPages: number;
   href: (page: number) => string;
@@ -26,6 +28,7 @@ export default function ShopProducts({
   categories,
   products,
   activeCategory,
+  search,
   page,
   totalPages,
   href,
@@ -42,13 +45,15 @@ export default function ShopProducts({
         <div className="px-inset py-8 max-lg:border-b max-lg:border-line lg:border-r lg:border-line">
           {/* The column runs the grid's full height (for its rule); the filters ride down it */}
           <div className="lg:sticky lg:top-[calc(var(--spacing-header)+2rem)]">
-            <ShopFilters categories={categories} active={activeCategory} />
+            <ShopFilters categories={categories} active={activeCategory} search={search} />
           </div>
         </div>
 
         <div className="flex flex-col">
           {products.length === 0 ? (
-            <p className="py-section text-center text-body text-muted">No products here yet.</p>
+            <p className="px-inset py-section text-center text-body text-muted">
+              {search ? `Nothing matches “${search}” — try another word.` : "No products here yet."}
+            </p>
           ) : (
             // gap-px over a line-coloured ground: hairlines between the cells. The cards rise in turn
             <div data-reveal="stagger" className="grid grid-cols-2 gap-px bg-line md:grid-cols-3">

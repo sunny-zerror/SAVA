@@ -59,16 +59,18 @@ export default function Header() {
         )}
       >
         <div className="container">
-          {/* Side borders line up with the page's frame rails; shown only while the header is white */}
+          {/* Side borders line up with the page's frame rails; shown only while the header is white.
+              px-inset, with the end buttons' -ml/-mr-2 taking back their padding: the menu and bag
+              icons line up with the page content inside the rails */}
           <div
             className={cn(
-              "grid h-header grid-cols-[1fr_auto_1fr] items-center border-x transition-colors duration-300 md:px-inset",
+              "grid h-header grid-cols-[1fr_auto_1fr] items-center border-x px-inset transition-colors duration-300",
               stuck || !overlay ? "border-rule" : "border-transparent",
             )}
           >
             <div>
               <button onClick={() => setMenuOpen(true)} className={cn(action, "-ml-2")}>
-                <RiMenuLine className="size-5" aria-hidden="true" />
+                <RiMenuLine className="size-4" aria-hidden="true" />
                 <span className="max-md:sr-only">Menu</span>
               </button>
             </div>
@@ -78,7 +80,7 @@ export default function Header() {
             <div className="flex items-center justify-end gap-1 md:gap-5">
               {/* No search page yet — the shop listing is the closest thing */}
               <Link href="/shop" className={action}>
-                <RiSearchLine className="size-5" aria-hidden="true" />
+                <RiSearchLine className="size-4" aria-hidden="true" />
                 <span className="max-md:sr-only">Search</span>
               </Link>
               <button
@@ -86,7 +88,7 @@ export default function Header() {
                 aria-label={`Open cart, ${count} items`}
                 className={cn(action, "relative -mr-2")}
               >
-                <RiShoppingBag3Line className="size-5" aria-hidden="true" />
+                <RiShoppingBag3Line className="size-4" aria-hidden="true" />
                 <span aria-hidden="true" className="max-md:hidden">
                   Cart
                 </span>
