@@ -35,6 +35,12 @@ import { afterPageEnter, pageEntering } from "@/lib/page-transition";
  *     data-reveal="fade"     opacity only (things that mustn't move: overlays, big type)
  *     data-reveal="image"    an image wrapper (overflow-hidden) opens upward from its foot while
  *                            the image inside settles from a slight zoom
+ *   data-reveal-sequence     on a container: the reveals and headings inside it that are already in
+ *                            view as the page comes in play one after another, in page order, rather
+ *                            than all at once (a page's opening). Those further down still play as
+ *                            they scroll in, with no wait.
+ *   data-reveal-replay       on a container: its reveals replay — play on the way down, reverse
+ *                            when scrolled back up past them (toggleActions "play none none reverse")
  *   data-parallax="0.1"      scroll depth: the element drifts against the scroll by that fraction
  *                            (an image inside an overflow-hidden wrapper; it's scaled to cover)
  */
@@ -90,6 +96,8 @@ function reveal(heading: HTMLElement, lines: Element[]) {
 
   return gsap.from(lines, {
     ...motion,
+    // Its turn in a sequenced opening (data-reveal-sequence)
+    delay: sequenceDelay(heading),
     // Plays on the way down; scrolling back up past the start hides the lines again for a replay
     scrollTrigger: { trigger: heading, start: "top 90%", toggleActions: "play none none reverse" },
   });
@@ -183,25 +191,54 @@ function animateFrameRails(rails: HTMLElement) {
 
 /** The site's entrance motion: one ease and rhythm everywhere */
 const ENTER = { duration: 1.1, ease: "expo.out" };
-/** Plays once, as the element's top passes 88% of the viewport */
-const onEnter = (trigger: Element) => ({ trigger, start: "top 88%", once: true });
+/**
+ * Plays once, as the element's top passes 88% of the viewport — or, inside [data-reveal-replay],
+ * plays each time it comes in from below and reverses as it's scrolled back down out of view
+ */
+const onEnter = (trigger: Element) =>
+  trigger.closest("[data-reveal-replay]")
+    ? { trigger, start: "top 88%", toggleActions: "play none none reverse" }
+    : { trigger, start: "top 88%", once: true };
+
+/** Gap between the steps of a data-reveal-sequence opening */
+const SEQUENCE_STEP = 0.12;
+const SEQUENCED = `[data-reveal], ${HEADING_SELECTOR}`;
+/** In view as the page comes in — where onEnter would fire straight away */
+const inViewNow = (el: Element) => {
+  const { top, height } = el.getBoundingClientRect();
+  return height > 0 && top < window.innerHeight * 0.88;
+};
+
+/**
+ * The wait before an element's entrance inside a data-reveal-sequence: its place among the
+ * sequence's members already in view, one step apart. Nothing for those below the fold, which
+ * play as they scroll in.
+ */
+function sequenceDelay(el: Element) {
+  const sequence = el.closest("[data-reveal-sequence]");
+  if (!sequence || !inViewNow(el)) return 0;
+  const members = Array.from(sequence.querySelectorAll(SEQUENCED)).filter(inViewNow);
+  return Math.max(0, members.indexOf(el)) * SEQUENCE_STEP;
+}
 
 function animateReveal(el: HTMLElement) {
   const ready = () => el.setAttribute("data-reveal-ready", "");
   const kind = el.dataset.reveal;
+  // Its turn in a sequenced opening (data-reveal-sequence); 0 everywhere else
+  const delay = sequenceDelay(el);
 
   if (kind === "image") {
     const image = el.querySelector("img, canvas, video");
     gsap
-      .timeline({ scrollTrigger: onEnter(el) })
+      .timeline({ scrollTrigger: onEnter(el), delay })
       .from(el, { clipPath: "inset(100% 0% 0% 0%)", duration: 1.3, ease: "expo.out" })
       .from(image, { scale: 1.06, duration: 1.6, ease: "expo.out" }, 0);
   } else if (kind === "stagger") {
-    gsap.from(el.children, { ...ENTER, y: 32, opacity: 0, stagger: 0.08, scrollTrigger: onEnter(el) });
+    gsap.from(el.children, { ...ENTER, y: 32, opacity: 0, stagger: 0.08, delay, scrollTrigger: onEnter(el) });
   } else if (kind === "fade") {
-    gsap.from(el, { ...ENTER, duration: 1.4, opacity: 0, scrollTrigger: onEnter(el) });
+    gsap.from(el, { ...ENTER, duration: 1.4, opacity: 0, delay, scrollTrigger: onEnter(el) });
   } else {
-    gsap.from(el, { ...ENTER, y: 32, opacity: 0, scrollTrigger: onEnter(el) });
+    gsap.from(el, { ...ENTER, y: 32, opacity: 0, delay, scrollTrigger: onEnter(el) });
   }
   ready();
 }

@@ -13,11 +13,13 @@ interface TabsProps<T extends string> {
   active: T;
   onChange: (id: T) => void;
   label: string;
+  /** Fill the row, the tabs sharing it equally */
+  stretch?: boolean;
   className?: string;
 }
 
 /** Accessible tab list (arrow keys move between tabs). Render the panel yourself with tabPanelProps(). */
-export function Tabs<T extends string>({ tabs, active, onChange, label, className }: TabsProps<T>) {
+export function Tabs<T extends string>({ tabs, active, onChange, label, stretch, className }: TabsProps<T>) {
   const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const onKeyDown = (e: React.KeyboardEvent, index: number) => {
@@ -34,7 +36,11 @@ export function Tabs<T extends string>({ tabs, active, onChange, label, classNam
       role="tablist"
       aria-label={label}
       // Pill track: the selected tab fills with SAVA blue
-      className={cn("no-scrollbar flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-surface p-1", className)}
+      className={cn(
+        "no-scrollbar flex max-w-full gap-1 overflow-x-auto rounded-full bg-surface p-1",
+        stretch ? "w-full" : "w-fit",
+        className,
+      )}
     >
       {tabs.map((tab, i) => {
         const selected = tab.id === active;
@@ -53,6 +59,7 @@ export function Tabs<T extends string>({ tabs, active, onChange, label, classNam
             onKeyDown={(e) => onKeyDown(e, i)}
             className={cn(
               "h-10 shrink-0 rounded-full px-4 text-cta transition-colors duration-300 focus-visible:-outline-offset-2 md:px-6",
+              stretch && "flex-1",
               selected ? "bg-accent text-paper" : "text-muted hover:bg-paper hover:text-ink",
             )}
           >

@@ -11,3 +11,5 @@ export function absoluteUrl(path = "/"): string {
   const normalized = normalizePath(path);
   return normalized === "/" ? base : `${base}${normalized}`;
 }
+
+export const productHref = (slug: string) => `/shop/${slug}`;

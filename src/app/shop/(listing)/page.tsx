@@ -54,8 +54,8 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
   return (
     // Fades in over the skeleton as it leaves (loading.tsx) when the listing streams in
     <ViewTransition enter="page-in" default="none">
-      {showHero && <ShopHero productsId="products" />}
-      <section id="products" aria-label={title}>
+      {showHero && <ShopHero />}
+      <section aria-label={title}>
         <JsonLd data={productListSchema(products, title, query(page))} />
         {showHero ? (
           // Section spacing below the banner, framed so the rails run down into the grid's frame;

@@ -43,11 +43,21 @@ export default async function HomeHero() {
             header that overlay this section. */}
         <Frame
           tone="dark"
-          className="flex h-svh min-h-fit flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))] pb-12 md:pb-24"
+          className="flex h-svh min-h-fit flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))] pb-12 md:pb-16"
         >
-          <div className="relative grid flex-1 place-items-center py-16">
+          {/* The stick at the top, the headline at the foot, so the stick never covers the lines */}
+          <div className="flex flex-1 flex-col items-center justify-between gap-6 py-6">
+            {/* Slot for the 3D model (HomeModel): same box as the stick, unrotated — the model takes the
+                tilt. Sized off the screen's height so stick and headline share one screen */}
+            <div
+              data-model-anchor="hero"
+              data-model-tilt="-19.71"
+              data-model-fit="0.8"
+              data-model-drag
+              className="pointer-events-none aspect-[1122/1402] h-[clamp(14rem,40svh,34rem)] touch-pan-y model-ready:pointer-events-auto model-ready:cursor-grab model-ready:active:cursor-grabbing"
+            />
             {/* data-heading-effect="intro": the lines rise once the intro clears, not on scroll */}
-            <h1 id="home-hero" data-heading-effect="intro" className="text-center text-display uppercase">
+            <h1 id="home-hero" data-heading-effect="intro" className="text-center text-hero uppercase">
               <span data-heading-line className="block">
                 Own Your
               </span>
@@ -55,14 +65,6 @@ export default async function HomeHero() {
                 Movement
               </span>
             </h1>
-            {/* Slot for the 3D model (HomeModel): same box as the stick, unrotated — the model takes the tilt */}
-            <div
-              data-model-anchor="hero"
-              data-model-tilt="-19.71"
-              data-model-fit="0.8"
-              data-model-drag
-              className="pointer-events-none absolute top-1/2 left-1/2 aspect-[1122/1402] w-[clamp(11rem,33vw,29.5rem)] -translate-1/2 touch-pan-y model-ready:pointer-events-auto model-ready:cursor-grab model-ready:active:cursor-grabbing"
-            />
           </div>
         </Frame>
       </HeroMotion>

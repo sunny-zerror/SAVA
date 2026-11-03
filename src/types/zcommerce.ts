@@ -73,7 +73,8 @@ export interface ProductSummary {
   discountedPrice?: number | null;
   assets: Asset[];
   ribbon?: Ribbon | null;
-  variants?: Pick<Variant, "variantPrice" | "stockQuantity" | "stockStatus" | "status">[] | null;
+  productOptions?: Pick<ProductOption, "optionName" | "choices">[] | null;
+  variants?: Pick<Variant, "selectedOptions" | "variantPrice" | "stockQuantity" | "stockStatus" | "status">[] | null;
   categoryIds?: string[] | null;
 }
 

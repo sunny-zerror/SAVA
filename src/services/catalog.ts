@@ -50,6 +50,13 @@ export const getProduct = cache(async (slug: string): Promise<Product | null> =>
   }
 });
 
+/** Products sharing the first category, for the product page's related carousel */
+export const getRelatedProducts = cache(async (product: Product, limit = 8): Promise<ProductSummary[]> => {
+  const slug = product.categories?.[0]?.slug;
+  const pool = slug ? (await getCategoryProducts(slug))?.products : (await getProducts()).products;
+  return (pool ?? []).filter((p) => p._id !== product._id).slice(0, limit);
+});
+
 export const getCategories = cache(async (): Promise<Category[]> => {
   if (!isApiConfigured) return mockCategories;
   try {

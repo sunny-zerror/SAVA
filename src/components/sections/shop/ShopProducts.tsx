@@ -1,5 +1,4 @@
 import ShopFilters from "@/components/product/ShopFilters";
-import ShopGridModel from "@/components/product/ShopGridModel";
 import ShopProductCard from "@/components/product/ShopProductCard";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Pagination from "@/components/ui/Pagination";
@@ -15,13 +14,13 @@ interface ShopProductsProps {
   href: (page: number) => string;
 }
 
-/** Demo: the catalogue has three products, so the grid shows them this many times over */
+/** Demo: the catalogue has four products, so the grid shows them this many times over (12 fill rows of 2 and 3) */
 const DEMO_REPEAT = 3;
 
 /**
  * The shop listing, framed between the page rails: the filter sidebar on the left (sticky under the
  * header while the products scroll), the products in a ruled grid (one hairline between cells) on
- * the right, pagination underneath. Each card's 3D stick spins when hovered (ShopGridModel).
+ * the right, pagination underneath.
  */
 export default function ShopProducts({
   categories,
@@ -52,7 +51,6 @@ export default function ShopProducts({
             <p className="py-section text-center text-body text-muted">No products here yet.</p>
           ) : (
             // gap-px over a line-coloured ground: hairlines between the cells. The cards rise in turn
-            // (a rise only — each holds a [data-grid-slot], which the 3D canvas follows by its rect)
             <div data-reveal="stagger" className="grid grid-cols-2 gap-px bg-line md:grid-cols-3">
               {cards.map(({ product, key }, i) => (
                 <ShopProductCard key={key} product={product} priority={i < 3} />
@@ -67,7 +65,6 @@ export default function ShopProducts({
         </div>
       </div>
       <FrameRule />
-      <ShopGridModel />
     </Frame>
   );
 }

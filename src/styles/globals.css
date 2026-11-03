@@ -4,8 +4,6 @@
 @custom-variant model-ready (html[data-model="ready"] &);
 /* Set on <html> once the footer's 3D stick (FooterModel) is live — its static stand-in hides */
 @custom-variant footer-model-ready (html[data-footer-model="ready"] &);
-/* Set on <html> once the shop grid's 3D sticks (ShopGridModel) are live — the product photos hide */
-@custom-variant grid-model-ready (html[data-grid-model="ready"] &);
 /* An accordion item that is, or is animating to be, open: FaqAccordion sets data-expanded the moment
    it's toggled (`open` stays set while it collapses); before that, and without JS, `open` counts */
 @custom-variant expanded (&:is([data-expanded="true"], [open]:not([data-expanded])));
@@ -259,7 +257,8 @@
  * is font-medium for emphasis. font-bold isn't used. Sizes are fluid from phone to 1440px, on top
  * of the fluid root.
  *
- *   text-display   hero line, 404                      Inter Tight 600, ~52 → 198px
+ *   text-display   404                                 Inter Tight 600, ~52 → 198px
+ *   text-hero      home hero line, under the stick     Inter Tight 600, 56 → 160px, capped by screen height
  *   text-h1 – h4   page / section / block headings     Inter Tight 500, tracked tight
  *   text-h5 – h6   item titles: products, cards, rows  Inter 500
  *   text-lead      large intro paragraph               Inter Tight 400
@@ -275,6 +274,16 @@
   font-family: var(--font-primary);
   font-weight: 600;
   font-size: clamp(3.5rem, 13.75vw, 12.375rem);
+  line-height: 0.88;
+  letter-spacing: -0.045em;
+}
+
+/* Shares the screen with the hero's stick, so it's held by the screen's height as well as its width:
+   a short laptop screen gets a smaller line than a tall one of the same width */
+@utility text-hero {
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: clamp(3.5rem, min(11vw, 14svh), 10rem);
   line-height: 0.88;
   letter-spacing: -0.045em;
 }

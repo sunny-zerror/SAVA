@@ -14,12 +14,23 @@ export const isSoldOut = (product: ProductSummary | Product) =>
   Boolean(product.variants?.length) && product.variants!.every((v) => isOutOfStock(v));
 
 /** Variant whose selectedOptions match the chosen choice names (order-insensitive) */
-export function findVariant(variants: Variant[] = [], selected: string[]): Variant | undefined {
+export function findVariant<V extends Pick<Variant, "selectedOptions">>(variants: V[] = [], selected: string[]) {
   const wanted = [...selected].sort();
   return variants.find((v) => {
     const options = [...(v.selectedOptions ?? [])].sort();
     return options.length === wanted.length && options.every((o, i) => o === wanted[i]);
   });
+}
+
+/** The variant a listing card sells: every option's first choice (the first variant when there are no options) */
+export function cardVariant(product: ProductSummary) {
+  const variants = product.variants ?? [];
+  const options = product.productOptions ?? [];
+  if (options.length === 0) return variants[0];
+  return findVariant(
+    variants,
+    options.map((o) => o.choices[0]?.name ?? ""),
+  );
 }
 
 /** Removes Apollo's __typename keys, which z-commerce input types reject */

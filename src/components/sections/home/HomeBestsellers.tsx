@@ -9,6 +9,7 @@ import type { ProductSummary } from "@/types";
 import { cn } from "@/utils/cn";
 import { mediaUrl, primaryImage } from "@/utils/media";
 import { displayPrice } from "@/utils/product";
+import { productHref } from "@/utils/url";
 
 export default async function HomeBestsellers() {
   const { products } = await getProducts({ limit: 3 });
@@ -76,7 +77,7 @@ function BestsellerCard({ product, featured }: { product: ProductSummary; featur
       <div className="flex flex-col items-center gap-1.5">
         <h3 className="text-h5">
           {/* Stretched link: the whole card is clickable, one link for screen readers */}
-          <Link href="/shop" className="after:absolute after:inset-0">
+          <Link href={productHref(product.slug)} className="after:absolute after:inset-0">
             {product.name}
           </Link>
         </h3>

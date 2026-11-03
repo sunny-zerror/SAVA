@@ -6,25 +6,15 @@ interface SectionHeadingProps {
   title: React.ReactNode;
   /** Pair with aria-labelledby on the section */
   id?: string;
-  align?: "center" | "start";
   /** "dark" for white type on the brand gradient */
   tone?: "light" | "dark";
   className?: string;
 }
 
-/** Section label + heading: "✦ OUR BESTSELLERS" over an h2 */
-export default function SectionHeading({
-  eyebrow,
-  title,
-  id,
-  align = "center",
-  tone = "light",
-  className,
-}: SectionHeadingProps) {
+/** Section label + heading: "✦ OUR BESTSELLERS" over an h2, centred (pass lg:items-start lg:text-left in className to left-align it on large screens) */
+export default function SectionHeading({ eyebrow, title, id, tone = "light", className }: SectionHeadingProps) {
   return (
-    <div
-      className={cn("flex flex-col gap-4", align === "center" ? "items-center text-center" : "items-start", className)}
-    >
+    <div className={cn("flex flex-col items-center gap-4 text-center", className)}>
       <p className={cn("flex items-center gap-2 text-kicker", tone === "dark" ? "text-paper" : "text-accent")}>
         <Sparkle />
         {eyebrow}

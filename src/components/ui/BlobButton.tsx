@@ -2,11 +2,14 @@ import { RiArrowRightLine } from "@remixicon/react";
 import Link from "next/link";
 import { cn } from "@/utils/cn";
 
-type Tone = "accent" | "light";
+/** accent — SAVA blue · light — white, for the dark gradient · soft — pale blue, a secondary action beside an accent one */
+type Tone = "accent" | "light" | "soft";
 
+// Solid fills only: the goo filter's alpha threshold would render a translucent one fully opaque anyway
 const tones: Record<Tone, { fill: string; text: string }> = {
   accent: { fill: "bg-accent", text: "text-paper" },
   light: { fill: "bg-paper", text: "text-ink" },
+  soft: { fill: "bg-mist", text: "text-ink" },
 };
 
 const GOO_FILTER_ID = "blob-button-goo";

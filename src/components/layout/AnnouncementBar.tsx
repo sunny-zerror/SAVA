@@ -1,5 +1,6 @@
 import Sparkle from "@/components/ui/Sparkle";
 import { cn } from "@/utils/cn";
+import AnnouncementMotion from "./AnnouncementMotion";
 
 const messages = [
   "ISO-22716 Certified",
@@ -8,7 +9,8 @@ const messages = [
 ];
 
 /**
- * Thin brand strip above the header — the middle message only on small screens. Absolute, so it
+ * Thin brand strip above the header. Below lg the three messages share one slot and take turns
+ * (AnnouncementMotion); with reduced motion only the middle one shows there. Absolute, so it
  * takes no room in the flow: the header leaves space for it (mt-announcement) and the home hero runs
  * up underneath it.
  */
@@ -20,14 +22,20 @@ export default function AnnouncementBar() {
       // Anchored above the page during route fades (globals.css, "Page transitions")
       className="absolute inset-x-0 top-0 z-50 bg-accent text-paper [view-transition-class:site-chrome] [view-transition-name:site-announcement]"
     >
-      <ul className="container flex h-announcement items-center justify-center text-center text-eyebrow lg:justify-between">
+      {/* Below lg: one grid cell they all sit in, clipped so they rise in and out of the bar. The
+          others start invisible; AnnouncementMotion's inline styles take over from there */}
+      <AnnouncementMotion className="container grid h-announcement place-items-center overflow-clip text-center text-eyebrow lg:flex lg:items-center lg:justify-between">
         {messages.map((message, i) => (
-          <li key={message} className={cn("flex items-center gap-1.5", i !== 1 && "max-lg:hidden")}>
+          <li
+            key={message}
+            data-announcement
+            className={cn("col-start-1 row-start-1 flex items-center gap-1.5", i !== 1 && "max-lg:invisible")}
+          >
             <Sparkle />
             {message}
           </li>
         ))}
-      </ul>
+      </AnnouncementMotion>
     </div>
   );
 }

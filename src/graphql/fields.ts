@@ -25,7 +25,8 @@ export const PRODUCT_CARD = `
   _id name slug price discountedPrice categoryIds
   assets { ${ASSET} }
   ribbon { name ribbonId }
-  variants { variantPrice stockQuantity stockStatus status }
+  productOptions { optionName choices { name } }
+  variants { selectedOptions variantPrice stockQuantity stockStatus status }
 `;
 
 export const CART_LINE = `

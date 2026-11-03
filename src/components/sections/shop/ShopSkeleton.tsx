@@ -1,46 +1,32 @@
 import { Frame, FrameRule } from "@/components/ui/Frame";
-import Skeleton from "@/components/ui/Skeleton";
-import { cn } from "@/utils/cn";
+import Skeleton, { SkeletonLine as Line } from "@/components/ui/Skeleton";
 
-/**
- * A placeholder line of text in a type role. The zero-width space gives the line the role's own
- * height, so the skeleton takes the same room as the text it stands for.
- */
-function Line({ role, center, className }: { role: string; center?: boolean; className?: string }) {
-  return (
-    <span className={cn("flex items-center", center && "justify-center", role)}>
-      <span className="w-0">{"​"}</span>
-      <Skeleton className={cn("h-[0.7em] rounded-full", className)} />
-    </span>
-  );
-}
-
-/** The shop hero's layout (ShopHero): the 22:9 banner, the headline's two lines and the button over it */
+/** The shop hero's layout (ShopHero): the dark 22:9 banner, rails running top to bottom */
 function HeroSkeleton() {
   return (
     <div className="grid aspect-22/9 overflow-hidden bg-ink">
-      <Frame tone="dark" className="flex h-full items-center px-inset">
-        {/* Paper-tinted: the film's banner is dark */}
-        <div className="flex w-full flex-col items-start gap-8">
-          <div className="w-full max-w-xl">
-            <Line role="text-h1" className="w-11/12 bg-paper/15" />
-            <Line role="text-h1" className="w-3/5 bg-paper/15" />
-          </div>
-          <Skeleton className="h-12 w-38 rounded-full bg-paper/15" />
-        </div>
+      <Frame tone="dark" className="h-full">
+        {null}
       </Frame>
     </div>
   );
 }
 
-/** A listing cell (ShopProductCard): name, product, price, Buy It Now */
+/** A listing cell (ShopProductCard): photo, name and scent, then price and Add To Cart over a rule */
 function CardSkeleton() {
   return (
-    <div className="flex flex-col items-center gap-4 bg-paper px-5 pt-6 pb-5 md:px-7">
-      <Line role="text-h5" center className="w-32" />
-      <Skeleton className="aspect-square w-full max-w-60 rounded-3xl" />
-      <Line role="text-body-lg" center className="w-16" />
-      <Skeleton className="mt-auto h-12 w-full rounded-full" />
+    <div className="flex flex-col gap-5 bg-paper p-5 md:p-6">
+      <Skeleton className="aspect-4/5 w-full rounded-2xl" />
+      <div className="flex flex-col items-center gap-1">
+        <Line role="text-h5" className="w-32" />
+        <Line role="text-body" className="w-24" />
+      </div>
+      <div className="@container mt-auto border-t border-line pt-4">
+        <div className="flex flex-col gap-3 @[18.25rem]:flex-row @[18.25rem]:items-center">
+          <Line role="text-body" className="w-20" />
+          <Skeleton className="h-12 w-full rounded-full" />
+        </div>
+      </div>
     </div>
   );
 }

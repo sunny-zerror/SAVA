@@ -12,17 +12,32 @@ export default function Footer() {
   const { street, city, state, postalCode } = siteConfig.address;
   const address = [street, city, [state, postalCode].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 
+  // Rendered twice: beside the other link columns below lg, next to the address from lg up
+  const legalLinks = (
+    <ul data-reveal="stagger" className="flex flex-col gap-2.5 text-caption lg:text-body-lg">
+      {legalNav.map((item) => (
+        <li key={item.label}>
+          <Link href={item.href} className="link-underline">
+            {item.label}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+
   return (
     <footer className="relative isolate overflow-hidden bg-navy text-paper">
       {/* Live aurora (bg-navy shows for reduced motion / no WebGL), with grain */}
       <ReviewsCanvas className="absolute inset-0 -z-10 size-full" />
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-15 mix-blend-overlay" />
 
-      <Frame tone="dark" className="pt-12 md:pt-20">
+      {/* Below lg everything is centred: the heading, three link columns side by side, the address,
+          then the watermark last, where the rock and stick overlap it (order-last, -mt on the rock) */}
+      <Frame tone="dark" className="flex flex-col pt-12 md:pt-20 lg:block">
         <FrameRule tone="dark" />
 
         <div className="grid gap-10 px-inset py-10 lg:grid-cols-12">
-          <div className="flex flex-col items-start gap-8 lg:col-span-6">
+          <div className="flex flex-col items-center gap-8 text-center lg:col-span-6 lg:items-start lg:text-left">
             <h2 data-heading-effect>
               Clean Ingredients
               <br />
@@ -33,58 +48,62 @@ export default function Footer() {
             </BlobButton>
           </div>
 
-          <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-9">
-            <ul data-reveal="stagger" className="flex flex-col gap-4 text-h4">
-              {footerNav.map((item) => (
-                <li key={item.label}>
-                  <Link href={item.href} className="link-underline">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </nav>
+          {/* A row of columns below lg; from lg its columns take their own cells in the grid */}
+          <div className="flex justify-between gap-4 lg:contents">
+            <nav aria-label="Footer" className="lg:col-span-2 lg:col-start-9">
+              <ul data-reveal="stagger" className="flex flex-col gap-2.5 text-body font-medium lg:gap-4 lg:text-h4">
+                {footerNav.map((item) => (
+                  <li key={item.label}>
+                    <Link href={item.href} className="link-underline">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
 
-          <nav aria-label="Social" className="lg:col-span-1 lg:col-start-12">
-            <ul data-reveal="stagger" className="flex flex-col gap-2.5 text-body-lg whitespace-nowrap">
-              {socialNav.map((item) => (
-                <li key={item.label}>
-                  <a href={item.href} target="_blank" rel="noopener noreferrer" className="link-underline">
-                    {item.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+            <nav aria-label="Social" className="lg:col-span-1 lg:col-start-12">
+              <ul
+                data-reveal="stagger"
+                className="flex flex-col gap-2.5 text-caption whitespace-nowrap lg:text-body-lg"
+              >
+                {socialNav.map((item) => (
+                  <li key={item.label}>
+                    <a href={item.href} target="_blank" rel="noopener noreferrer" className="link-underline">
+                      {item.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <nav aria-label="Legal" className="lg:hidden">
+              {legalLinks}
+            </nav>
+          </div>
         </div>
 
         <FrameRule tone="dark" />
-        {/* Band for the SAVA watermark: big type, so it only fades in */}
-        <div aria-hidden="true" data-reveal="fade" className="relative h-56 md:h-78">
-          <span className="absolute inset-x-[2%] inset-y-[12%] bg-paper/15 mask-[url(/images/brand/wordmark.png)] mask-contain mask-center mask-no-repeat" />
+        {/* Band for the SAVA watermark: big type, so it only fades in. Below lg it comes last and the
+            wordmark sits low, just above the rock's top face, behind the stick */}
+        <div aria-hidden="true" data-reveal="fade" className="relative h-56 max-lg:order-last md:h-78">
+          <span className="absolute inset-x-[2%] inset-y-[12%] bg-paper/15 mask-[url(/images/brand/wordmark.png)] mask-contain mask-center mask-no-repeat max-lg:top-auto max-lg:bottom-6 max-lg:aspect-256/49" />
         </div>
-        <FrameRule tone="dark" />
+        <FrameRule tone="dark" className="max-lg:hidden" />
 
-        <div className="grid gap-8 px-inset pt-14 pb-12 lg:grid-cols-12">
-          <nav aria-label="Legal" className="lg:col-span-2 lg:col-start-7">
-            <ul data-reveal="stagger" className="flex flex-col gap-2.5 text-body-lg">
-              {legalNav.map((item) => (
-                <li key={item.label}>
-                  <Link href={item.href} className="link-underline">
-                    {item.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+        <div className="grid gap-8 px-inset py-10 lg:grid-cols-12 lg:pt-14 lg:pb-12">
+          <nav aria-label="Legal" className="max-lg:hidden lg:col-span-2 lg:col-start-7">
+            {legalLinks}
           </nav>
 
           <address
             data-reveal="stagger"
-            className="flex flex-col gap-5 text-h5 not-italic lg:col-span-4 lg:col-start-9"
+            className="flex flex-col items-center gap-5 text-center text-body font-medium not-italic lg:col-span-4 lg:col-start-9 lg:items-start lg:text-left lg:text-h5"
           >
-            {/* The link wraps only the address, so its underline runs under the text, not the sparkle */}
+            {/* The link wraps only the address, so its underline runs under the text, not the sparkle.
+                Below lg the sparkle sits above its line */}
             {email && (
-              <p className="flex items-center gap-4">
+              <p className="flex flex-col items-center gap-2 lg:flex-row lg:gap-4">
                 <Sparkle className="size-4.5" />
                 <a href={`mailto:${email}`} className="link-underline">
                   {email}
@@ -92,7 +111,7 @@ export default function Footer() {
               </p>
             )}
             {address && (
-              <p className="flex items-center gap-4">
+              <p className="flex flex-col items-center gap-2 lg:flex-row lg:gap-4">
                 <Sparkle className="size-4.5" />
                 {address}
               </p>
@@ -102,12 +121,13 @@ export default function Footer() {
       </Frame>
 
       {/*
-        The rock ledge, flush with the bottom-left corner (in flow below the content on small screens).
+        The rock ledge, flush with the bottom-left corner (in flow below the content on small screens,
+        pulled up over the watermark band so the wordmark shows just above its top face).
         The SAVA stick stands on it: FooterModel drops its 3D stick into this slot as the footer
         scrolls in, landing as the footer bottoms out; for reduced motion / no WebGL, the static one.
         z-30 keeps it in front of the frame's rail pulses (z-20), which run down behind it.
       */}
-      <div className="relative z-30 w-[min(70vw,24rem)] lg:absolute lg:bottom-0 lg:left-0 lg:w-[clamp(15rem,30vw,27rem)]">
+      <div className="relative z-30 w-[min(70vw,24rem)] max-lg:-mt-16 lg:absolute lg:bottom-0 lg:left-0 lg:w-[clamp(15rem,30vw,27rem)]">
         <Image
           src="/images/home/footer-rock.png"
           alt=""

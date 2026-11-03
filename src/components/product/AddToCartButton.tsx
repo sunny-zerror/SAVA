@@ -2,54 +2,55 @@
 
 import { useApolloClient } from "@apollo/client/react";
 import { RiShoppingBag3Line } from "@remixicon/react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import BlobButton from "@/components/ui/BlobButton";
 import { GET_PRODUCT } from "@/graphql";
 import { useCart } from "@/hooks/useCart";
 import { isApiConfigured } from "@/lib/env";
+import { useCartStore } from "@/store/cart-store";
 import { toast } from "@/store/toast-store";
-import { isOutOfStock, toVariantDetail } from "@/utils/product";
+import { findVariant, isOutOfStock, toVariantDetail } from "@/utils/product";
+import { productHref } from "@/utils/url";
 
-interface BuyNowButtonProps {
+interface AddToCartButtonProps {
   slug: string;
   productId: string;
   categoryId?: string;
+  /** The choices of the variant the card shows ([] for a product without options) */
+  selectedOptions: string[];
   soldOut?: boolean;
   className?: string;
 }
 
 /**
- * "Buy It Now" on a listing card — SAVA's BlobButton (BlobButton is always a link, so it points at
- * /shop). The click fetches the full product (listings don't carry variant detail), adds its single
- * variant to the bag and goes straight to checkout. Products with options can't be bought from a
- * card, so they get a toast instead.
+ * "Add To Cart" on a listing card — SAVA's BlobButton, full width. It's a real link to the product
+ * (so it works before JS); the click adds the variant the card shows and opens the bag. Listings
+ * don't carry full variant detail, so the click fetches the product first.
  */
-export default function BuyNowButton({ slug, productId, categoryId, soldOut, className }: BuyNowButtonProps) {
+export default function AddToCartButton({
+  slug,
+  productId,
+  categoryId,
+  selectedOptions,
+  soldOut,
+  className,
+}: AddToCartButtonProps) {
   const client = useApolloClient();
-  const router = useRouter();
   const { addItem, busy } = useCart();
+  const openCart = useCartStore((s) => s.open);
   const [loading, setLoading] = useState(false);
 
-  const onBuy = async () => {
+  const onAdd = async () => {
     // Demo catalogue: there's no cart to add to — useCart explains that
     if (!isApiConfigured) {
-      await addItem({ productId, categoryId, variant: { selectedOptions: [], variantPrice: 0 } });
+      await addItem({ productId, categoryId, variant: { selectedOptions, variantPrice: 0 } });
       return;
     }
     setLoading(true);
     try {
       const { data } = await client.query({ query: GET_PRODUCT, variables: { slug } });
-      const product = data?.getClientSideProductById;
-      if (!product) {
-        toast.error("Couldn't load this one. Please try again.");
-        return;
-      }
-      if ((product.productOptions ?? []).length > 0) {
-        toast.info("That one comes in options — it can't be bought from here yet.");
-        return;
-      }
-      const variant = product.variants?.[0];
+      const variants = data?.getClientSideProductById?.variants ?? [];
+      const variant = selectedOptions.length ? findVariant(variants, selectedOptions) : variants[0];
       if (!variant) {
         toast.info("That one isn't available right now.");
         return;
@@ -59,9 +60,9 @@ export default function BuyNowButton({ slug, productId, categoryId, soldOut, cla
         return;
       }
       const added = await addItem({ productId, categoryId, variant: toVariantDetail(variant) });
-      if (added) router.push("/checkout");
+      if (added) openCart();
     } catch {
-      toast.error("Couldn't load this one. Please try again.");
+      toast.error("Couldn't add this one. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -69,18 +70,18 @@ export default function BuyNowButton({ slug, productId, categoryId, soldOut, cla
 
   return (
     <BlobButton
-      href="/shop"
+      href={productHref(slug)}
       block
       icon={<RiShoppingBag3Line className="size-4" />}
       aria-disabled={soldOut || undefined}
       onClick={(event) => {
         event.preventDefault();
         if (soldOut || busy || loading) return;
-        void onBuy();
+        void onAdd();
       }}
       className={className}
     >
-      {soldOut ? "Sold Out" : loading ? "Adding…" : "Buy It Now"}
+      {soldOut ? "Sold Out" : loading ? "Adding…" : "Add To Cart"}
     </BlobButton>
   );
 }

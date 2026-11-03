@@ -8,9 +8,9 @@ import { gsap, useGSAP } from "@/lib/gsap";
  *   – data-scroll-speed="1"–"2.5" (large screens; on each card): the card drifts at that multiple of
  *     the page's scroll as it passes through the viewport, centred on its place in the layout. (Below
  *     lg the grid stacks, and a faster card would slide up over the summary.)
- *   – Each card (data-review-card) makes an entrance as it arrives: the glass opens upward as it
- *     tips up and grows, the photo settles from a zoom, then the stars, name and price, thumbnail
- *     and play chip follow in turn. Reverses when scrolled back below, to replay.
+ *   – Each card (data-review-card) makes an entrance as it arrives: the glass and the photo (with its
+ *     play chip) stay still, while the stars, name and price, and thumbnail along its foot come in
+ *     turn. Reverses when scrolled back below, to replay.
  */
 export default function ReviewsMotion({ children, ...props }: React.ComponentProps<"div">) {
   const root = useRef<HTMLDivElement>(null);
@@ -75,42 +75,25 @@ export default function ReviewsMotion({ children, ...props }: React.ComponentPro
           { rootMargin: "0px 0px -12% 0px" },
         );
 
-        // The card's entrance: the glass opens upward from its foot as it tips up out of a lean and
-        // grows to size; the photo settles from a deeper zoom; then the stars pop in one by one, the
-        // name and price rise, and the stick thumbnail springs in with a twist, the play chip last.
-        // On the glass inside each card: the card itself carries the scroll drift (a second set of
-        // transforms on it would be overwritten as the drift refreshes), and it's the card, never
-        // clipped, that's watched — a fully clipped element doesn't register as coming into view.
+        // The card's entrance, along its foot only (the glass and photo stay put): the stars pop in one
+        // by one, the name and price rise, and the stick thumbnail springs in with a twist. The card's
+        // parent is what's watched: the card itself carries the scroll drift.
         gsap.utils.toArray<HTMLElement>("[data-review-card]").forEach((card) => {
           const watched = card.parentElement ?? card;
           const q = gsap.utils.selector(card);
           const tl = gsap
             .timeline({ paused: true, defaults: { ease: "expo.out" } })
-            .fromTo(
-              card,
-              {
-                clipPath: "inset(100% 0% 0% 0% round 1.5rem)",
-                rotateX: 24,
-                scale: 0.9,
-                transformPerspective: 1200,
-                transformOrigin: "50% 100%",
-              },
-              { clipPath: "inset(0% 0% 0% 0% round 1.5rem)", rotateX: 0, scale: 1, duration: 1.3 },
-              0,
-            )
-            .from(q("[data-review-image]"), { scale: 1.3, duration: 1.8 }, 0)
             .from(
               q("[data-review-stars] > *"),
               { scale: 0, rotate: -45, duration: 0.6, stagger: 0.06, ease: "back.out(3)" },
-              0.45,
+              0,
             )
-            .from(q("[data-review-info] > *"), { y: 16, opacity: 0, duration: 0.9, stagger: 0.08 }, 0.55)
+            .from(q("[data-review-info] > *"), { y: 16, opacity: 0, duration: 0.9, stagger: 0.08 }, 0.1)
             .from(
               q("[data-review-thumb]"),
               { scale: 0.5, rotate: -14, opacity: 0, duration: 0.9, ease: "back.out(2.2)" },
-              0.65,
-            )
-            .from(q("[data-review-chip]"), { y: 8, opacity: 0, duration: 0.7 }, 0.8);
+              0.2,
+            );
           reveals.set(watched, tl);
           observer.observe(watched);
         });

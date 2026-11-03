@@ -9,6 +9,7 @@ import { getProduct } from "@/services/catalog";
 import { cn } from "@/utils/cn";
 import { formatPrice } from "@/utils/format";
 import { displayPrice } from "@/utils/product";
+import { productHref } from "@/utils/url";
 import RatingMotion from "./RatingMotion";
 import ReviewsMotion from "./ReviewsMotion";
 import ReviewsCanvas from "./ReviewsCanvas";
@@ -141,7 +142,7 @@ const reviews: {
 export default async function HomeReviews() {
   const product = await getProduct(siteConfig.featuredProductSlug);
   const reviewed = product
-    ? { name: product.name, price: formatPrice(displayPrice(product).price), href: "/shop" }
+    ? { name: product.name, price: formatPrice(displayPrice(product).price), href: productHref(product.slug) }
     : null;
 
   return (
@@ -159,7 +160,8 @@ export default async function HomeReviews() {
 
       <Frame tone="dark" className="py-section">
         <FrameRule tone="dark" />
-        <div className="flex flex-col gap-8 px-inset py-10 lg:flex-row lg:items-center lg:justify-between">
+        {/* Stacked and centred on small screens; on large ones the heading and the pitch split into two columns */}
+        <div className="grid justify-items-center gap-8 px-inset py-10 text-center lg:grid-cols-2 lg:items-center lg:justify-items-start lg:text-left">
           <SectionHeading
             id="home-reviews"
             eyebrow="User stories"
@@ -170,10 +172,10 @@ export default async function HomeReviews() {
                 Real Results
               </>
             }
-            align="start"
             tone="dark"
+            className="lg:items-start lg:text-left"
           />
-          <div data-reveal className="flex max-w-sm flex-col items-start gap-6">
+          <div data-reveal className="flex max-w-sm flex-col items-center gap-6 lg:items-start lg:justify-self-end">
             <p className="text-body-lg">
               Advanced sweat control meets lasting fragrance for reliable protection and all-day freshness.
             </p>
@@ -283,14 +285,12 @@ function ReviewCard({ review, product, className }: ReviewCardProps) {
     >
       <div data-review-card className="relative flex flex-col gap-4 rounded-3xl glass p-3.5">
         <div
-          data-review-media
           className={cn(
             "relative overflow-hidden rounded-xl",
             review.landscape ? "aspect-[432/313]" : "aspect-[310/372]",
           )}
         >
           <Image
-            data-review-image
             src={review.image}
             alt={review.alt}
             fill
@@ -300,7 +300,6 @@ function ReviewCard({ review, product, className }: ReviewCardProps) {
           />
           {/* Video length chip — wire up the review films here when they arrive */}
           <span
-            data-review-chip
             aria-hidden="true"
             className="absolute right-3.5 bottom-3.5 flex items-center gap-2 text-caption font-medium tabular-nums"
           >
