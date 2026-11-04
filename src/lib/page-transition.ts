@@ -12,6 +12,9 @@
 
 const SAFETY_MS = 2000;
 
+/** How long the curtain takes to cover the screen — and so how long the old page is held on screen under it */
+export const CURTAIN_COVER_MS = 500;
+
 let running = 0;
 const waiting = new Set<() => void>();
 
@@ -53,4 +56,44 @@ export function afterPageEnter(callback: () => void) {
   return () => {
     waiting.delete(callback);
   };
+}
+
+/**
+ * Holds afterPageEnter callbacks as if a transition were still running, until the returned release
+ * is called (once; later calls do nothing) — for the page curtain, which covers the new page after
+ * the browser's transition has ended
+ */
+export function holdPageEnter() {
+  running++;
+  let released = false;
+  const release = () => {
+    if (released) return;
+    released = true;
+    settle();
+  };
+  window.setTimeout(release, SAFETY_MS * 4);
+  return release;
+}
+
+/*
+ * The page curtain (PageCurtain, in the site layout) registers how to play itself; template.tsx
+ * calls coverPage as the old page leaves. Nothing registered (or reduced motion): pages just swap.
+ */
+let curtain: (() => void) | null = null;
+
+export function registerCurtain(play: () => void) {
+  curtain = play;
+  return () => {
+    if (curtain === play) curtain = null;
+  };
+}
+
+/** Whether a curtain will play on the next page change */
+export const hasCurtain = () => curtain !== null;
+
+/** Plays the curtain; false when there's none to play */
+export function coverPage() {
+  if (!curtain) return false;
+  curtain();
+  return true;
 }

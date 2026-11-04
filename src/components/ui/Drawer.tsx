@@ -18,8 +18,6 @@ interface DrawerProps {
   /** Replaces the visible header content (e.g. the wordmark in the menu) */
   heading?: React.ReactNode;
   side?: "left" | "right";
-  /** "lg" for full-bleed panels like the site menu */
-  size?: "md" | "lg";
   children: React.ReactNode;
   footer?: React.ReactNode;
 }
@@ -32,17 +30,7 @@ export const DRAWER_OPEN_MS = 900;
 const DRAWER_CLOSE_MS = 700;
 
 /** Side panel with overlay: Esc and overlay click close it, page scroll is paused while open */
-export default function Drawer({
-  open,
-  onClose,
-  title,
-  name,
-  heading,
-  side = "right",
-  size = "md",
-  children,
-  footer,
-}: DrawerProps) {
+export default function Drawer({ open, onClose, title, name, heading, side = "right", children, footer }: DrawerProps) {
   const lenis = useLenis();
   const panelRef = useRef<HTMLDivElement>(null);
   // The element that had focus before opening (usually the trigger button) gets it back on close
@@ -93,8 +81,8 @@ export default function Drawer({
         tabIndex={-1}
         style={glide}
         className={cn(
-          "absolute top-0 flex h-full w-full flex-col overflow-hidden bg-paper shadow-2xl shadow-navy/20 transition-transform ease-out-expo outline-none",
-          size === "lg" ? "max-w-xl" : "max-w-md",
+          // One width for every drawer (menu and cart alike): 20% under max-w-xl (36rem)
+          "absolute top-0 flex h-full w-full max-w-[28.8rem] flex-col overflow-hidden bg-paper shadow-2xl shadow-navy/20 transition-transform ease-out-expo outline-none",
           side === "right" ? "right-0 sm:rounded-l-3xl" : "left-0 sm:rounded-r-3xl",
           open ? "translate-x-0" : side === "right" ? "translate-x-full" : "-translate-x-full",
         )}

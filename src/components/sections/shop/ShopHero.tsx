@@ -3,7 +3,7 @@ import { Frame } from "@/components/ui/Frame";
 /** The shop page's hero: a full-width 22:9 banner with the listing film looping silently */
 export default function ShopHero() {
   return (
-    <section aria-labelledby="shop-hero" className="relative aspect-22/9 overflow-hidden bg-ink">
+    <section aria-labelledby="shop-hero" className="relative aspect-22/9 overflow-hidden bg-gray-100">
       <video
         src="/videos/listing_hero_video.mp4"
         autoPlay
@@ -14,8 +14,6 @@ export default function ShopHero() {
         aria-hidden="true"
         className="absolute inset-0 size-full object-cover"
       />
-      {/* The film is dark, products centred: a wash from the left deepens it */}
-      <div aria-hidden="true" className="absolute inset-0 bg-linear-to-r from-ink/70 via-ink/30 to-transparent" />
 
       {/* Grid: the frame's container stretches to the banner's height, rails running top to bottom */}
       <div className="relative grid h-full">

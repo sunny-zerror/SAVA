@@ -123,8 +123,8 @@ export default function Footer() {
       {/*
         The rock ledge, flush with the bottom-left corner (in flow below the content on small screens,
         pulled up over the watermark band so the wordmark shows just above its top face).
-        The SAVA stick stands on it: FooterModel drops its 3D stick into this slot as the footer
-        scrolls in, landing as the footer bottoms out; for reduced motion / no WebGL, the static one.
+        The SAVA stick stands on it: FooterModel drops its own 3D stick into this slot once the
+        footer's top reaches the middle of the screen; for reduced motion / no WebGL, the static one.
         z-30 keeps it in front of the frame's rail pulses (z-20), which run down behind it.
       */}
       <div className="relative z-30 w-[min(70vw,24rem)] max-lg:-mt-16 lg:absolute lg:bottom-0 lg:left-0 lg:w-[clamp(15rem,30vw,27rem)]">
@@ -141,9 +141,10 @@ export default function Footer() {
           data-footer-model-anchor
           className="pointer-events-none absolute bottom-[63.2%] left-[37%] aspect-176/344 w-[40.7%] touch-pan-y footer-model-ready:pointer-events-auto footer-model-ready:cursor-grab footer-model-ready:active:cursor-grabbing"
         >
-          {/* Contact shadow on the rock */}
+          {/* Contact shadow on the rock (FooterModel fades it in as its stick lands) */}
           <span
             aria-hidden="true"
+            data-footer-model-shadow
             className="absolute inset-x-[-12%] -bottom-[3%] h-[7%] bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-ink)_55%,transparent),transparent)] blur-[2px]"
           />
           <Image

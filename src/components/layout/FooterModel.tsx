@@ -9,16 +9,20 @@ import { drag as dragTurntable, lerp, turn, TURN } from "@/lib/turntable";
 const ANCHOR = "[data-footer-model-anchor]";
 /** Turns the stick makes on the way down, settling front-facing as it lands */
 const DROP_TURNS = 2;
+/** Seconds from leaving the top of the viewport to touching down; lifting away is quicker */
+const LAND = 1.6;
+const LIFT = 0.7;
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 
 /**
- * The footer's own SAVA stick, on every page. It's drawn by a fixed canvas over the page (outside
- * the footer), so it can come from above it: as the footer scrolls in, the stick drops from above
- * the viewport, arcing in from the right, spinning and tilted, and lands upright on the rock ledge
- * exactly when the footer's bottom meets the viewport's bottom. Scrolling back up lifts it away.
- * Once landed it can be dragged to spin. The static stick in the slot shows until the model is
+ * The footer's own SAVA stick, on every page — its own canvas, renderer and stick, separate from the
+ * home page's travelling one (HomeModel). It's drawn by a fixed canvas over the page, clipped to the
+ * footer as if the footer hid its overflow: once the footer's top reaches the middle of the viewport,
+ * the stick drops in through the footer's top edge, arcing in from the right, spinning and tilted,
+ * and lands upright on the rock ledge — a timed drop, not tied to the scroll. Scrolling back above that point lifts it
+ * away. Once landed it can be dragged to spin. The slot's static stick shows until the model is
  * live (html[data-footer-model="ready"]), and for reduced motion / no WebGL. It lives in the layout
  * with the footer, so it stays across navigation; SmoothScroll re-measures the scroll per route.
  */
@@ -42,16 +46,42 @@ export default function FooterModel() {
       }
 
       const stick = await stage.build("balanced");
+      await stage.warm();
+      if (disposed) {
+        stage.dispose();
+        return;
+      }
       const { state, tilt, spin } = stick;
+      const shadow = anchor.querySelector<HTMLElement>("[data-footer-model-shadow]");
+      // Live: the static stick leaves the slot empty for the drop
+      document.documentElement.dataset.footerModel = "ready";
 
-      // Scrubbed by the footer's own scroll: from its top entering to its bottom meeting the viewport's
-      const trigger = ScrollTrigger.create({ trigger: footer, start: "top bottom", end: "bottom bottom" });
-      let progress = 0;
+      // 0 = above the viewport, 1 = landed; tweened in time once the footer's top passes the middle
+      const drop = { progress: 0 };
+      let tween: gsap.core.Tween | undefined;
+      const to = (progress: number, duration: number, ease: string) => {
+        tween?.kill();
+        tween = gsap.to(drop, { progress, duration, ease });
+      };
+      const trigger = ScrollTrigger.create({
+        trigger: footer,
+        // The footer's top at the viewport's middle — or the page's bottom, on a page too short to get there
+        start: () =>
+          Math.min(
+            footer.getBoundingClientRect().top + window.scrollY - window.innerHeight / 2,
+            ScrollTrigger.maxScroll(window) - 1,
+          ),
+        end: "max",
+        onEnter: () => to(1, LAND * (1 - drop.progress), "none"),
+        onLeaveBack: () => to(0, LIFT * drop.progress, "power1.in"),
+      });
+      // Already past it (a reload low on the page, or a short page): land straight away
+      if (trigger.isActive) to(1, LAND, "none");
 
       // Drag to spin once it has landed (springs back to front on release)
       let dragging: { x: number; y: number; t: number } | null = null;
       const onDown = (e: PointerEvent) => {
-        if (progress > 0.98 && (e.target as Element).closest?.(ANCHOR)) {
+        if (drop.progress > 0.98 && (e.target as Element).closest?.(ANCHOR)) {
           dragging = { x: e.clientX, y: e.clientY, t: performance.now() };
         }
       };
@@ -70,34 +100,37 @@ export default function FooterModel() {
       window.addEventListener("pointerup", onUp);
       window.addEventListener("pointercancel", onUp);
 
-      let ready = false;
       let cleared = false;
       const render = (_time: number, deltaMs: number) => {
         const dt = Math.min(deltaMs / 1000, 0.05);
-        // Smooth the scrubbed progress so the drop glides rather than tracking every wheel tick
-        progress = lerp(progress, trigger.progress, 1 - Math.exp(-dt * 9));
+        const { progress } = drop;
         turn(state, dt, 0, dragging !== null);
 
         if (progress < 0.001) {
           if (!cleared) {
             stage.clear();
+            if (shadow) shadow.style.opacity = "0";
             cleared = true;
           }
-          return; // Still above the fold — nothing to draw
+          return; // Not dropped yet — nothing to draw
         }
         cleared = false;
 
+        // Measured every frame, so it lands in the slot even while the page is still scrolling
         const slot = anchor.getBoundingClientRect();
+        const top = footer.getBoundingClientRect().top;
+        // Nothing shows above the footer (it's last on the page, so only its top edge needs clipping)
+        canvas.style.clipPath = `inset(${Math.max(0, top)}px 0 0 0)`;
         const vw = window.innerWidth;
-        // Most of the drop in the second half, touching down softly as the footer bottoms out
+        // Speeds up through the fall and touches down softly
         const fall = easeInOutCubic(progress);
         const drift = easeInOut(progress); // sideways arc
 
-        // From above the top of the viewport, off to the right, down into the slot
+        // From just above the footer's top edge (clipped away), off to the right, down into the slot
         const endX = slot.left + slot.width / 2;
         const endY = slot.top + slot.height / 2;
         const startX = Math.min(vw * 0.6, endX + vw * 0.35);
-        const startY = -slot.height * 0.9;
+        const startY = top - slot.height * 0.6;
         const x = lerp(startX, endX, drift);
         const y = lerp(startY, endY, fall);
 
@@ -106,23 +139,24 @@ export default function FooterModel() {
         // Leans into the fall, straightening up as it lands
         tilt.rotation.set(state.tip + (1 - fall) * 0.35, 0, (1 - fall) * -0.45);
         spin.rotation.y = state.angle + (1 - fall) * DROP_TURNS * TURN;
+        // The contact shadow darkens over the last stretch of the fall
+        if (shadow) shadow.style.opacity = String(gsap.utils.clamp(0, 1, (fall - 0.75) / 0.25));
 
         stage.render();
-        if (!ready) {
-          ready = true;
-          document.documentElement.dataset.footerModel = "ready";
-        }
       };
       gsap.ticker.add(render);
 
       cleanup = () => {
         gsap.ticker.remove(render);
+        tween?.kill();
         trigger.kill();
         window.removeEventListener("pointerdown", onDown);
         window.removeEventListener("pointermove", onMove);
         window.removeEventListener("pointerup", onUp);
         window.removeEventListener("pointercancel", onUp);
         delete document.documentElement.dataset.footerModel;
+        canvas.style.removeProperty("clip-path");
+        shadow?.style.removeProperty("opacity");
         stage.dispose();
       };
       if (disposed) cleanup();

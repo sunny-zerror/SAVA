@@ -30,7 +30,7 @@ const features = [
 const DISC = { cx: 795, cy: 663.3, r: 663.3 };
 const LINE = { radius: 548, startDeg: 72.6 }; // baseline radius; the line starts low on the right, running clockwise
 
-/** Two full clockwise turns from the start angle, so the line can orbit without running off the end */
+/** Two full clockwise turns from the start angle; the line sits halfway along (startOffset 50%) */
 const LINE_PATH = (() => {
   const at = (deg: number) => {
     const a = (deg * Math.PI) / 180;
@@ -80,7 +80,6 @@ export default function HomeFeatures() {
           */}
           <figure className="relative">
             <Image
-              data-features-ring
               src="/images/home/story-ring.svg"
               alt=""
               width={663}
@@ -98,7 +97,7 @@ export default function HomeFeatures() {
                     <stop offset="0.62" style={{ stopColor: "var(--color-accent)", stopOpacity: 0.48 }} />
                     <stop offset="0.9" style={{ stopColor: "var(--color-accent)", stopOpacity: 0.78 }} />
                   </linearGradient>
-                  {/* Fixed to the stage (not the letters), so text reads white on the blue, grey on the white as it orbits */}
+                  {/* Fixed to the stage (not the letters), so text reads white on the blue, grey on the white */}
                   <linearGradient
                     id="features-line-fill"
                     gradientUnits="userSpaceOnUse"
@@ -112,27 +111,27 @@ export default function HomeFeatures() {
                   </linearGradient>
                   <path id="features-line-path" d={LINE_PATH} fill="none" />
                 </defs>
-                <g data-features-disc>
+                <g>
                   <circle cx={DISC.cx} cy={DISC.cy} r={DISC.r} className="fill-paper" />
                   <circle cx={DISC.cx} cy={DISC.cy} r={DISC.r} fill="url(#features-disc-fill)" />
                 </g>
                 {/* No type role: its size is in the artwork's units, and a role's font-size would override
                     fontSize. Medium, like the headings */}
                 <text fill="url(#features-line-fill)" fontSize={76} className="font-primary font-medium">
-                  {/* 50% = its resting place on the doubled path (FeaturesMotion orbits it from there) */}
-                  <textPath data-features-text href="#features-line-path" startOffset="50%">
+                  {/* 50%: its place on the doubled path */}
+                  <textPath href="#features-line-path" startOffset="50%">
                     Performance Meets Personal Care
                   </textPath>
                 </text>
               </svg>
 
-              {/* Back layers, moved as one */}
-              <div data-features-hand className="absolute inset-0">
+              {/* Back layers */}
+              <div className="absolute inset-0">
                 <Image
                   src="/images/home/features-hand.png"
                   alt="An open hand holding the SAVA Balanced stick — performance meets personal care"
                   fill
-                  // Eager: the section animates in, and a late-arriving hand would leave its shadow floating
+                  // Eager: a late-arriving hand would leave its shadow floating
                   loading="eager"
                   sizes="(min-width: 64rem) 730px, 100vw"
                 />
@@ -158,7 +157,6 @@ export default function HomeFeatures() {
               </div>
               {/* The palm's front lip, over the 3D stick's base */}
               <Image
-                data-features-hand
                 src="/images/home/features-hand-front.png"
                 alt=""
                 fill

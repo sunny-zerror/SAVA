@@ -7,7 +7,8 @@ import { productPickers } from "@/config/shop";
 import { productContent } from "@/data/product-content";
 import type { ProductSummary } from "@/types";
 import { cn } from "@/utils/cn";
-import { hoverImage, mediaUrl, primaryImage } from "@/utils/media";
+import { stickVariantFor } from "@/lib/sava-stick";
+import { mediaUrl, primaryImage } from "@/utils/media";
 import { cardVariant, displayPrice, isOutOfStock, isSoldOut } from "@/utils/product";
 import { productHref } from "@/utils/url";
 
@@ -21,12 +22,13 @@ const sizes = "(min-width: 64rem) 24vw, (min-width: 48rem) 30vw, 50vw";
 
 /**
  * A cell of the shop listing. Over the photo: a badge (the discount, else the ribbon) and the
- * wishlist heart; the photo turns to the product's hover image under the pointer. Then the name, the
- * scent and size, and the price and Add To Cart for the variant the card sells (cardVariant).
+ * wishlist heart. Products with a 3D stick show it in place of the photo once live (ShopGridModel, in
+ * the shop grid); hovering the card spins it round. Then the name, the scent and size, and the price
+ * and Add To Cart for the variant the card sells (cardVariant).
  */
 export default function ShopProductCard({ product, priority }: ShopProductCardProps) {
   const image = primaryImage(product.assets);
-  const hover = hoverImage(product.assets);
+  const stick = stickVariantFor(product.slug);
   const variant = cardVariant(product);
   const soldOut = variant ? isOutOfStock(variant) : isSoldOut(product);
 
@@ -41,8 +43,14 @@ export default function ShopProductCard({ product, priority }: ShopProductCardPr
 
   return (
     // group/card, named: BlobButton runs its own (unnamed) group hover, so the card's mustn't set it off
-    <article className="group/card relative flex flex-col gap-5 bg-paper p-4">
-      <div className="relative aspect-4/5 overflow-hidden rounded-2xl bg-surface">
+    <article data-grid-hover className="group/card relative flex flex-col gap-5 bg-paper p-4">
+      {/* The 3D stick's slot (ShopGridModel), when the product has one */}
+      <div
+        data-grid-slot={stick ? "" : undefined}
+        data-variant={stick ?? undefined}
+        data-fit="0.72"
+        className="relative aspect-4/5 overflow-hidden rounded-2xl bg-surface"
+      >
         <Image
           src={mediaUrl(image?.path)}
           alt={image?.altText || product.name}
@@ -51,18 +59,13 @@ export default function ShopProductCard({ product, priority }: ShopProductCardPr
           priority={priority}
           // The shots are wide with the stick centred: cover trims the empty sides, scaled down for room
           // around it. multiply: their white backdrop takes the box's tint; the mask fades out the
-          // reflection the shots cut off at their foot (the stick ends above 92%)
-          className="scale-90 mask-b-from-92% object-cover mix-blend-multiply"
+          // reflection the shots cut off at their foot (the stick ends above 92%). Hidden once the 3D
+          // stick is live; without it (reduced motion / no WebGL) the photo leans in a touch on hover
+          className={cn(
+            "scale-90 mask-b-from-92% object-cover mix-blend-multiply transition-transform duration-700 ease-out-expo group-hover/card:scale-95",
+            stick && "grid-model-ready:invisible",
+          )}
         />
-        {hover && (
-          <Image
-            src={mediaUrl(hover.path)}
-            alt=""
-            fill
-            sizes={sizes}
-            className="object-cover opacity-0 transition-opacity duration-700 ease-out-expo group-hover/card:opacity-100"
-          />
-        )}
         {badge && (
           // A discount on blue; a ribbon ("Best Seller") on green, as on the product page
           <span

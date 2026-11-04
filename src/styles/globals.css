@@ -4,6 +4,8 @@
 @custom-variant model-ready (html[data-model="ready"] &);
 /* Set on <html> once the footer's 3D stick (FooterModel) is live — its static stand-in hides */
 @custom-variant footer-model-ready (html[data-footer-model="ready"] &);
+/* Set on <html> once the shop grid's 3D sticks (ShopGridModel) are live — the product photos hide */
+@custom-variant grid-model-ready (html[data-grid-model="ready"] &);
 /* An accordion item that is, or is animating to be, open: FaqAccordion sets data-expanded the moment
    it's toggled (`open` stays set while it collapses); before that, and without JS, `open` counts */
 @custom-variant expanded (&:is([data-expanded="true"], [open]:not([data-expanded])));
@@ -258,7 +260,7 @@
  * of the fluid root.
  *
  *   text-display   404                                 Inter Tight 600, ~52 → 198px
- *   text-hero      home hero line, under the stick     Inter Tight 600, 56 → 160px, capped by screen height
+ *   text-hero      home hero line, under the stick     Inter Tight 600, ~20vw on phones → 160px, capped by screen height
  *   text-h1 – h4   page / section / block headings     Inter Tight 500, tracked tight
  *   text-h5 – h6   item titles: products, cards, rows  Inter 500
  *   text-lead      large intro paragraph               Inter Tight 400
@@ -283,7 +285,7 @@
 @utility text-hero {
   font-family: var(--font-primary);
   font-weight: 600;
-  font-size: clamp(3.5rem, min(11vw, 14svh), 10rem);
+  font-size: clamp(3.5rem, min(16vw, 14svh), 10rem);
   line-height: 0.88;
   letter-spacing: -0.045em;
 }
@@ -477,9 +479,11 @@
 
 /* ---------- Page transitions ---------------------------------------------- */
 /*
- * src/app/template.tsx: on a route change the outgoing page fades out, then the incoming one fades
- * in (the browser's View Transitions API, through React's <ViewTransition>). Everything else — the
- * header, the footer — is the root snapshot, and switches without animating.
+ * src/app/template.tsx: on a route change the white curtain (PageCurtain) covers the page, shows a
+ * tagline and lifts off the new one; template.tsx holds the page snapshots still under it while it
+ * covers. The cross-fade below (the outgoing page out, the incoming one in) is what shows without the
+ * curtain. Everything else — the header, the footer — is the root snapshot, and switches without
+ * animating.
  */
 ::view-transition-old(root),
 ::view-transition-new(root) {

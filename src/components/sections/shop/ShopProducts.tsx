@@ -1,4 +1,5 @@
 import ShopFilters from "@/components/product/ShopFilters";
+import ShopGridModel from "@/components/product/ShopGridModel";
 import ShopProductCard from "@/components/product/ShopProductCard";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Pagination from "@/components/ui/Pagination";
@@ -22,7 +23,7 @@ const DEMO_REPEAT = 3;
 /**
  * The shop listing, framed between the page rails: the filter sidebar on the left (sticky under the
  * header while the products scroll), the products in a ruled grid (one hairline between cells) on
- * the right, pagination underneath.
+ * the right, pagination underneath. Each card's 3D stick spins when hovered (ShopGridModel).
  */
 export default function ShopProducts({
   categories,
@@ -62,6 +63,7 @@ export default function ShopProducts({
               ))}
             </div>
           )}
+          {products.length > 0 && <ShopGridModel />}
           {totalPages > 1 && (
             <div className="border-t border-line px-inset py-8">
               <Pagination page={page} totalPages={totalPages} href={href} />

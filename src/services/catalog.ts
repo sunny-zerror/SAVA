@@ -10,6 +10,7 @@ import { GET_CATEGORIES, GET_CATEGORY, GET_PRODUCT, GET_PRODUCTS } from "@/graph
 import { query } from "@/lib/apollo/server";
 import { isApiConfigured } from "@/lib/env";
 import type { Category, Product, ProductSummary } from "@/types";
+import { isSoldOut } from "@/utils/product";
 
 export const PAGE_SIZE = 12;
 
@@ -56,6 +57,12 @@ export const getRelatedProducts = cache(async (product: Product, limit = 8): Pro
   const slug = product.categories?.[0]?.slug;
   const pool = slug ? (await getCategoryProducts(slug))?.products : (await getProducts()).products;
   return (pool ?? []).filter((p) => p._id !== product._id).slice(0, limit);
+});
+
+/** A few products to suggest in an empty bag: in stock, in catalogue order */
+export const getCartSuggestions = cache(async (limit = 3): Promise<ProductSummary[]> => {
+  const { products } = await getProducts({ limit: limit * 3 });
+  return products.filter((p) => !isSoldOut(p)).slice(0, limit);
 });
 
 export const getCategories = cache(async (): Promise<Category[]> => {

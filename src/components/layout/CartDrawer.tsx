@@ -9,8 +9,10 @@ import Skeleton from "@/components/ui/Skeleton";
 import { useCart } from "@/hooks/useCart";
 import { useDrawerMotion } from "@/hooks/useDrawerMotion";
 import { useCartStore } from "@/store/cart-store";
+import type { ProductSummary } from "@/types";
 import { formatPrice } from "@/utils/format";
 import { mediaUrl } from "@/utils/media";
+import CartEmpty from "./CartEmpty";
 
 /** A block that rises into its own overflow-hidden mask as the drawer opens (useDrawerMotion) */
 function Line({ className, children }: { className?: string; children: React.ReactNode }) {
@@ -24,11 +26,11 @@ function Line({ className, children }: { className?: string; children: React.Rea
 }
 
 /**
- * The bag: each item on its own row between hairlines, the subtotal and Checkout at the foot. It
- * moves like the menu (useDrawerMotion) — rows rise in once the panel is open, and sink back before
+ * The bag: each item on its own row between hairlines, the subtotal and Checkout at the foot; empty,
+ * a few products to start with (CartEmpty, fetched by SiteLayout). It moves like the menu (useDrawerMotion) — rows rise in once the panel is open, and sink back before
  * it leaves.
  */
-export default function CartDrawer() {
+export default function CartDrawer({ suggestions = [] }: { suggestions?: ProductSummary[] }) {
   const isOpen = useCartStore((s) => s.isOpen);
   const close = useCartStore((s) => s.close);
   const { cart, lines, count, loading, busy, increment, decrement, removeItem } = useCart();
@@ -81,17 +83,7 @@ export default function CartDrawer() {
             </div>
           ))
         ) : lines.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-6 py-section text-center">
-            <Line className="flex flex-col items-center gap-2">
-              <p className="text-h4">Your bag is empty</p>
-              <p className="text-body text-muted">Add a stick and it&apos;ll wait for you here.</p>
-            </Line>
-            <Line className="w-56">
-              <BlobButton href="/shop" onClick={requestClose} block>
-                Shop all
-              </BlobButton>
-            </Line>
-          </div>
+          <CartEmpty suggestions={suggestions} enter={shown} onNavigate={requestClose} />
         ) : (
           <ul className="flex flex-col">
             {lines.map((line) => {

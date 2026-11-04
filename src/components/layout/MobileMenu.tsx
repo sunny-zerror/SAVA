@@ -40,7 +40,6 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
       onClose={requestClose}
       title="Menu"
       side="left"
-      size="lg"
       heading={
         <p className="flex items-center gap-2 text-kicker text-accent">
           <Sparkle />

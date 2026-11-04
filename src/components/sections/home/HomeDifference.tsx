@@ -32,9 +32,9 @@ const rows = [
   },
 ];
 
-/** Tint behind a SAVA-column cell; DifferenceMotion runs them top to bottom as one column of light */
+/** Tint behind a SAVA-column cell */
 function SavaFill() {
-  return <span data-diff-fill aria-hidden="true" className="absolute inset-0 -z-10 bg-accent/10" />;
+  return <span aria-hidden="true" className="absolute inset-0 -z-10 bg-accent/10" />;
 }
 
 export default function HomeDifference() {
@@ -68,16 +68,14 @@ export default function HomeDifference() {
             <thead className="max-md:block">
               <tr className="border-b border-line max-md:grid max-md:grid-cols-2">
                 <th scope="col" className="px-inset py-10 text-h4 text-ink max-md:hidden">
-                  <span data-diff-head className="block">
-                    Comparison Point
-                  </span>
+                  <span className="block">Comparison Point</span>
                 </th>
                 <th
                   scope="col"
                   className="border-r border-line px-4 py-6 text-h6 text-ink md:border-l md:px-6 md:py-10 md:text-h5"
                 >
-                  <span data-diff-head className="flex flex-col items-center gap-3">
-                    <span data-diff-product>
+                  <span className="flex flex-col items-center gap-3">
+                    <span>
                       <CroppedImage
                         src="/images/home/perfume-sprite.png"
                         width={2000}
@@ -93,8 +91,8 @@ export default function HomeDifference() {
                 {/* isolate: keeps the fill's -z-10 inside the cell */}
                 <th scope="col" className="relative isolate px-4 py-6 text-h6 text-ink md:px-6 md:py-10 md:text-h5">
                   <SavaFill />
-                  <span data-diff-head className="flex flex-col items-center gap-3">
-                    <span data-diff-product>
+                  <span className="flex flex-col items-center gap-3">
+                    <span>
                       <StickThumb />
                     </span>
                     SAVA Fragrance
@@ -106,7 +104,6 @@ export default function HomeDifference() {
               {rows.map((row) => (
                 <tr
                   key={row.point}
-                  data-diff-row
                   className="border-b border-line transition-colors duration-300 last:border-b-0 hover:bg-paper/60 max-md:grid max-md:grid-cols-2"
                 >
                   {/* font-normal undoes the browser's bold <th>: row labels read as body text */}
@@ -125,11 +122,11 @@ export default function HomeDifference() {
                           style={{ maskImage: `url(${row.icon})` }}
                         />
                       </span>
-                      <span data-diff-point>{row.point}</span>
+                      <span>{row.point}</span>
                     </span>
                   </th>
                   <td className="border-r border-line px-4 text-center max-md:center max-md:py-5 md:border-l md:px-6">
-                    <span data-diff-value className="inline-block">
+                    <span className="inline-block">
                       {row.standard ?? (
                         <span className="inline-flex items-center gap-1.5">
                           <RiCloseLine className="size-4.5" aria-hidden="true" />
@@ -140,9 +137,7 @@ export default function HomeDifference() {
                   </td>
                   <td className="relative isolate px-4 text-center max-md:center max-md:py-5 md:px-6">
                     <SavaFill />
-                    <span data-diff-value className="inline-block">
-                      {row.sava}
-                    </span>
+                    <span className="inline-block">{row.sava}</span>
                   </td>
                 </tr>
               ))}

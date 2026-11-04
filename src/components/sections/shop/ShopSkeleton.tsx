@@ -4,7 +4,7 @@ import Skeleton, { SkeletonLine as Line } from "@/components/ui/Skeleton";
 /** The shop hero's layout (ShopHero): the dark 22:9 banner, rails running top to bottom */
 function HeroSkeleton() {
   return (
-    <div className="grid aspect-22/9 overflow-hidden bg-ink">
+    <div className="grid aspect-22/9 overflow-hidden bg-gray-100">
       <Frame tone="dark" className="h-full">
         {null}
       </Frame>
