@@ -1,9 +1,9 @@
-import { createSavaStick, type SavaStickVariant, stickLabelUrl } from "@/lib/sava-stick";
+import { createSavaStick, type SavaStickOptions, type SavaStickVariant, stickLabelUrl } from "@/lib/sava-stick";
 import { turntable } from "@/lib/turntable";
 
 /*
  * Shared setup for the fixed, full-viewport canvases that draw SAVA sticks over the page (HomeModel,
- * FooterModel): three.js loaded on demand, a transparent renderer in neutral tone mapping, soft
+ * FooterModel, the /home page's ExperienceStage): three.js loaded on demand, a transparent renderer in neutral tone mapping, soft
  * studio light tuned to match the product photos, and an orthographic camera in CSS pixels (y up)
  * so page rects map straight onto the scene. `build` adds a stick, centred, wrapped as
  * tilt (z, plus tip on x) → spin (y) so it turns on its own axis.
@@ -45,17 +45,17 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
   resize();
   window.addEventListener("resize", resize);
 
-  const models: InstanceType<typeof THREE.Group>[] = [];
+  const models: InstanceType<typeof THREE.Object3D>[] = [];
   const loader = new THREE.TextureLoader();
 
   /** Adds a stick; only its printed label is fetched (a missing label leaves it unprinted) */
-  const build = async (variant: SavaStickVariant) => {
+  const build = async (variant: SavaStickVariant, options?: SavaStickOptions) => {
     const label = await loader.loadAsync(stickLabelUrl(variant)).catch(() => undefined);
     if (label) {
       label.colorSpace = THREE.SRGBColorSpace;
       label.anisotropy = renderer.capabilities.getMaxAnisotropy();
     }
-    const model = createSavaStick(THREE, variant, label);
+    const model = createSavaStick(THREE, variant, label, options);
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
     model.position.sub(box.getCenter(new THREE.Vector3()));
@@ -66,6 +66,32 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
     scene.add(tilt);
     models.push(model);
     return { model, spin, tilt, size, state: turntable() };
+  };
+
+  /**
+   * A soft contact shadow for a stick resting on a surface in the page (the /home hero's tabletop): a
+   * blurred ellipse on a plane behind the sticks, 1 × 1 px until it's scaled. Place, size and fade it
+   * (material.opacity) per frame.
+   */
+  const shadow = () => {
+    const size = 128;
+    const disc = document.createElement("canvas");
+    disc.width = disc.height = size;
+    const context = disc.getContext("2d")!;
+    const fade = context.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    fade.addColorStop(0, "rgba(0, 0, 0, 0.6)");
+    fade.addColorStop(0.5, "rgba(0, 0, 0, 0.28)");
+    fade.addColorStop(1, "rgba(0, 0, 0, 0)");
+    context.fillStyle = fade;
+    context.fillRect(0, 0, size, size);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(disc), transparent: true, depthWrite: false }),
+    );
+    mesh.position.z = -4000;
+    scene.add(mesh);
+    models.push(mesh);
+    return mesh;
   };
 
   /** Scale that fits a stick into a w × h CSS-pixel slot (× fit) */
@@ -108,7 +134,7 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
     renderer.dispose();
   };
 
-  return { build, warm, fitScale, render, clear, dispose };
+  return { build, shadow, warm, fitScale, render, clear, dispose };
 }
 
 export type StickStage = NonNullable<Awaited<ReturnType<typeof createStickStage>>>;

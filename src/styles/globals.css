@@ -30,6 +30,11 @@
   --color-star: #f5c60b; /* rating stars */
   --color-sale: #b42318; /* discounts, errors */
   --color-success: #1f7a4d;
+  /* The four ranges' finishes (the sticks' bodies, src/lib/sava-stick.ts): swatches and range tints */
+  --color-balanced: #6f96c0;
+  --color-kinetic: #c3c6ca;
+  --color-renewed: #12292a;
+  --color-grounded: #362e2b;
 
   /* Spacing rhythm (mobile values; desktop overrides below) */
   --spacing-section: 4rem; /* vertical padding of a page section */
@@ -438,6 +443,13 @@
 @utility glass {
   background-color: rgb(255 255 255 / 0.3);
   backdrop-filter: blur(11.6px);
+}
+
+/* Frosted panel over a full-bleed photo (the /home features and closing): the photo shows through,
+   heavily blurred and dimmed, so light type reads on any picture */
+@utility frost {
+  background-color: color-mix(in srgb, var(--color-ink) 24%, transparent);
+  backdrop-filter: blur(28px) saturate(1.15);
 }
 
 /* ---------- Skeleton ------------------------------------------------------- */
