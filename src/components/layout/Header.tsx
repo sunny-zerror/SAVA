@@ -14,8 +14,8 @@ const action = "flex items-center gap-2.5 p-2 text-kicker transition-opacity hov
 
 export default function Header() {
   const pathname = usePathname();
-  // On the home pages the header sits transparent over the hero
-  const overlay = pathname === "/" || pathname === "/home";
+  // On the home page the header sits transparent over the hero
+  const overlay = pathname === "/";
   const [menuOpen, setMenuOpen] = useState(false);
   const openCart = useCartStore((s) => s.open);
   const { count } = useCart();

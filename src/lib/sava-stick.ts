@@ -10,10 +10,8 @@ type THREE = typeof Three;
  */
 
 /*
- * The four SAVA sticks share one mould; each has its own finish and printed label. Labels are lifted
+ * The three SAVA sticks share one mould; each has its own finish and printed label. Labels are lifted
  * from public/images/products/sava-<variant>.jpg onto one shared layout, so any label fits any stick.
- * Grounded has no straight-on photo to lift from: its label is Balanced's print in Grounded's bronze,
- * with the range and scent names reset to match grounded/sava-grounded-front.jpg.
  */
 export const STICK_VARIANTS = {
   balanced: { body: 0x6f96c0, knob: 0x6d95bf, recess: 0x3f5f84, roughness: 0.58, metalness: 0 },
@@ -21,8 +19,6 @@ export const STICK_VARIANTS = {
   kinetic: { body: 0xc3c6ca, knob: 0xa9adb2, recess: 0x55595f, roughness: 0.45, metalness: 0.6 },
   // Deep forest green
   renewed: { body: 0x12292a, knob: 0x163130, recess: 0x08130f, roughness: 0.6, metalness: 0 },
-  // Dark chocolate
-  grounded: { body: 0x362e2b, knob: 0x3d3430, recess: 0x15110f, roughness: 0.6, metalness: 0 },
 };
 
 export type SavaStickVariant = keyof typeof STICK_VARIANTS;
@@ -171,34 +167,7 @@ function loft(
   return geometry;
 }
 
-// The formula under the cap: a solid column with a soft dome, a little narrower than the ledge it rises
-// from. [photo y, half-width], top → bottom; it starts below the ledge, so it never shows a gap.
-const FORMULA: [number, number][] = [
-  [300, 0],
-  [302, 90],
-  [308, 150],
-  [318, 196],
-  [332, 226],
-  [350, 242],
-  [370, 248],
-  [400, 248],
-];
-
-export interface SavaStickOptions {
-  /** Build the formula dome under the cap, for scenes that take the cap off (the /home page) */
-  formula?: boolean;
-}
-
-/**
- * The parts a scene can move are named: "cap" (its pivot at its own centre — userData.rest is where
- * it sits closed), "knob", and with `formula`, "formula" (userData.rest is fully twisted down).
- */
-export function createSavaStick(
-  THREE: THREE,
-  variant: SavaStickVariant,
-  label?: Three.Texture,
-  { formula = false }: SavaStickOptions = {},
-) {
+export function createSavaStick(THREE: THREE, variant: SavaStickVariant, label?: Three.Texture) {
   const finish = STICK_VARIANTS[variant];
   const plastic = new THREE.MeshPhysicalMaterial({
     color: finish.body,
@@ -232,25 +201,9 @@ export function createSavaStick(
   const body = loft(THREE, bodyRings, angles, (py, a) => py > NOTCH_TOP && py < BOTTOM_Y - 3 && inNotch(a));
   group.add(new THREE.Mesh(body, plastic));
 
-  // Cap, pivoting on its own centre so it can lift and tip off
+  // Cap
   const capRows = rows(CAP, 3);
-  const capGeometry = loft(THREE, [...capRows, { py: CAP.at(-1)![0], hw: 0 }], angles);
-  capGeometry.computeBoundingBox();
-  const capCentre = capGeometry.boundingBox!.getCenter(new THREE.Vector3());
-  capGeometry.translate(-capCentre.x, -capCentre.y, -capCentre.z);
-  const cap = new THREE.Mesh(capGeometry, plastic);
-  cap.name = "cap";
-  cap.position.copy(capCentre);
-  cap.userData.rest = capCentre.clone();
-  group.add(cap);
-
-  if (formula) {
-    const solid = new THREE.MeshStandardMaterial({ color: 0xf2f1ec, roughness: 0.82 });
-    const dome = new THREE.Mesh(loft(THREE, [...rows(FORMULA, 3), { py: FORMULA.at(-1)![0], hw: 0 }], angles), solid);
-    dome.name = "formula";
-    dome.userData.rest = dome.position.clone();
-    group.add(dome);
-  }
+  group.add(new THREE.Mesh(loft(THREE, [...capRows, { py: CAP.at(-1)![0], hw: 0 }], angles), plastic));
 
   // Notch recess, in shade: side walls and ceiling where the shell was cut, plus a back wall (z = 0)
   // and floor so it reads as a pocket around the knob rather than a hole through the stick
@@ -297,9 +250,7 @@ export function createSavaStick(
   }
   knob.computeVertexNormals();
   knob.translate(0, toY(KNOB.bottom) + knobHeight / 2, 0);
-  const dial = new THREE.Mesh(knob, knobMaterial);
-  dial.name = "knob";
-  group.add(dial);
+  group.add(new THREE.Mesh(knob, knobMaterial));
   const rim = new THREE.CylinderGeometry((KNOB.radius + 5) / 1000, (KNOB.radius + 5) / 1000, 0.006, 96);
   rim.translate(0, toY(KNOB.top), 0);
   group.add(new THREE.Mesh(rim, knobMaterial));
