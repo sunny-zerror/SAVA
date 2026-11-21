@@ -6,7 +6,6 @@ import { Frame, FrameRule } from "@/components/ui/Frame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { socialNav } from "@/config/navigation";
 import FaqAccordion from "./FaqAccordion";
-import FaqBackdrop from "./FaqBackdrop";
 
 const faqs = [
   {
@@ -65,10 +64,16 @@ export default function HomeFaq() {
               name="home-faq"
               open={i === 0}
               // expanded: / group-expanded: (not open:) so the styles change as the item animates
-              className="group relative isolate overflow-hidden border-b border-line transition-[background-color,border-color,border-radius] duration-500 last:border-b-0 expanded:rounded-3xl expanded:border-transparent expanded:bg-navy"
+              className="group relative isolate overflow-hidden border-b border-line transition-[border-color,border-radius] duration-500 last:border-b-0 expanded:rounded-3xl expanded:border-transparent"
             >
-              {/* The live aurora over that static backdrop, mounted only while this item is open */}
-              <FaqBackdrop />
+              {/* The open item's backdrop, faded in and out with it */}
+              <Image
+                src="/images/newhome/faq_bg.svg"
+                alt=""
+                fill
+                sizes="(min-width: 64rem) 64rem, 100vw"
+                className="-z-10 object-cover opacity-0 transition-opacity duration-500 group-expanded:opacity-100"
+              />
               {/* Same padding open or shut, so nothing jumps; the answer tucks up into it instead */}
               <summary className="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-8 md:px-10 md:py-12 [&::-webkit-details-marker]:hidden">
                 <h3 className="transition-colors duration-500 group-expanded:text-paper">{faq.question}</h3>

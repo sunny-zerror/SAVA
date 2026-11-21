@@ -2,8 +2,6 @@
 
 /* Set on <html> once the home page's 3D model is live — static stand-ins hide, empty slots show */
 @custom-variant model-ready (html[data-model="ready"] &);
-/* Set on <html> once the footer's 3D stick (FooterModel) is live — its static stand-in hides */
-@custom-variant footer-model-ready (html[data-footer-model="ready"] &);
 /* Set on <html> once the shop grid's 3D sticks (ShopGridModel) are live — the product photos hide */
 @custom-variant grid-model-ready (html[data-grid-model="ready"] &);
 /* An accordion item that is, or is animating to be, open: FaqAccordion sets data-expanded the moment
@@ -41,7 +39,7 @@
   --spacing-announcement: 2.5rem; /* announcement bar height */
 
   /* Layout */
-  --container-site: 90rem; /* max content width */
+  --container-site: 95rem; /* max content width */
 
   /* Easing */
   --ease-out-expo: cubic-bezier(0.22, 1, 0.36, 1);

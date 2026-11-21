@@ -1,5 +1,5 @@
 /*
- * Spin state for a 3D SAVA stick (HomeModel, FooterModel): an optional idle spin, a hover spin,
+ * Spin state for a 3D SAVA stick (HomeModel): an optional idle spin, a hover spin,
  * drag with inertia (plus a forward/back tip that springs back), and — whenever nothing is turning
  * it — an ease round to the nearest front-facing turn.
  */

@@ -1,7 +1,6 @@
 import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import CartDrawer from "@/components/layout/CartDrawer";
 import Footer from "@/components/layout/Footer";
-import FooterModel from "@/components/layout/FooterModel";
 import Header from "@/components/layout/Header";
 import PageCurtain from "@/components/layout/PageCurtain";
 import AppProviders from "@/components/providers/AppProviders";
@@ -25,8 +24,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <Header />
       <main id="main">{children}</main>
       <Footer />
-      {/* The footer's 3D stick: a fixed canvas outside the footer, clipped to it, that drops in through its top edge */}
-      <FooterModel />
       <CartDrawer suggestions={suggestions} />
       <BlobButtonFilter />
       {/* The page transition (template.tsx): a white curtain with a tagline */}

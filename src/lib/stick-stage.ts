@@ -3,7 +3,7 @@ import { turntable } from "@/lib/turntable";
 
 /*
  * Shared setup for the fixed, full-viewport canvases that draw SAVA sticks over the page (HomeModel,
- * FooterModel): three.js loaded on demand, a transparent renderer in neutral tone mapping, soft
+ * HeroStick): three.js loaded on demand, a transparent renderer in neutral tone mapping, soft
  * studio light tuned to match the product photos, and an orthographic camera in CSS pixels (y up)
  * so page rects map straight onto the scene. `build` adds a stick, centred, wrapped as
  * tilt (z, plus tip on x) → spin (y) so it turns on its own axis.

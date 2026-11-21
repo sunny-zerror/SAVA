@@ -27,7 +27,7 @@ const isVariant = (value: string | undefined): value is SavaStickVariant => !!va
 /**
  * The SAVA sticks on the home page, drawn by one fixed transparent canvas over the page.
  * The travelling stick goes from the hero (where it idles in a slow spin) into the middle bestseller
- * card and onto the open hand, facing front at each stop (the footer has its own stick, FooterModel);
+ * card and onto the open hand, facing front at each stop:
  * each frame it measures the anchor slots and blends between them by scroll progress, so it
  * locks exactly into each slot. The other bestseller
  * cards hold sticks of their own. Static images stay in the slots for reduced motion / no WebGL.
