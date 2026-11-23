@@ -11,8 +11,7 @@ export const metadata: Metadata = createMetadata({ title: "Page not found", noIn
 export default function NotFound() {
   return (
     // The hero's gradient and oversized type, with the stick standing in the middle of the "404"
-    <section aria-labelledby="not-found" className="relative isolate overflow-hidden bg-navy text-paper">
-      <Image src="/images/home/hero-bg.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover" />
+    <section aria-labelledby="not-found" className="relative isolate overflow-hidden bg-gradient-light text-paper">
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20" />
       <Frame tone="dark" className="py-section">
         <FrameRule tone="dark" />

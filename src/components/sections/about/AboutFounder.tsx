@@ -46,7 +46,7 @@ export default function AboutFounder() {
               alt="The founder training with a dumbbell in a busy gym"
               fill
               sizes="(min-width: 48rem) 45vw, 100vw"
-              className="object-cover"
+              className="object-cover object-left"
             />
           </div>
         </div>

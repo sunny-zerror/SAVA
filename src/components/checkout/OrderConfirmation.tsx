@@ -2,7 +2,6 @@
 
 import { useQuery } from "@apollo/client/react";
 import { RiCheckLine, RiMailSendLine, RiTruckLine, RiUser3Line } from "@remixicon/react";
-import Image from "next/image";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import BlobButton from "@/components/ui/BlobButton";
 import { ButtonLink } from "@/components/ui/Button";
@@ -53,8 +52,10 @@ export default function OrderConfirmation({ orderId }: { orderId?: string }) {
   return (
     <>
       {/* Celebration band on the brand gradient */}
-      <section aria-labelledby="order-confirmed" className="relative isolate overflow-hidden bg-navy text-paper">
-        <Image src="/images/home/hero-bg.png" alt="" fill priority sizes="100vw" className="-z-10 object-cover" />
+      <section
+        aria-labelledby="order-confirmed"
+        className="relative isolate overflow-hidden bg-gradient-light text-paper"
+      >
         <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20" />
         <Frame tone="dark" className="py-section">
           <FrameRule tone="dark" />

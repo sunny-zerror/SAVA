@@ -422,6 +422,14 @@
 }
 
 /* Icon disc in the comparison table */
+/* Panels and cards on light SAVA blue: the brand blue easing to a paler sky at the right (with bg-grain over it) */
+@utility bg-gradient-light {
+  background-color: var(--color-accent);
+  background-image:
+    radial-gradient(ellipse at 100% 35%, #a9cbe9 0%, transparent 60%),
+    linear-gradient(100deg, #6a98c6 0%, var(--color-accent) 45%, #9dc1e3 100%);
+}
+
 @utility bg-gradient-badge {
   background-image: linear-gradient(166.57deg, var(--color-accent) 41%, var(--color-navy) 148%);
 }

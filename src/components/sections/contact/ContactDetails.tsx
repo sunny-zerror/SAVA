@@ -1,5 +1,4 @@
 import { RiMailLine, RiMapPin2Line, RiPhoneLine, RiTimeLine, type RemixiconComponentType } from "@remixicon/react";
-import Image from "next/image";
 import Sparkle from "@/components/ui/Sparkle";
 import { socialNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
@@ -60,14 +59,8 @@ export default function ContactDetails() {
       )}
 
       {/* Social card on the brand gradient */}
-      <div data-reveal className="relative isolate overflow-hidden rounded-3xl bg-navy p-6 text-paper md:p-8">
-        <Image
-          src="/images/home/hero-bg.png"
-          alt=""
-          fill
-          sizes="(min-width: 64rem) 36vw, 100vw"
-          className="-z-10 object-cover"
-        />
+      <div data-reveal className="relative isolate overflow-hidden rounded-3xl bg-gradient-light p-6 text-paper md:p-8">
+        <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20 mix-blend-overlay" />
         <p className="flex items-center gap-2 text-kicker">
           <Sparkle />
           {siteConfig.name} Club

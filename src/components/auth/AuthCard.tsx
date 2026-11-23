@@ -26,8 +26,7 @@ export default function AuthCard({ title, description, eyebrow = "Your account",
 
       {/* The brand panel, then the form, each rise in as one block (like checkout's two columns) */}
       <div data-reveal="stagger" className="grid gap-10 px-inset py-10 md:py-14 lg:grid-cols-2 lg:gap-14">
-        <aside className="relative isolate hidden min-h-[34rem] flex-col justify-between overflow-hidden rounded-3xl bg-navy p-10 text-paper lg:flex">
-          <Image src="/images/home/hero-bg.png" alt="" fill sizes="45vw" className="-z-10 object-cover" />
+        <aside className="relative isolate hidden min-h-[34rem] flex-col justify-between overflow-hidden rounded-3xl bg-gradient-light p-10 text-paper lg:flex">
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20" />
           <Image
             src="/images/home/hero-stick.png"

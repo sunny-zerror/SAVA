@@ -140,7 +140,7 @@ export default function CareShowcase() {
                         src={slide.src}
                         alt={slide.alt}
                         fill
-                        sizes="(min-width: 48rem) 36rem, 82vw"
+                        sizes="(min-width: 48rem) 42rem, 90vw"
                         className="object-cover"
                       />
                       {/* The first photo's dashed circle (48.2% across, 49.65% down, 26.1% of its width):
@@ -191,7 +191,7 @@ export default function CareShowcase() {
 function Thumb({ src }: { src: string }) {
   return (
     <div className="relative h-(--thumb-h) w-(--thumb-w) shrink-0 overflow-hidden rounded-2xl bg-surface">
-      <Image src={src} alt="" fill sizes="12rem" className="object-cover" />
+      <Image src={src} alt="" fill sizes="16rem" className="object-cover" />
     </div>
   );
 }

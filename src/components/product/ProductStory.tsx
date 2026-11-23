@@ -17,13 +17,12 @@ const notes = {
   application: {
     title: "Application",
     text: "Twist up a little of the stick and glide it two or three times over clean, dry underarms — no need to rub it in. For best results apply it at night, when you sweat least, and again after your morning shower, giving it a minute to set before you dress.",
-    // Light pooling up from the lower right
-    glow: "bg-radial-[at_90%_100%] from-accent via-accent/45 to-navy to-75%",
+    glow: "bg-gradient-light",
   },
   formula: {
     title: "The Formula",
     text: "SAVA pairs an advanced sweat-control complex with skin-conditioning botanical oils and time-release fragrance micro-capsules that open as you move. Dermatologist approved and made to cosmetic GMP standards, it's free from paraben preservatives, denatured alcohols and artificial dyes — gentle enough for every day, and built to keep up with it.",
-    glow: "bg-radial-[at_15%_75%] from-accent/90 via-accent/35 to-navy to-80%",
+    glow: "bg-gradient-light",
   },
 };
 
@@ -74,7 +73,7 @@ function Photo({ src, alt }: { src: string; alt: string }) {
 
 function Note({ title, text, glow, className }: { title: string; text: string; glow: string; className?: string }) {
   return (
-    <article data-reveal="fade" className={cn(cell, "isolate flex flex-col bg-navy text-paper", className)}>
+    <article data-reveal="fade" className={cn(cell, "isolate flex flex-col bg-accent text-paper", className)}>
       <div aria-hidden="true" className={cn("absolute inset-0 -z-10", glow)} />
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20 mix-blend-overlay" />
       <Rules />

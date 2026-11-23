@@ -177,7 +177,7 @@ export default function AboutTestimonials() {
                   onClick={() => !open && setActive(i)}
                   style={{ left: `${slot.left}%`, width: `${slot.width}%` }}
                   className={cn(
-                    "absolute top-0 isolate overflow-hidden rounded-2xl bg-navy text-paper",
+                    "absolute top-0 isolate overflow-hidden rounded-2xl bg-accent text-paper",
                     "transition-[left,width,height,opacity] duration-900 ease-out-expo",
                     slot.tall ? "h-full" : "h-1/2",
                     slot.shown ? "opacity-100" : "opacity-0",
@@ -216,17 +216,14 @@ export default function AboutTestimonials() {
                     </div>
                   </div>
 
-                  {/* The open card: deep blue, the light pooling up from the lower right, and the review */}
+                  {/* The open card: light SAVA blue, and the review */}
                   <div
                     className={cn(
                       "absolute inset-0 flex flex-col justify-between p-5 transition-opacity duration-700 md:p-6",
                       open ? "opacity-100 delay-200" : "pointer-events-none opacity-0",
                     )}
                   >
-                    <div
-                      aria-hidden="true"
-                      className="absolute inset-0 -z-10 bg-radial-[at_90%_100%] from-accent via-accent/45 to-navy to-75%"
-                    />
+                    <div aria-hidden="true" className="absolute inset-0 -z-10 bg-gradient-light" />
                     <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20 mix-blend-overlay" />
 
                     <div className="flex items-start justify-between gap-4">
@@ -268,7 +265,7 @@ export default function AboutTestimonials() {
             })}
           </div>
 
-          <div data-reveal className="flex gap-2">
+          <div className="flex gap-2">
             {[
               { label: "Previous testimonial", by: -1, Icon: RiArrowLeftLine },
               { label: "Next testimonial", by: 1, Icon: RiArrowRightLine },

@@ -17,7 +17,7 @@ import type { Product } from "@/types";
 // Copy shared by every range: the About photo, the formula, the directions (from the pack) and the questions
 
 const aboutImage = {
-  src: "/images/products/shared/sava-about-kinetic.jpg",
+  src: "/images/products/shared/product_about_img.png",
   alt: "A SAVA Kinetic stick on a lavender ledge in soft light",
 };
 

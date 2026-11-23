@@ -92,11 +92,11 @@ export default function AboutPrinciples() {
                     <span
                       aria-hidden="true"
                       className={cn(
-                        "absolute inset-0 -z-10 bg-navy transition-opacity duration-500",
+                        "absolute inset-0 -z-10 bg-accent transition-opacity duration-500",
                         active ? "opacity-100" : "opacity-0",
                       )}
                     >
-                      <span className="absolute inset-0 bg-radial-[at_90%_100%] from-accent via-accent/45 to-navy to-75%" />
+                      <span className="absolute inset-0 bg-gradient-light" />
                       <span className="absolute inset-0 bg-grain opacity-20 mix-blend-overlay" />
                     </span>
                     <span className="flex items-baseline justify-between gap-4">
