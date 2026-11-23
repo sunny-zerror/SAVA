@@ -10,6 +10,10 @@ interface ProductCarouselProps {
   title: React.ReactNode;
   /** Names the list of cards for screen readers */
   label: string;
+  /** What the cards are, for the arrows' labels: "Next products" */
+  noun?: string;
+  /** Each card's share of the row at each breakpoint */
+  itemClassName?: string;
   children: React.ReactNode;
 }
 
@@ -25,7 +29,13 @@ const arrow = (atEnd: boolean) =>
  * the arrows beside the title (each turns blue on hover while it can move). Hairlines between the
  * cards, as in the shop grid.
  */
-export default function ProductCarousel({ title, label, children }: ProductCarouselProps) {
+export default function ProductCarousel({
+  title,
+  label,
+  noun = "products",
+  itemClassName = "basis-3/4 sm:basis-1/2 md:basis-1/3 lg:basis-1/4",
+  children,
+}: ProductCarouselProps) {
   const track = useRef<HTMLUListElement>(null);
   const id = useId();
   const [edges, setEdges] = useState({ start: true, end: true });
@@ -62,7 +72,7 @@ export default function ProductCarousel({ title, label, children }: ProductCarou
         <div data-reveal className="flex shrink-0 gap-2">
           <button
             type="button"
-            aria-label="Previous products"
+            aria-label={`Previous ${noun}`}
             aria-controls={id}
             disabled={edges.start}
             onClick={() => step(-1)}
@@ -72,7 +82,7 @@ export default function ProductCarousel({ title, label, children }: ProductCarou
           </button>
           <button
             type="button"
-            aria-label="Next products"
+            aria-label={`Next ${noun}`}
             aria-controls={id}
             disabled={edges.end}
             onClick={() => step(1)}
@@ -93,7 +103,7 @@ export default function ProductCarousel({ title, label, children }: ProductCarou
       >
         {Children.map(children, (child) => (
           // grid: the card stretches to the row's tallest
-          <li className="grid shrink-0 basis-3/4 snap-start sm:basis-1/2 md:basis-1/3 lg:basis-1/4">{child}</li>
+          <li className={cn("grid shrink-0 snap-start", itemClassName)}>{child}</li>
         ))}
       </ul>
       <FrameRule />

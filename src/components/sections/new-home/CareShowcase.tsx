@@ -9,9 +9,12 @@ interface Slide {
   /** Caption card over the photo; the first photo carries its own feature callouts instead */
   title?: string;
   text?: string;
+  /** object-position for photos of another shape, so the crop keeps their subject in frame */
+  position?: string;
 }
 
-// Photos share the main image's shape (1792 × 2400), so the card shows each whole and the circle stays put
+// The card (and each thumbnail) has the main photo's shape, 1792 × 2400, so that one shows whole and its circle
+// stays put; the others are cropped to it — landscape ones down to about half their width
 const SLIDES: Slide[] = [
   {
     src: "/images/newhome/main_feature.png",
@@ -25,9 +28,11 @@ const SLIDES: Slide[] = [
   },
   {
     src: "/images/about/gym_img.png",
-    alt: "A man training with a dumbbell on a gym bench",
+    alt: "A man in a white hoodie running on a treadmill against a blue wall",
     title: "Made for active lifestyles",
     text: "Daily commutes, training sessions and long, warm days.",
+    // The runner and treadmill fill the photo's left half; centred, the crop cut him off at the card's edge
+    position: "5% 50%",
   },
   {
     src: "/images/about/confidence_img_3.png",
@@ -98,7 +103,7 @@ export default function CareShowcase() {
                 className="absolute top-1/2 left-full flex -translate-y-1/2 gap-(--thumb-gap) pl-(--thumb-gap) motion-safe:opacity-0"
               >
                 {SLIDES.map((slide) => (
-                  <Thumb key={slide.src} src={slide.src} />
+                  <Thumb key={slide.src} src={slide.src} position={slide.position} />
                 ))}
               </div>
             </div>
@@ -111,7 +116,7 @@ export default function CareShowcase() {
                 className="absolute top-1/2 left-0 flex -translate-y-1/2 gap-(--thumb-gap) motion-safe:opacity-0"
               >
                 {SLIDES.slice(1).map((slide) => (
-                  <Thumb key={slide.src} src={slide.src} />
+                  <Thumb key={slide.src} src={slide.src} position={slide.position} />
                 ))}
               </div>
             </div>
@@ -141,6 +146,7 @@ export default function CareShowcase() {
                         alt={slide.alt}
                         fill
                         sizes="(min-width: 48rem) 42rem, 90vw"
+                        style={{ objectPosition: slide.position }}
                         className="object-cover"
                       />
                       {/* The first photo's dashed circle (48.2% across, 49.65% down, 26.1% of its width):
@@ -188,10 +194,10 @@ export default function CareShowcase() {
   );
 }
 
-function Thumb({ src }: { src: string }) {
+function Thumb({ src, position }: { src: string; position?: string }) {
   return (
     <div className="relative h-(--thumb-h) w-(--thumb-w) shrink-0 overflow-hidden rounded-2xl bg-surface">
-      <Image src={src} alt="" fill sizes="16rem" className="object-cover" />
+      <Image src={src} alt="" fill sizes="16rem" style={{ objectPosition: position }} className="object-cover" />
     </div>
   );
 }

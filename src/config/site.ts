@@ -56,6 +56,12 @@ export const siteRoutes: SiteRoute[] = [
     priority: 0.9,
   },
   {
+    path: "/blogs",
+    title: "Blogs",
+    description: `Notes on sweat control, fragrance and everyday freshness from the ${siteConfig.name} team.`,
+    priority: 0.7,
+  },
+  {
     path: "/about",
     title: "About Us",
     description: `The story behind ${siteConfig.name}.`,

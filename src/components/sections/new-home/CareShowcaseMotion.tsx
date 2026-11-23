@@ -50,9 +50,12 @@ export default function CareShowcaseMotion({ children, ...props }: React.Compone
         // Coming in, the right strip slides in from its side. The left one only ever moves with the photos:
         // pulled left any further, its queued thumbnails would show before their photos have had the card
         const enter = (1 - gallery.intro) * pitch * 0.6;
-        gsap.set(left, { x: shift, opacity: gallery.intro });
-        gsap.set(right, { x: shift + enter, opacity: gallery.intro });
-        slides.forEach((el, i) => gsap.set(el, { xPercent: gsap.utils.clamp(-100, 100, (i - gallery.t) * 100) }));
+        // Each sets its whole horizontal offset. Reverting and re-running this (React's dev double mount,
+        // Fast Refresh) can leave GSAP reading a photo's last position back as a pixel x, which then
+        // added to its xPercent and held the card a photo behind the strips
+        gsap.set(left, { x: shift, xPercent: 0, opacity: gallery.intro });
+        gsap.set(right, { x: shift + enter, xPercent: 0, opacity: gallery.intro });
+        slides.forEach((el, i) => gsap.set(el, { x: 0, xPercent: gsap.utils.clamp(-100, 100, (i - gallery.t) * 100) }));
       };
       measure();
       layout();

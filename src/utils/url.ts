@@ -13,3 +13,5 @@ export function absoluteUrl(path = "/"): string {
 }
 
 export const productHref = (slug: string) => `/shop/${slug}`;
+
+export const blogHref = (slug: string) => `/blogs/${slug}`;

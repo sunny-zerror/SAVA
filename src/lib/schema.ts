@@ -2,10 +2,11 @@
  * schema.org structured data (JSON-LD) for rich results. Render with <JsonLd />.
  */
 import { siteConfig } from "@/config/site";
+import type { BlogPost } from "@/data/blog-posts";
 import type { Crumb, Product, ProductSummary } from "@/types";
 import { mediaUrl, productImages } from "@/utils/media";
 import { displayPrice, isSoldOut } from "@/utils/product";
-import { absoluteUrl, productHref } from "@/utils/url";
+import { absoluteUrl, blogHref, productHref } from "@/utils/url";
 
 const ORG_ID = absoluteUrl("/#organization");
 const SITE_ID = absoluteUrl("/#website");
@@ -104,3 +105,39 @@ export const productListSchema = (products: ProductSummary[], name: string, path
     })),
   },
 });
+
+export const blogListSchema = (posts: BlogPost[], name: string, path: string) => ({
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name,
+  url: absoluteUrl(path),
+  isPartOf: { "@id": SITE_ID },
+  publisher: { "@id": ORG_ID },
+  blogPost: posts.map((p) => ({
+    "@type": "BlogPosting",
+    headline: p.title,
+    url: absoluteUrl(blogHref(p.slug)),
+    datePublished: p.date,
+  })),
+});
+
+export const articleSchema = (post: BlogPost, section: string) => {
+  const url = absoluteUrl(blogHref(post.slug));
+  return {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
+    headline: post.title,
+    description: post.excerpt,
+    url,
+    mainEntityOfPage: url,
+    image: absoluteUrl(post.image.src),
+    datePublished: post.date,
+    dateModified: post.date,
+    articleSection: section,
+    inLanguage: siteConfig.language,
+    author: { "@type": "Person", name: post.author },
+    publisher: { "@id": ORG_ID },
+    isPartOf: { "@id": SITE_ID },
+  };
+};

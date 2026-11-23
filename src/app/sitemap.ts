@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
 import { siteRoutes } from "@/config/site";
+import { getAllBlogPosts } from "@/services/blog";
 import { getCategories, getProducts } from "@/services/catalog";
 import { mediaUrl, primaryImage } from "@/utils/media";
-import { absoluteUrl, productHref } from "@/utils/url";
+import { absoluteUrl, blogHref, productHref } from "@/utils/url";
 
 // Rebuilt hourly so new products and categories appear without a deploy
 export const revalidate = 3600;
@@ -36,5 +37,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     };
   });
 
-  return [...pages, ...categoryPages, ...productPages];
+  const blogPages: MetadataRoute.Sitemap = getAllBlogPosts().map((post) => ({
+    url: absoluteUrl(blogHref(post.slug)),
+    lastModified: new Date(post.date),
+    changeFrequency: "monthly",
+    priority: 0.6,
+    images: [absoluteUrl(post.image.src)],
+  }));
+
+  return [...pages, ...categoryPages, ...productPages, ...blogPages];
 }

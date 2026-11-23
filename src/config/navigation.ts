@@ -4,6 +4,7 @@ import type { NavItem } from "@/types";
 /** Links in the slide-out menu (the header's MENU button) */
 export const mainNav: NavItem[] = [
   { label: "Shop", href: "/shop" },
+  { label: "Blogs", href: "/blogs" },
   { label: "About", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];
