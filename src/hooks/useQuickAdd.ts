@@ -5,6 +5,7 @@ import { useState } from "react";
 import { GET_PRODUCT } from "@/graphql";
 import { useCart } from "@/hooks/useCart";
 import { isApiConfigured } from "@/lib/env";
+import { localVariant } from "@/lib/local-shop";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "@/store/toast-store";
 import { findVariant, isOutOfStock, toVariantDetail } from "@/utils/product";
@@ -28,9 +29,14 @@ export function useQuickAdd() {
   const [loading, setLoading] = useState(false);
 
   const add = async ({ slug, productId, categoryId, selectedOptions }: QuickAddItem) => {
-    // Demo catalogue: there's no cart to add to — useCart explains that
+    // The local store: the demo catalogue is right here, no fetch needed
     if (!isApiConfigured) {
-      await addItem({ productId, categoryId, variant: { selectedOptions, variantPrice: 0 } });
+      const variant = localVariant(slug, selectedOptions);
+      if (!variant) {
+        toast.info("That one isn't available right now.");
+        return;
+      }
+      if (await addItem({ productId, categoryId, variant: toVariantDetail(variant) })) openCart();
       return;
     }
     setLoading(true);

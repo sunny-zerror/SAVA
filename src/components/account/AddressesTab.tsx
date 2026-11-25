@@ -4,39 +4,44 @@ import { useMutation, useQuery } from "@apollo/client/react";
 import { RiAddLine, RiEditLine, RiMapPin2Line } from "@remixicon/react";
 import { useState } from "react";
 import AddressFields, { readAddress } from "@/components/checkout/AddressFields";
-import { Button } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { Checkbox, TextField, formValues } from "@/components/ui/form";
 import Skeleton from "@/components/ui/Skeleton";
 import { GET_ADDRESSES, SAVE_ADDRESS } from "@/graphql";
+import { isApiConfigured } from "@/lib/env";
+import { addressesStore, localSaveAddress } from "@/lib/local-shop";
 import { toast } from "@/store/toast-store";
 import type { Address } from "@/types";
 import { errorMessage } from "@/utils/errors";
 
 export default function AddressesTab({ userId }: { userId: string }) {
-  const { data, loading } = useQuery(GET_ADDRESSES, {
+  const { data, loading: fetching } = useQuery(GET_ADDRESSES, {
     variables: { filters: { userId }, limit: 50, sort: { primary: "DESC", createdAt: "DESC" } },
+    skip: !isApiConfigured,
   });
   const [save, { loading: saving }] = useMutation(SAVE_ADDRESS, { refetchQueries: ["GetAddressByFilters"] });
+  // Without z-commerce: the addresses saved on this device (src/lib/local-shop.ts)
+  const localAddresses = addressesStore.useValue();
   // null = list view, "new" = blank form, otherwise the address being edited
   const [editing, setEditing] = useState<Address | "new" | null>(null);
-  const addresses = data?.getAddressByFilters.data ?? [];
+  const addresses = isApiConfigured ? (data?.getAddressByFilters.data ?? []) : (localAddresses[userId] ?? []);
+  const loading = isApiConfigured && fetching;
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const v = formValues(e.currentTarget);
     const current = editing !== "new" ? editing : null;
+    const address = {
+      ...readAddress(v, "address"),
+      addressType: v.addressType || "Home",
+      primary: Boolean(v.primary),
+    };
     try {
-      await save({
-        variables: {
-          input: {
-            ...readAddress(v, "address"),
-            userId,
-            addressType: v.addressType || "Home",
-            primary: Boolean(v.primary),
-          },
-          ...(current?._id ? { id: current._id } : {}),
-        },
-      });
+      if (isApiConfigured) {
+        await save({ variables: { input: { ...address, userId }, ...(current?._id ? { id: current._id } : {}) } });
+      } else {
+        localSaveAddress(userId, address, current?._id);
+      }
       toast.success("Address saved");
       setEditing(null);
     } catch (error) {
@@ -76,13 +81,14 @@ export default function AddressesTab({ userId }: { userId: string }) {
           defaultChecked={current?.primary ?? addresses.length === 0}
           label="Use as my default address"
         />
-        <div className="flex flex-wrap gap-3 border-t border-line pt-6">
-          <Button type="submit" loading={saving}>
+        {/* gap-x-16 leaves room for the first button's hover disc */}
+        <div className="flex flex-wrap gap-x-16 gap-y-4 border-t border-line pt-6">
+          <BlobButton type="submit" loading={saving}>
             Save address
-          </Button>
-          <Button type="button" variant="outline" onClick={() => setEditing(null)}>
+          </BlobButton>
+          <BlobButton tone="soft" onClick={() => setEditing(null)}>
             Cancel
-          </Button>
+          </BlobButton>
         </div>
       </form>
     );

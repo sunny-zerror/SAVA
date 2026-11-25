@@ -4,11 +4,14 @@ import { useApolloClient } from "@apollo/client/react";
 import { useRouter } from "next/navigation";
 import { LOGIN, LOGOUT, SIGN_UP, type SignUpInput } from "@/graphql";
 import { isApiConfigured } from "@/lib/env";
+import { localSignIn, localSignUp } from "@/lib/local-shop";
 import { selectIsLoggedIn, useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 
-const notConfigured = () => new Error("Demo mode — connect z-commerce in .env.local to sign in.");
-
+/*
+ * Sign in, sign up and out. On z-commerce through its API; without it, through the local store
+ * (src/lib/local-shop.ts): accounts made on this device, where any password signs in, for testing.
+ */
 export function useAuth() {
   const client = useApolloClient();
   const router = useRouter();
@@ -18,7 +21,11 @@ export function useAuth() {
 
   /** Throws with the API's message on bad credentials — show it in the form */
   async function login(email: string, password: string) {
-    if (!isApiConfigured) throw notConfigured();
+    if (!isApiConfigured) {
+      const local = localSignIn(email);
+      useAuthStore.getState().setSession(local);
+      return local.user;
+    }
     const { data } = await client.query({
       query: LOGIN,
       // guestId lets z-commerce move the guest's bag into the account
@@ -32,7 +39,13 @@ export function useAuth() {
   }
 
   async function signup(input: Omit<SignUpInput, "status">) {
-    if (!isApiConfigured) throw notConfigured();
+    if (!isApiConfigured) {
+      // The password isn't kept: any password signs in to a local account
+      const { firstName, lastName, email, phoneNumber, countryCode, emailSubscribedStatus } = input;
+      const local = localSignUp({ firstName, lastName, email, phoneNumber, countryCode, emailSubscribedStatus });
+      useAuthStore.getState().setSession(local);
+      return local.user;
+    }
     const { data } = await client.mutate({
       mutation: SIGN_UP,
       variables: { input: { ...input, status: "ACTIVE" } },

@@ -2,7 +2,7 @@
 
 import { RiRefreshLine } from "@remixicon/react";
 import { useEffect } from "react";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Sparkle from "@/components/ui/Sparkle";
 
@@ -25,14 +25,14 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
         <p data-reveal className="max-w-xl text-body-lg text-muted">
           Please try again. If it keeps happening, contact us and we&apos;ll sort it out.
         </p>
-        <div data-reveal className="mt-2 flex flex-wrap justify-center gap-3">
-          <Button onClick={reset} size="lg">
-            <RiRefreshLine aria-hidden="true" className="size-4" />
+        {/* gap-x-16 leaves room for the first button's hover disc */}
+        <div data-reveal className="mt-2 flex flex-wrap justify-center gap-x-16 gap-y-4">
+          <BlobButton onClick={reset} icon={<RiRefreshLine className="size-4" />}>
             Try again
-          </Button>
-          <ButtonLink href="/" variant="outline" size="lg">
+          </BlobButton>
+          <BlobButton href="/" tone="soft">
             Back home
-          </ButtonLink>
+          </BlobButton>
         </div>
       </div>
       <FrameRule />

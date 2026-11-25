@@ -1,9 +1,12 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { Button } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { TextField, formValues } from "@/components/ui/form";
+import PhoneField from "@/components/ui/PhoneField";
 import { CHANGE_PASSWORD, UPDATE_PROFILE } from "@/graphql";
+import { isApiConfigured } from "@/lib/env";
+import { localUpdateUser } from "@/lib/local-shop";
 import { useAuthStore } from "@/store/auth-store";
 import { toast } from "@/store/toast-store";
 import type { User } from "@/types";
@@ -16,6 +19,20 @@ export default function ProfileTab({ user }: { user: User }) {
   async function onProfile(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const v = formValues(e.currentTarget);
+    // Without z-commerce: the account kept on this device (src/lib/local-shop.ts)
+    if (!isApiConfigured) {
+      const updated = {
+        ...user,
+        firstName: v.firstName,
+        lastName: v.lastName,
+        countryCode: v.countryCode,
+        phoneNumber: v.phoneNumber,
+      };
+      localUpdateUser(updated);
+      useAuthStore.getState().setUser(updated);
+      toast.success("Profile updated");
+      return;
+    }
     try {
       const { data } = await updateProfile({
         variables: {
@@ -42,6 +59,12 @@ export default function ProfileTab({ user }: { user: User }) {
     const v = formValues(form);
     if (v.newPassword.length < 8) return toast.error("Use at least 8 characters for the new password.");
     if (v.newPassword !== v.confirmPassword) return toast.error("New passwords don't match.");
+    // Local accounts keep no password (any one signs in), so there's nothing to change
+    if (!isApiConfigured) {
+      form.reset();
+      toast.success("Password changed");
+      return;
+    }
     try {
       const { data } = await changePassword({
         variables: { email: user.email, currentPassword: v.currentPassword, newPassword: v.newPassword },
@@ -89,19 +112,16 @@ export default function ProfileTab({ user }: { user: User }) {
           disabled
           hint="Contact us to change your email."
         />
-        <div className="grid grid-cols-[5.5rem_1fr] gap-3">
-          <TextField label="Code" name="countryCode" defaultValue={user.countryCode ?? "+91"} />
-          <TextField
-            label="Phone"
-            name="phoneNumber"
-            type="tel"
-            defaultValue={user.phoneNumber ?? ""}
-            autoComplete="tel-national"
-          />
-        </div>
-        <Button type="submit" loading={savingProfile} className="mt-2 self-start">
+        <PhoneField
+          label="Phone"
+          codeName="countryCode"
+          numberName="phoneNumber"
+          defaultCode={user.countryCode}
+          defaultNumber={user.phoneNumber}
+        />
+        <BlobButton type="submit" loading={savingProfile} className="mt-2 self-start">
           Save details
-        </Button>
+        </BlobButton>
       </form>
 
       <form
@@ -134,9 +154,9 @@ export default function ProfileTab({ user }: { user: User }) {
           autoComplete="new-password"
           required
         />
-        <Button type="submit" variant="ink" loading={savingPassword} className="mt-2 self-start">
+        <BlobButton type="submit" loading={savingPassword} className="mt-2 self-start">
           Change password
-        </Button>
+        </BlobButton>
       </form>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { ADD_TO_WISHLIST, GET_WISHLIST, REMOVE_FROM_WISHLIST } from "@/graphql";
 import { isApiConfigured } from "@/lib/env";
+import { wishlistsStore } from "@/lib/local-shop";
 import { selectIsLoggedIn, useAuthStore } from "@/store/auth-store";
 import { toast } from "@/store/toast-store";
 import { errorMessage } from "@/utils/errors";
@@ -10,8 +11,8 @@ import { errorMessage } from "@/utils/errors";
 const refetchWishlist = { refetchQueries: ["GetWishlistItems"], awaitRefetchQueries: true };
 
 /*
- * The signed-in shopper's z-commerce wishlist. z-commerce keys wishlists by user, so guests are
- * asked to sign in first. Every card shares the one query (Apollo dedupes it).
+ * The signed-in shopper's wishlist: z-commerce's (keyed by user, so guests are asked to sign in
+ * first; every card shares the one query, Apollo dedupes it), or the local store's without it.
  */
 export function useWishlist() {
   const hydrated = useAuthStore((s) => s.hydrated);
@@ -22,19 +23,27 @@ export function useWishlist() {
     variables: { userId: userId ?? "", limit: 100 },
     skip: !hydrated || !isLoggedIn || !userId || !isApiConfigured,
   });
+  const localLists = wishlistsStore.useValue();
   const [addMutation, addState] = useMutation(ADD_TO_WISHLIST, refetchWishlist);
   const [removeMutation, removeState] = useMutation(REMOVE_FROM_WISHLIST, refetchWishlist);
 
   const items = data?.getWishlistItems.items ?? [];
+  const localSaved = isLoggedIn && userId ? (localLists[userId] ?? []) : [];
   const entry = (productId: string) => items.find((item) => item.productId === productId);
+  const isSaved = (productId: string) => (isApiConfigured ? Boolean(entry(productId)) : localSaved.includes(productId));
 
   async function toggle(productId: string) {
-    if (!isApiConfigured) {
-      toast.info("Demo mode — connect z-commerce in .env.local to use the wishlist.");
-      return;
-    }
     if (!isLoggedIn || !userId) {
       toast.info("Sign in to save products to your wishlist.");
+      return;
+    }
+    if (!isApiConfigured) {
+      const saved = isSaved(productId);
+      wishlistsStore.write((all) => {
+        const list = all[userId] ?? [];
+        return { ...all, [userId]: saved ? list.filter((id) => id !== productId) : [...list, productId] };
+      });
+      if (!saved) toast.success("Saved to your wishlist");
       return;
     }
     const saved = entry(productId);
@@ -51,7 +60,7 @@ export function useWishlist() {
   }
 
   return {
-    isSaved: (productId: string) => Boolean(entry(productId)),
+    isSaved,
     toggle,
     busy: addState.loading || removeState.loading,
   };

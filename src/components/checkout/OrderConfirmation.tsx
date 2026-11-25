@@ -4,12 +4,12 @@ import { useQuery } from "@apollo/client/react";
 import { RiCheckLine, RiMailSendLine, RiTruckLine, RiUser3Line } from "@remixicon/react";
 import OrderSummary from "@/components/checkout/OrderSummary";
 import BlobButton from "@/components/ui/BlobButton";
-import { ButtonLink } from "@/components/ui/Button";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Skeleton from "@/components/ui/Skeleton";
 import Sparkle from "@/components/ui/Sparkle";
 import { GET_ORDER_PAYMENT } from "@/graphql";
 import { isApiConfigured } from "@/lib/env";
+import { ordersStore } from "@/lib/local-shop";
 import type { Address } from "@/types";
 
 const nextSteps = [
@@ -43,11 +43,16 @@ function AddressBlock({ title, address }: { title: string; address?: Address | n
 
 /** Thank-you page body. z-commerce redirects here with ?orderId= after a successful payment. */
 export default function OrderConfirmation({ orderId }: { orderId?: string }) {
-  const { data, loading } = useQuery(GET_ORDER_PAYMENT, {
+  const { data, loading: fetching } = useQuery(GET_ORDER_PAYMENT, {
     variables: { id: orderId ?? "" },
     skip: !orderId || !isApiConfigured,
   });
-  const order = data?.getClientSidePaymentByOrderId?.order;
+  // Without z-commerce: the test order placed in this browser (src/lib/local-shop.ts)
+  const localOrders = ordersStore.useValue();
+  const order = isApiConfigured
+    ? data?.getClientSidePaymentByOrderId?.order
+    : localOrders.find((placed) => placed._id === orderId);
+  const loading = isApiConfigured && fetching;
 
   return (
     <>
@@ -65,23 +70,26 @@ export default function OrderConfirmation({ orderId }: { orderId?: string }) {
             </span>
             <p className="flex items-center gap-2 text-kicker text-mint">
               <Sparkle />
-              Payment successful
+              {isApiConfigured ? "Payment successful" : "Test order placed"}
             </p>
             <h1 data-heading-effect id="order-confirmed" className="max-w-3xl">
               Thank you for your order
             </h1>
             <p data-reveal className="max-w-xl text-body-lg text-paper/80">
-              {order
-                ? `Order ${order.orderNo} is confirmed — we've emailed your receipt.`
-                : "Your order is confirmed — we've emailed your receipt and details."}
+              {!isApiConfigured
+                ? `${order ? `Order ${order.orderNo}` : "Your order"} is saved in this browser — no payment was taken.`
+                : order
+                  ? `Order ${order.orderNo} is confirmed — we've emailed your receipt.`
+                  : "Your order is confirmed — we've emailed your receipt and details."}
             </p>
-            <div data-reveal className="mt-2 flex flex-wrap items-center justify-center gap-3">
+            {/* gap-x-16 leaves room for the first button's hover disc */}
+            <div data-reveal className="mt-2 flex flex-wrap items-center justify-center gap-x-16 gap-y-4">
               <BlobButton href="/shop" tone="light">
                 Continue shopping
               </BlobButton>
-              <ButtonLink href="/account?tab=orders" variant="outline-light" size="lg">
+              <BlobButton href="/account?tab=orders" tone="soft">
                 View orders
-              </ButtonLink>
+              </BlobButton>
             </div>
           </div>
           <FrameRule tone="dark" />

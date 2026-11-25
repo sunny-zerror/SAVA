@@ -1,6 +1,6 @@
 import { RiErrorWarningLine } from "@remixicon/react";
 import type { Metadata } from "next";
-import { ButtonLink } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Sparkle from "@/components/ui/Sparkle";
 import { createMetadata } from "@/lib/seo";
@@ -30,13 +30,12 @@ export default function PaymentFailedPage() {
         <p data-reveal className="max-w-xl text-body-lg text-muted">
           You haven&apos;t been charged and your bag is saved. Please try again or use another payment method.
         </p>
-        <div data-reveal className="mt-2 flex flex-wrap justify-center gap-3">
-          <ButtonLink href="/checkout" size="lg">
-            Try again
-          </ButtonLink>
-          <ButtonLink href="/contact" variant="outline" size="lg">
+        {/* gap-x-16 leaves room for the first button's hover disc */}
+        <div data-reveal className="mt-2 flex flex-wrap justify-center gap-x-16 gap-y-4">
+          <BlobButton href="/checkout">Try again</BlobButton>
+          <BlobButton href="/contact" tone="soft">
             Contact us
-          </ButtonLink>
+          </BlobButton>
         </div>
       </div>
       <FrameRule />

@@ -16,16 +16,19 @@ export const getBlogCategories = (): BlogCategory[] => blogCategories;
 
 export const getBlogCategory = (slug?: string) => blogCategories.find((c) => c.slug === slug);
 
-/** One page of posts, newest first — filtered to a category, or searched across titles and copy */
+/**
+ * One page of posts, newest first — filtered to a category, or searched: posts whose title or copy
+ * holds every word of the term, case-insensitive (as the shop's search matches products)
+ */
 export function getBlogPosts({ category, search, page = 1 }: { category?: string; search?: string; page?: number }) {
-  const term = search?.trim().toLowerCase();
+  const words = search?.toLowerCase().split(/\s+/).filter(Boolean) ?? [];
   const matches = blogPosts.filter((post) => {
     if (category && post.category !== category) return false;
-    if (!term) return true;
-    return [post.title, post.excerpt, ...post.sections.map((s) => `${s.heading} ${s.body}`)]
+    if (!words.length) return true;
+    const text = [post.title, post.excerpt, ...post.sections.map((s) => `${s.heading} ${s.body}`)]
       .join(" ")
-      .toLowerCase()
-      .includes(term);
+      .toLowerCase();
+    return words.every((word) => text.includes(word));
   });
   const offset = (page - 1) * BLOG_PAGE_SIZE;
   return { posts: matches.slice(offset, offset + BLOG_PAGE_SIZE), totalCount: matches.length } satisfies BlogPage;

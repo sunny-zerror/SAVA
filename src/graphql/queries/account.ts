@@ -1,6 +1,6 @@
 import { gql, type TypedDocumentNode } from "@apollo/client";
-import { ADDRESS, CART, ORDER, USER } from "@/graphql/fields";
-import type { Address, AuthPayload, Cart, Order, Paginated, PaymentRecord } from "@/types";
+import { ADDRESS, CART, ORDER, PROMOTION, USER } from "@/graphql/fields";
+import type { Address, AuthPayload, Cart, Order, Paginated, PaymentRecord, Promotion } from "@/types";
 
 /** Login is a query on z-commerce. Pass guestId to merge the guest cart into the account. */
 export const LOGIN: TypedDocumentNode<
@@ -33,6 +33,13 @@ export const GET_CART: TypedDocumentNode<
 > = gql`
   query GetCart($guestId: String, $cartId: String, $token: String) {
     getCart(guestId: $guestId, cartId: $cartId, token: $token) { ${CART} }
+  }
+`;
+
+/** The offers a shopper can use now — the signed-in one by token, a guest by guestId */
+export const GET_PROMOTIONS: TypedDocumentNode<{ getAllValidPromotions: Promotion[] }, { guestId?: string }> = gql`
+  query GetAllValidPromotions($guestId: String) {
+    getAllValidPromotions(guestId: $guestId) { ${PROMOTION} }
   }
 `;
 

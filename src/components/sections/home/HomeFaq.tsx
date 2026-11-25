@@ -5,30 +5,8 @@ import BlobButton from "@/components/ui/BlobButton";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { socialNav } from "@/config/navigation";
+import { faqs } from "@/data/faqs";
 import FaqAccordion from "./FaqAccordion";
-
-const faqs = [
-  {
-    question: "How long does the fragrance last after application?",
-    answer:
-      "Thanks to our time-release scent micro-capsule technology, SAVA offers up to 24-48 hours of continuous freshness, adapting to your body movement and everyday rhythm.",
-  },
-  {
-    question: "Is SAVA suitable for all skin types, including sensitive skin?",
-    answer:
-      "Yes. SAVA is dermatologist approved, non-comedogenic and hypoallergenic, and has been clinically tested on hypersensitive underarm skin.",
-  },
-  {
-    question: "What makes SAVA’s safe and effective for daily use?",
-    answer:
-      "Every batch is made to cosmetic GMP standards (ISO 22716) and is free from paraben preservatives, denatured alcohols and artificial dyes — so it’s gentle enough to use every day.",
-  },
-  {
-    question: "What makes SAVA’s packaging eco-conscious and modern?",
-    answer:
-      "Our sticks are designed to use less material and to be easy to recycle, without compromising on a clean, modern look.",
-  },
-];
 
 const faqSchema = {
   "@context": "https://schema.org",

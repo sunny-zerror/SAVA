@@ -54,6 +54,10 @@ export const USER = `
   addresses { ${ADDRESS} }
 `;
 
+export const PROMOTION = `
+  _id promotionCode promotionName promotionType discount minimumSubtotal endDate
+`;
+
 export const ORDER = `
   _id orderNo orderPrice totalprice discountedPrice totalDiscount shippingAmount
   taxAmount itemcount currency paymentStatus fulfillmentStatus shipmentStatus

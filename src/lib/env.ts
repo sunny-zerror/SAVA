@@ -7,8 +7,9 @@ export const env = {
 };
 
 /**
- * False until .env.local points at a z-commerce store. While false the catalogue
- * renders from src/data/mock-products.ts and cart/account actions explain what's missing.
+ * False until .env.local points at a z-commerce store. While false the catalogue renders from
+ * src/data/mock-products.ts, and the bag, accounts, orders and messages run on the local store in
+ * this browser (src/lib/local-shop.ts), for testing.
  */
 export const isApiConfigured = Boolean(env.graphqlUrl && env.dbToken);
 

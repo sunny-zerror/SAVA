@@ -2,7 +2,7 @@ import { RiSearchLine } from "@remixicon/react";
 import Image from "next/image";
 import Link from "next/link";
 import BlogMeta from "@/components/blog/BlogMeta";
-import { fieldClass } from "@/components/ui/form";
+import { fieldClass } from "@/components/ui/field-class";
 import type { BlogCategory, BlogPost } from "@/data/blog-posts";
 import { cn } from "@/utils/cn";
 import { blogHref } from "@/utils/url";

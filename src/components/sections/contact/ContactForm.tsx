@@ -3,10 +3,11 @@
 import { useMutation } from "@apollo/client/react";
 import { RiCheckLine } from "@remixicon/react";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { TextArea, TextField, formValues } from "@/components/ui/form";
 import { CREATE_CONTACT } from "@/graphql";
 import { isApiConfigured } from "@/lib/env";
+import { localSendMessage } from "@/lib/local-shop";
 import { toast } from "@/store/toast-store";
 import { errorMessage } from "@/utils/errors";
 
@@ -17,17 +18,22 @@ export default function ContactForm() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
+    const { name, email, phoneNumber, subject, message } = formValues(form);
+    // Without z-commerce the message is kept in this browser (src/lib/local-shop.ts)
     if (!isApiConfigured) {
-      toast.info("Demo mode — connect z-commerce in .env.local to send messages.");
+      localSendMessage({ name, email, phoneNumber: phoneNumber || undefined, subject, message });
+      form.reset();
+      setSent(true);
+      toast.success("Message sent. We will reply within one working day.");
       return;
     }
-    const { name, email, phoneNumber, subject, message } = formValues(form);
     try {
       await createContact({
         variables: { input: { name, email, phoneNumber: phoneNumber || undefined, subject, message } },
       });
       form.reset();
       setSent(true);
+      toast.success("Message sent. We will reply within one working day.");
     } catch (error) {
       toast.error(errorMessage(error, "Your message didn't send. Please try again."));
     }
@@ -41,9 +47,9 @@ export default function ContactForm() {
         </span>
         <h2 className="text-h3">Thank you</h2>
         <p className="text-body-lg text-muted">We&apos;ve received your message and will be in touch shortly.</p>
-        <Button variant="outline" onClick={() => setSent(false)}>
+        <BlobButton tone="soft" onClick={() => setSent(false)}>
           Send another
-        </Button>
+        </BlobButton>
       </div>
     );
   }
@@ -59,9 +65,9 @@ export default function ContactForm() {
       <TextField label="Phone (optional)" name="phoneNumber" type="tel" autoComplete="tel" />
       <TextField label="Subject" name="subject" required />
       <TextArea label="Message" name="message" required className="md:col-span-2" />
-      <Button type="submit" size="lg" loading={loading} className="mt-2 md:col-span-2 md:justify-self-start">
+      <BlobButton type="submit" loading={loading} className="mt-2 justify-self-start md:col-span-2">
         Send message
-      </Button>
+      </BlobButton>
     </form>
   );
 }

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Frame, FrameRule } from "@/components/ui/Frame";
-import PageHeader from "@/components/ui/PageHeader";
+import { Frame } from "@/components/ui/Frame";
 import Sparkle from "@/components/ui/Sparkle";
 import { siteConfig } from "@/config/site";
 
@@ -16,17 +15,17 @@ interface AuthCardProps {
 
 const perks = ["Track every order and download invoices", "Save delivery addresses", "Check out in a few taps"];
 
-/** Framed sign-in / sign-up page: title band, then the form beside a brand panel on wide screens */
+/**
+ * Framed sign-in / sign-up page: the brand panel on the left holds the page's heading (and, on wide
+ * screens, the club's perks), the form sits beside it. On phones the panel shrinks to the heading,
+ * above the form.
+ */
 export default function AuthCard({ title, description, eyebrow = "Your account", footer, children }: AuthCardProps) {
   return (
-    <Frame className="py-section">
-      <FrameRule />
-      <PageHeader eyebrow={eyebrow} title={title} description={description} align="center" className="px-inset py-10" />
-      <FrameRule />
-
+    <Frame className="pb-section">
       {/* The brand panel, then the form, each rise in as one block (like checkout's two columns) */}
-      <div data-reveal="stagger" className="grid gap-10 px-inset py-10 md:py-14 lg:grid-cols-2 lg:gap-14">
-        <aside className="relative isolate hidden min-h-[34rem] flex-col justify-between overflow-hidden rounded-3xl bg-gradient-light p-10 text-paper lg:flex">
+      <div data-reveal="stagger" className="grid gap-8 px-inset py-10 md:py-14 lg:grid-cols-2 lg:gap-14">
+        <aside className="relative isolate flex flex-col justify-between gap-10 overflow-hidden rounded-3xl bg-gradient-light p-8 text-paper md:p-10 lg:min-h-136">
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-20" />
           <Image
             src="/images/home/hero-stick.png"
@@ -34,14 +33,21 @@ export default function AuthCard({ title, description, eyebrow = "Your account",
             width={1122}
             height={1402}
             sizes="18rem"
-            className="pointer-events-none absolute -right-10 -bottom-16 -z-10 w-72 rotate-12"
+            className="pointer-events-none absolute -right-10 -bottom-16 -z-10 hidden w-72 rotate-12 lg:block"
           />
-          <p className="flex items-center gap-2 text-kicker">
-            <Sparkle />
-            {siteConfig.name} Club
-          </p>
-          <div className="flex flex-col gap-6">
-            <p className="max-w-xs text-h2">{siteConfig.tagline}</p>
+          <header className="flex flex-col gap-4">
+            <p className="flex items-center gap-2 text-kicker">
+              <Sparkle />
+              {eyebrow}
+            </p>
+            <h1>{title}</h1>
+            <p className="max-w-sm text-body-lg text-paper/85">{description}</p>
+          </header>
+          <div className="hidden flex-col gap-5 lg:flex">
+            <p className="flex items-center gap-2 text-kicker">
+              <Sparkle className="text-mint" />
+              {siteConfig.name} Club
+            </p>
             <ul className="flex max-w-xs flex-col gap-3 text-body-lg">
               {perks.map((perk) => (
                 <li key={perk} className="flex items-center gap-3">

@@ -25,6 +25,7 @@
   --color-mist: #d8e3ff; /* frame rail dots */
   --color-mint: #ace2ae; /* highlights on dark: badge drop, top rating bar */
   --color-navy: #021b5b; /* deep end of the brand gradients */
+  --color-night: #08080a; /* near-black: the footer's dark */
   --color-star: #f5c60b; /* rating stars */
   --color-sale: #b42318; /* discounts, errors */
   --color-success: #1f7a4d;
@@ -72,6 +73,62 @@
   --animate-spin-slow: spin 24s linear infinite;
   /* Clears the home intro's curtain if its script never runs */
   --animate-intro-fallback: intro-fallback 0.6s ease 4s forwards;
+  /* Toasts (Toaster): slide in from the right, out again, and the countdown bar (its duration set inline) */
+  --animate-toast-in: toast-in 0.5s var(--ease-out-expo) both;
+  --animate-toast-out: toast-out 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+  --animate-toast-progress: toast-progress linear forwards;
+  /* QuantityStepper: the new count rolls in from below as it rises, from above as it falls */
+  --animate-count-up: count-up 0.4s var(--ease-out-expo) both;
+  --animate-count-down: count-down 0.4s var(--ease-out-expo) both;
+
+  @keyframes count-up {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes count-down {
+    from {
+      opacity: 0;
+      transform: translateY(-100%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes toast-in {
+    from {
+      opacity: 0;
+      transform: translateX(110%);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes toast-out {
+    to {
+      opacity: 0;
+      transform: translateX(110%);
+    }
+  }
+
+  @keyframes toast-progress {
+    from {
+      transform: scaleX(1);
+    }
+    to {
+      transform: scaleX(0);
+    }
+  }
 
   @keyframes intro-fallback {
     to {
@@ -458,6 +515,227 @@
     background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.6) 50%, transparent 80%);
     transform: translateX(-100%);
     animation: var(--animate-skeleton);
+  }
+}
+
+/* Scroll areas whose ends fade out rather than cut off */
+@utility fade-edges-y {
+  mask-image: linear-gradient(transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+}
+
+@utility fade-edges-x {
+  mask-image: linear-gradient(90deg, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent);
+}
+
+/* ---------- Shopping assistant ----------------------------------------------- */
+/*
+ * src/components/assistant/. The stage opens in a circle growing from the launcher (GSAP tweens
+ * --assistant-r about --assistant-x / --assistant-y), with light bending on the circle's edge; the
+ * speech bubble's light drifts; the input's ring turns; the screen's edges glow while dictating.
+ */
+@property --assistant-ring-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --assistant-glow-angle {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@property --assistant-light-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 65%;
+}
+
+@property --assistant-light-y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 70%;
+}
+
+/* The stage: SAVA blue pooling round the orb (right on wide screens, top on phones), inside the
+   opening circle — unmasked once it covers the screen */
+@utility assistant-stage {
+  background-color: var(--color-surface);
+  background-image:
+    radial-gradient(
+      ellipse 55% 70% at 76% 50%,
+      color-mix(in srgb, var(--color-accent) 24%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(ellipse 60% 50% at 0% 100%, var(--color-mist), transparent 70%);
+  -webkit-mask-image: radial-gradient(
+    circle at var(--assistant-x) var(--assistant-y),
+    #000 calc(var(--assistant-r) - 60px),
+    transparent var(--assistant-r)
+  );
+  mask-image: radial-gradient(
+    circle at var(--assistant-x) var(--assistant-y),
+    #000 calc(var(--assistant-r) - 60px),
+    transparent var(--assistant-r)
+  );
+  @media (width < 64rem) {
+    background-image:
+      radial-gradient(
+        ellipse 90% 45% at 50% 22%,
+        color-mix(in srgb, var(--color-accent) 24%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(ellipse 90% 40% at 0% 100%, var(--color-mist), transparent 70%);
+  }
+  &[data-revealed] {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* Over the page on the opening circle's edge: what's beneath blurs and brightens, as through glass */
+@utility assistant-ripple {
+  -webkit-backdrop-filter: blur(10px) saturate(1.5);
+  backdrop-filter: blur(10px) saturate(1.5);
+  background: radial-gradient(
+    circle at var(--assistant-x) var(--assistant-y),
+    transparent calc(var(--assistant-r) - 90px),
+    color-mix(in srgb, var(--color-accent) 14%, transparent) calc(var(--assistant-r) - 30px),
+    color-mix(in srgb, var(--color-paper) 45%, transparent) calc(var(--assistant-r) - 4px),
+    color-mix(in srgb, var(--color-mist) 35%, transparent) calc(var(--assistant-r) + 18px),
+    transparent calc(var(--assistant-r) + 60px)
+  );
+  -webkit-mask-image: radial-gradient(
+    circle at var(--assistant-x) var(--assistant-y),
+    transparent calc(var(--assistant-r) - 90px),
+    #000 calc(var(--assistant-r) - 36px),
+    #000 calc(var(--assistant-r) + 14px),
+    transparent calc(var(--assistant-r) + 60px)
+  );
+  mask-image: radial-gradient(
+    circle at var(--assistant-x) var(--assistant-y),
+    transparent calc(var(--assistant-r) - 90px),
+    #000 calc(var(--assistant-r) - 36px),
+    #000 calc(var(--assistant-r) + 14px),
+    transparent calc(var(--assistant-r) + 60px)
+  );
+}
+
+/* The launcher's speech bubble: navy, lit by a pool of SAVA blue that drifts across it */
+@utility assistant-bubble {
+  background-color: var(--color-navy);
+  background-image:
+    radial-gradient(
+      circle at var(--assistant-light-x) var(--assistant-light-y),
+      color-mix(in srgb, var(--color-accent) 65%, transparent),
+      transparent 65%
+    ),
+    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--color-mist) 28%, transparent), transparent 55%),
+    radial-gradient(circle at 96% 96%, color-mix(in srgb, var(--color-accent) 40%, transparent), transparent 55%);
+  animation: assistant-light-drift 14s ease-in-out infinite alternate;
+}
+
+/* The input's ring: a faint SAVA-blue border, two brighter arcs turning round it without end (once
+   every 8s), and a soft glow beneath */
+@utility assistant-ring {
+  --assistant-ring-base: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  animation: assistant-ring-spin 8s linear infinite;
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  &::before {
+    padding: 1.5px;
+    background: conic-gradient(
+      from var(--assistant-ring-angle),
+      var(--assistant-ring-base) 0,
+      var(--color-accent) 8%,
+      var(--assistant-ring-base) 22%,
+      var(--assistant-ring-base) 48%,
+      color-mix(in srgb, var(--color-accent) 45%, var(--color-navy)) 60%,
+      var(--assistant-ring-base) 74%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  &::after {
+    z-index: -1;
+    box-shadow: 0 0 40px 10px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  }
+}
+
+/* Round the screen's edges while the shopper dictates: a 3px border of turning SAVA blue and a glow
+   fading in 56px from every edge. Paused unless data-visible */
+@utility assistant-glow {
+  animation: assistant-glow-spin 12s linear infinite;
+  &:not([data-visible]) {
+    animation-play-state: paused;
+  }
+  &::before,
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(
+      from var(--assistant-glow-angle),
+      var(--color-accent),
+      color-mix(in srgb, var(--color-accent) 60%, var(--color-navy)) 33%,
+      var(--color-mist) 66%,
+      var(--color-accent)
+    );
+  }
+  &::before {
+    padding: 3px;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  &::after {
+    opacity: 0.85;
+    -webkit-mask-image:
+      linear-gradient(to right, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px),
+      linear-gradient(to left, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px),
+      linear-gradient(to bottom, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px),
+      linear-gradient(to top, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px);
+    mask-image:
+      linear-gradient(to right, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px),
+      linear-gradient(to left, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px),
+      linear-gradient(to bottom, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px),
+      linear-gradient(to top, rgb(0 0 0 / 0.9), rgb(0 0 0 / 0.4) 17px, rgb(0 0 0 / 0.13) 34px, transparent 56px);
+  }
+}
+
+@keyframes assistant-light-drift {
+  to {
+    --assistant-light-x: 30%;
+    --assistant-light-y: 35%;
+  }
+}
+
+@keyframes assistant-ring-spin {
+  to {
+    --assistant-ring-angle: 360deg;
+  }
+}
+
+@keyframes assistant-glow-spin {
+  to {
+    --assistant-glow-angle: 360deg;
   }
 }
 

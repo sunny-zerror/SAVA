@@ -6,6 +6,7 @@ import { footerNav, legalNav, socialNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/utils/cn";
 import FooterDroplets from "./FooterDroplets";
+import FooterGlow from "./FooterGlow";
 
 // The legal links line up under the columns above; the last one ends at the right rail
 const LEGAL_COLUMNS = ["lg:col-start-7", "lg:col-start-9", "lg:col-start-11 lg:justify-self-end"];
@@ -16,14 +17,18 @@ export default function Footer() {
   const address = [street, city, [state, postalCode].filter(Boolean).join(" ")].filter(Boolean).join(", ");
 
   return (
-    <footer className="relative isolate overflow-hidden bg-accent text-paper">
-      {/* Soft light pooling across the blue, with grain */}
-      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-radial from-paper/30 via-paper/10 to-transparent" />
+    <footer data-droplets-host className="relative isolate overflow-hidden bg-night text-paper">
+      {/* Skin, close up: the image stands in until the live version over it is drawn */}
+      <Image src="/images/footer/bg_skin_texture.png" alt="" fill sizes="100vw" className="-z-10 object-cover" />
+      {/* Skin and sweat dimmed, and at full brightness around the pointer */}
+      <FooterGlow className="absolute inset-0 -z-10">
+        {/* Sweat beads, running down when the pointer passes */}
+        <FooterDroplets density={2} strength={1.8} className="absolute inset-0 size-full" />
+      </FooterGlow>
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-15 mix-blend-overlay" />
-      {/* Sweat beads that run down when the pointer passes */}
-      <FooterDroplets className="absolute inset-0 -z-10 size-full" />
 
-      <Frame tone="dark" className="flex flex-col">
+      {/* A screen tall, less the header */}
+      <Frame tone="dark" className="flex min-h-[calc(100svh-var(--spacing-header))] flex-col">
         <FrameRule tone="dark" />
 
         <div className="grid gap-10 px-inset pt-12 pb-10 md:pt-16 lg:grid-cols-12">
@@ -69,11 +74,19 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Room for the photo, which stands on the footer's bottom edge (behind the last row), and the badge */}
-        <div className="relative h-72 md:h-80 lg:h-64">
-          <div className="absolute right-(--spacing-inset) bottom-6">
-            <StickBadge className="size-28 text-paper md:size-32" />
-          </div>
+        {/* The open skin between the links and the logo */}
+        <div className="min-h-16 flex-1" />
+
+        {/* The logo bottom left, in line with the text above it, and the badge across from it */}
+        <div className="flex items-center justify-between gap-6 px-inset pb-8 md:pb-10">
+          <Link
+            href="/"
+            aria-label={`${siteConfig.name} — home`}
+            data-reveal
+            // The header's wordmark, as a mask in the text colour; kept within ~1.5× its 256px source
+            className="block aspect-256/49 w-[min(60vw,24rem)] bg-current mask-[url(/images/brand/wordmark.png)] mask-contain mask-left mask-no-repeat"
+          />
+          <StickBadge className="size-28 shrink-0 text-paper md:size-32" />
         </div>
 
         <FrameRule tone="dark" />
@@ -88,18 +101,6 @@ export default function Footer() {
               {item.label}
             </Link>
           ))}
-        </div>
-
-        {/* The brand photo, standing on the bottom edge and fading out as it meets it */}
-        <div className="pointer-events-none absolute bottom-0 left-(--spacing-inset) w-[clamp(13rem,22vw,20rem)] mask-b-from-75%">
-          <Image
-            src="/images/newhome/footer_img.png"
-            alt="A woman in SAVA blue sportswear holding out a SAVA Balanced stick"
-            width={1024}
-            height={1280}
-            sizes="(min-width: 64rem) 22vw, 13rem"
-            className="w-full"
-          />
         </div>
       </Frame>
     </footer>

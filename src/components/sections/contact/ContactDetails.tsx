@@ -1,4 +1,5 @@
 import { RiMailLine, RiMapPin2Line, RiPhoneLine, RiTimeLine, type RemixiconComponentType } from "@remixicon/react";
+import BlobButton from "@/components/ui/BlobButton";
 import Sparkle from "@/components/ui/Sparkle";
 import { socialNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
@@ -66,17 +67,13 @@ export default function ContactDetails() {
           {siteConfig.name} Club
         </p>
         <p className="mt-3 max-w-xs text-h3">Follow along for drops, routines and stories</p>
-        <ul aria-label="Social" className="mt-6 flex flex-wrap gap-2">
+        {/* gap-x-16 leaves room for each button's hover disc */}
+        <ul aria-label="Social" className="mt-6 flex flex-wrap gap-x-16 gap-y-3">
           {socialNav.map((item) => (
             <li key={item.label}>
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex h-10 items-center rounded-full border border-paper/40 px-5 text-cta transition-colors hover:bg-paper hover:text-ink"
-              >
+              <BlobButton href={item.href} target="_blank" rel="noopener noreferrer" tone="light">
                 {item.label}
-              </a>
+              </BlobButton>
             </li>
           ))}
         </ul>

@@ -1,7 +1,7 @@
 import { RiAddLine, RiSearchLine, RiSubtractLine } from "@remixicon/react";
 import Link from "next/link";
 import FaqAccordion from "@/components/sections/home/FaqAccordion";
-import { fieldClass } from "@/components/ui/form";
+import { fieldClass } from "@/components/ui/field-class";
 import { shopFilterGroups } from "@/config/shop";
 import type { Category } from "@/types";
 import { cn } from "@/utils/cn";

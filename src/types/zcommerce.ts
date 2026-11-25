@@ -122,6 +122,17 @@ export interface Cart {
   coupon?: { couponId?: string | null; couponCode?: string | null } | null;
 }
 
+/** A live offer (getAllValidPromotions): its code is entered at checkout */
+export interface Promotion {
+  _id: string;
+  promotionCode: string;
+  promotionName?: string | null;
+  promotionType?: string | null; // e.g. "PERCENTAGE", "FIXED_AMOUNT", "FREE_SHIPPING"
+  discount?: number | null;
+  minimumSubtotal?: number | null;
+  endDate?: string | null;
+}
+
 // --- Account --------------------------------------------------------------------
 
 export interface Address {

@@ -3,18 +3,24 @@
 import { useQuery } from "@apollo/client/react";
 import { RiArrowDownSLine, RiBox3Line, RiDownload2Line } from "@remixicon/react";
 import Image from "next/image";
-import { ButtonLink, buttonClass } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import Skeleton from "@/components/ui/Skeleton";
 import { GET_ORDERS } from "@/graphql";
+import { isApiConfigured } from "@/lib/env";
+import { ordersOf, ordersStore } from "@/lib/local-shop";
 import { formatDate, formatPrice, humanize } from "@/utils/format";
 import { mediaUrl } from "@/utils/media";
 
 export default function OrdersTab({ userId }: { userId: string }) {
-  const { data, loading } = useQuery(GET_ORDERS, {
+  const { data, loading: fetching } = useQuery(GET_ORDERS, {
     variables: { filter: { userId }, limit: 50, offset: 0 },
     fetchPolicy: "cache-and-network",
+    skip: !isApiConfigured,
   });
-  const orders = data?.getOrdersByFilters.data ?? [];
+  // Without z-commerce: the orders placed on this device (src/lib/local-shop.ts)
+  const localOrders = ordersStore.useValue();
+  const orders = isApiConfigured ? (data?.getOrdersByFilters.data ?? []) : ordersOf(localOrders, userId);
+  const loading = isApiConfigured && fetching;
 
   if (loading && !data) {
     return (
@@ -35,7 +41,7 @@ export default function OrdersTab({ userId }: { userId: string }) {
           <h2 className="text-h3">No orders yet</h2>
           <p className="text-body text-muted">When you place an order, you can track it here.</p>
         </div>
-        <ButtonLink href="/shop">Start shopping</ButtonLink>
+        <BlobButton href="/shop">Start shopping</BlobButton>
       </div>
     );
   }
@@ -103,15 +109,16 @@ export default function OrdersTab({ userId }: { userId: string }) {
                 </div>
               ))}
               {order.invoiceUrl && (
-                <a
+                <BlobButton
                   href={order.invoiceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={buttonClass({ variant: "outline", className: "self-start" })}
+                  tone="soft"
+                  icon={<RiDownload2Line className="size-4" />}
+                  className="self-start"
                 >
-                  <RiDownload2Line aria-hidden="true" className="size-4" />
                   Download invoice
-                </a>
+                </BlobButton>
               )}
             </div>
           </details>

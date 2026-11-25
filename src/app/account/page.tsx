@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import AccountView, { isAccountTab } from "@/components/account/AccountView";
+import AccountView from "@/components/account/AccountView";
+import { isAccountTab } from "@/config/account";
 import { Frame } from "@/components/ui/Frame";
 import { createMetadata } from "@/lib/seo";
 

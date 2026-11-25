@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Checkbox, FormAlert, TextField, formValues } from "@/components/ui/form";
+import BlobButton from "@/components/ui/BlobButton";
+import { Checkbox, TextField, formValues } from "@/components/ui/form";
+import PhoneField from "@/components/ui/PhoneField";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "@/store/toast-store";
 import { errorMessage } from "@/utils/errors";
 
 export default function SignupForm() {
@@ -20,12 +22,13 @@ export default function SignupForm() {
     const found: Record<string, string> = {};
     if (v.password.length < 8) found.password = "Use at least 8 characters.";
     if (v.password !== v.confirmPassword) found.confirmPassword = "Passwords don't match.";
+    // Shown under their fields, like the browser's own checks
     setErrors(found);
     if (Object.keys(found).length) return;
 
     setLoading(true);
     try {
-      await signup({
+      const user = await signup({
         firstName: v.firstName,
         lastName: v.lastName,
         email: v.email,
@@ -34,22 +37,28 @@ export default function SignupForm() {
         phoneNumber: v.phoneNumber,
         emailSubscribedStatus: v.newsletter ? "SUBSCRIBED" : "NEVER_SUBSCRIBED",
       });
+      toast.success(`Welcome to SAVA, ${user.firstName}! Your account is ready.`);
       router.replace("/account");
     } catch (err) {
-      setErrors({ form: errorMessage(err, "Couldn't create your account.") });
+      toast.error(errorMessage(err, "Couldn't create your account."));
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={onSubmit} className="grid grid-cols-2 gap-x-4 gap-y-5">
+    <form
+      onSubmit={onSubmit}
+      // A password error clears as soon as that field is typed in again
+      onInput={(e) => {
+        const name = (e.target as HTMLInputElement).name;
+        if (errors[name]) setErrors((current) => ({ ...current, [name]: "" }));
+      }}
+      className="grid grid-cols-2 gap-x-4 gap-y-5"
+    >
       <TextField label="First name" name="firstName" autoComplete="given-name" required />
       <TextField label="Last name" name="lastName" autoComplete="family-name" required />
       <TextField label="Email" name="email" type="email" autoComplete="email" required className="col-span-2" />
-      <div className="col-span-2 grid grid-cols-[5.5rem_1fr] gap-3">
-        <TextField label="Code" name="countryCode" defaultValue="+91" autoComplete="tel-country-code" required />
-        <TextField label="Phone" name="phoneNumber" type="tel" autoComplete="tel-national" required />
-      </div>
+      <PhoneField label="Phone" codeName="countryCode" numberName="phoneNumber" required className="col-span-2" />
       <TextField
         label="Password"
         name="password"
@@ -70,10 +79,9 @@ export default function SignupForm() {
         className="col-span-2"
       />
       <Checkbox name="newsletter" label="Email me about new arrivals and offers" className="col-span-2" />
-      {errors.form && <FormAlert className="col-span-2">{errors.form}</FormAlert>}
-      <Button type="submit" size="lg" fullWidth loading={loading} className="col-span-2 mt-2">
+      <BlobButton type="submit" block loading={loading} className="col-span-2 mt-2">
         Create account
-      </Button>
+      </BlobButton>
     </form>
   );
 }

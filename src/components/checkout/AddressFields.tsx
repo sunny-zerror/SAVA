@@ -1,4 +1,5 @@
 import { TextField } from "@/components/ui/form";
+import PhoneField from "@/components/ui/PhoneField";
 import type { Address } from "@/types";
 
 type AddressInput = Omit<Address, "_id" | "userId">;
@@ -88,23 +89,16 @@ export default function AddressFields({ prefix, defaults }: AddressFieldsProps) 
         autoComplete={ac("country-name")}
         required
       />
-      <div className="col-span-2 grid grid-cols-[5.5rem_1fr] gap-3">
-        <TextField
-          label="Code"
-          name={name("countryCode")}
-          defaultValue={defaults?.countryCode ?? "+91"}
-          autoComplete={ac("tel-country-code")}
-          required
-        />
-        <TextField
-          label="Phone"
-          name={name("phone")}
-          type="tel"
-          defaultValue={defaults?.phone}
-          autoComplete={ac("tel-national")}
-          required
-        />
-      </div>
+      <PhoneField
+        label="Phone"
+        codeName={name("countryCode")}
+        numberName={name("phone")}
+        defaultCode={defaults?.countryCode}
+        defaultNumber={defaults?.phone}
+        required
+        autoCompleteSection={prefix === "billing" ? "billing" : "shipping"}
+        className="col-span-2"
+      />
     </div>
   );
 }

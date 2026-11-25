@@ -142,7 +142,9 @@ function smoothPath(points: Point[]) {
  * (kept outside its edge), a body that's barely there, darker toward the light and brighter where the
  * light comes through at the bottom right, a fine dark edge on the lit side, and a sharp glint.
  */
-function paint(points: Point[], r: number, dpr: number, paper: string, ink: string): Shape {
+function paint(points: Point[], r: number, dpr: number, paper: string, ink: string, strength: number): Shape {
+  // Stronger shading reads on busier or brighter backgrounds
+  const tone = (hex: string, alpha: number) => rgb(hex, Math.min(1, alpha * strength));
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
   const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)];
@@ -164,9 +166,9 @@ function paint(points: Point[], r: number, dpr: number, paper: string, ink: stri
 
   s.save();
   s.translate(r * 0.08, r * 0.18);
-  s.shadowColor = rgb(ink, 0.3);
+  s.shadowColor = tone(ink, 0.3);
   s.shadowBlur = Math.max(1, r * 0.5) * dpr;
-  s.fillStyle = rgb(ink, 0.14);
+  s.fillStyle = tone(ink, 0.14);
   s.fill(path);
   s.restore();
   s.globalCompositeOperation = "destination-out";
@@ -174,9 +176,9 @@ function paint(points: Point[], r: number, dpr: number, paper: string, ink: stri
   s.globalCompositeOperation = "source-over";
 
   s.fillStyle = across([
-    [0, rgb(ink, 0.16)],
-    [0.5, rgb(paper, 0.03)],
-    [1, rgb(paper, 0.26)],
+    [0, tone(ink, 0.16)],
+    [0.5, tone(paper, 0.03)],
+    [1, tone(paper, 0.26)],
   ]);
   s.fill(path);
 
@@ -184,27 +186,27 @@ function paint(points: Point[], r: number, dpr: number, paper: string, ink: stri
   s.save();
   s.clip(path);
   s.strokeStyle = across([
-    [0.35, rgb(paper, 0)],
-    [1, rgb(paper, 0.6)],
+    [0.35, tone(paper, 0)],
+    [1, tone(paper, 0.6)],
   ]);
   s.lineWidth = Math.max(1, r * 0.4);
   s.stroke(path);
   s.restore();
 
   s.strokeStyle = across([
-    [0, rgb(ink, 0.45)],
-    [0.6, rgb(ink, 0.1)],
-    [1, rgb(ink, 0.03)],
+    [0, tone(ink, 0.45)],
+    [0.6, tone(ink, 0.1)],
+    [1, tone(ink, 0.03)],
   ]);
   s.lineWidth = Math.max(0.5, r * 0.07);
   s.stroke(path);
 
-  s.fillStyle = rgb(paper, 0.95);
+  s.fillStyle = tone(paper, 0.95);
   s.beginPath();
   s.ellipse(-r * 0.36, -r * 0.4, Math.max(0.45, r * 0.22), Math.max(0.3, r * 0.13), -0.7, 0, TAU);
   s.fill();
   if (r > 2.5) {
-    s.fillStyle = rgb(paper, 0.45);
+    s.fillStyle = tone(paper, 0.45);
     s.beginPath();
     s.arc(r * 0.3, r * 0.42, r * 0.08, 0, TAU);
     s.fill();
@@ -225,14 +227,24 @@ function paint(points: Point[], r: number, dpr: number, paper: string, ink: stri
  * (nudged and forming beads, drops, streaks) and is left alone while nothing is. Beads share a small
  * pool of shaded sprites, and a grid finds the ones near a point without looking at them all.
  */
-export default function FooterDroplets({ className }: { className?: string }) {
+interface FooterDropletsProps {
+  className?: string;
+  /** How many beads, against the usual (1) */
+  density?: number;
+  /** How strongly each is shaded, against the usual (1): higher stands out more on a busy background */
+  strength?: number;
+}
+
+export default function FooterDroplets({ className, density: amount = 1, strength = 1 }: FooterDropletsProps) {
   const backRef = useRef<HTMLCanvasElement>(null);
   const frontRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const back = backRef.current;
     const front = frontRef.current;
-    const host = back?.parentElement?.parentElement;
+    // The element the beads cover and take the pointer from: the nearest one marked for it, or the
+    // layer's own parent
+    const host = back?.closest<HTMLElement>("[data-droplets-host]") ?? back?.parentElement?.parentElement;
     const bctx = back?.getContext("2d");
     const fctx = front?.getContext("2d");
     if (!back || !front || !host || !bctx || !fctx) return;
@@ -262,7 +274,7 @@ export default function FooterDroplets({ className }: { className?: string }) {
     const sprite = (key: string, r: number, outline: (r: number) => Point[]) => {
       let shape = sprites.get(key);
       if (!shape) {
-        shape = paint(outline(r), r, dpr, paper, ink);
+        shape = paint(outline(r), r, dpr, paper, ink, strength);
         sprites.set(key, shape);
       }
       return shape;
@@ -384,12 +396,12 @@ export default function FooterDroplets({ className }: { className?: string }) {
     let filling = 0;
     const populate = () => {
       clearAll();
-      target = Math.round(Math.min(1100, Math.max(200, (width * height) / 1000)));
+      target = Math.round(Math.min(1100, Math.max(200, (width * height) / 1000)) * amount);
       built = { w: width, h: height, dpr };
       cancelAnimationFrame(filling);
       let batches = 0;
       const batch = () => {
-        for (let i = 0; i < 220 && beads.size < target; i++) addBead(1);
+        for (let i = 0; i < 220 * amount && beads.size < target; i++) addBead(1);
         allDirty = true;
         flushBack();
         // A crowded footer may not fit them all; the rest fill in over time as beads come and go
@@ -486,8 +498,8 @@ export default function FooterDroplets({ className }: { className?: string }) {
 
       // Every few seconds a heavy bead breaks away on its own
       if (time > nextDrip) {
-        nextDrip = time + rand(2, 4.5);
-        if (drops.length < MAX_DROPS) {
+        nextDrip = time + rand(2, 4.5) / amount;
+        if (drops.length < MAX_DROPS * amount) {
           const heavy = [...beads].filter((b) => b.r > 3.6 && b.y < height - 60);
           if (heavy.length) startDrop(heavy[Math.floor(Math.random() * heavy.length)]);
         }
@@ -595,7 +607,7 @@ export default function FooterDroplets({ className }: { className?: string }) {
         wake(b);
         if (b.r > 4 && f > 0.4 && Math.random() < 0.03 * f) breaking.push(b);
       });
-      for (const b of breaking) if (drops.length < MAX_DROPS) startDrop(b);
+      for (const b of breaking) if (drops.length < MAX_DROPS * amount) startDrop(b);
     };
     const onLeave = () => {
       last.set = false;
@@ -631,7 +643,7 @@ export default function FooterDroplets({ className }: { className?: string }) {
       host.removeEventListener("pointermove", onMove);
       host.removeEventListener("pointerleave", onLeave);
     };
-  }, []);
+  }, [amount, strength]);
 
   return (
     <div aria-hidden="true" className={className}>

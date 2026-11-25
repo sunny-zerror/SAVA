@@ -31,7 +31,7 @@ export function BlobButtonFilter() {
   );
 }
 
-type BlobButtonProps = React.ComponentProps<typeof Link> & {
+interface BlobOptions {
   tone?: Tone;
   /** Shown in the disc on hover; defaults to an arrow */
   icon?: React.ReactNode;
@@ -40,64 +40,94 @@ type BlobButtonProps = React.ComponentProps<typeof Link> & {
    * right and the disc melts out into the space it leaves, all inside the button's own box.
    */
   block?: boolean;
-};
+  /** A spinner in place of the label (which keeps its room) while an action runs; the button is disabled */
+  loading?: boolean;
+}
+
+/** With `href`, a link (next/link) */
+type BlobLinkProps = BlobOptions & React.ComponentProps<typeof Link>;
+/** Without, a <button> — type "button" unless given */
+type BlobActionProps = BlobOptions & React.ButtonHTMLAttributes<HTMLButtonElement> & { href?: never };
+export type BlobButtonProps = BlobLinkProps | BlobActionProps;
+
+const spring = "duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]";
+// Disabled buttons and aria-disabled links fade and stop taking the pointer, so they don't melt either
+const inert =
+  "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50";
 
 /**
- * SAVA's signature CTA. At rest it's a plain pill; on hover a disc stretches out of its
- * right end like liquid, snaps free a small gap away and the icon pops in.
- * The disc overflows the link's box, so the pill keeps its size and centring.
+ * SAVA's one button, for links and actions alike. At rest it's a plain pill; on hover a disc
+ * stretches out of its right end like liquid, snaps free a small gap away and the icon pops in.
+ * The disc overflows the button's box (so the pill keeps its size and centring): leave about 4rem
+ * after a button that has another beside it — or use `block`, which keeps it all inside.
  */
-export default function BlobButton({ tone = "accent", icon, block, className, children, ...props }: BlobButtonProps) {
+// One signature each, so a click handler is typed for the element it's on
+export default function BlobButton(props: BlobLinkProps): React.JSX.Element;
+export default function BlobButton(props: BlobActionProps): React.JSX.Element;
+export default function BlobButton(props: BlobButtonProps) {
+  const { tone = "accent", icon, block, loading, className, children, ...rest } = props;
   const t = tones[tone];
   const revealed = "group-hover:translate-x-0 group-focus-visible:translate-x-0";
-  const spring = "duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]";
+  const disc = icon ?? <RiArrowRightLine className="size-4" />;
 
-  if (block) {
-    const hovered = "group-hover:right-14 group-focus-visible:right-14";
-    return (
-      <Link className={cn("group relative flex h-12 w-full items-center text-cta", t.text, className)} {...props}>
-        {/* Liquid layer, inside the box: the pill gives up its right end and the disc fills it */}
-        <span aria-hidden="true" className="pointer-events-none absolute inset-0 filter-[url(#blob-button-goo)]">
-          <span
-            className={cn("absolute inset-y-0 right-0 left-0 rounded-full transition-[right]", spring, hovered, t.fill)}
-          />
-          {/* Tucked inside the pill's round end at rest */}
-          <span
-            className={cn(
-              "absolute top-0 right-0 size-12 scale-75 rounded-full transition-transform group-hover:scale-100 group-focus-visible:scale-100",
-              spring,
-              t.fill,
-            )}
-          />
-        </span>
+  const spinner = loading && (
+    <span className="absolute inset-0 grid place-items-center">
+      <span
+        aria-hidden="true"
+        className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent"
+      />
+      <span className="sr-only">Loading</span>
+    </span>
+  );
 
-        {/* Label stays centred on the pill as it draws in */}
+  const content = block ? (
+    <>
+      {/* Liquid layer, inside the box: the pill gives up its right end and the disc fills it */}
+      <span aria-hidden="true" className="pointer-events-none absolute inset-0 filter-[url(#blob-button-goo)]">
         <span
           className={cn(
-            "relative flex-1 px-7 text-center transition-[padding]",
+            "absolute inset-y-0 right-0 left-0 rounded-full transition-[right]",
             spring,
-            "group-hover:pr-21 group-focus-visible:pr-21",
+            "group-hover:right-14 group-focus-visible:right-14",
+            t.fill,
           )}
-        >
-          {children}
-        </span>
-
+        />
+        {/* Tucked inside the pill's round end at rest */}
         <span
-          aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute top-0 right-0 flex size-12 scale-50 items-center justify-center opacity-0 transition duration-500 ease-out-expo",
-            "group-hover:scale-100 group-hover:opacity-100 group-hover:delay-150 group-focus-visible:scale-100 group-focus-visible:opacity-100",
+            "absolute top-0 right-0 size-12 scale-75 rounded-full transition-transform group-hover:scale-100 group-focus-visible:scale-100",
+            spring,
+            t.fill,
           )}
-        >
-          {icon ?? <RiArrowRightLine className="size-4" />}
-        </span>
-      </Link>
-    );
-  }
+        />
+      </span>
 
-  return (
-    <Link className={cn("group relative inline-flex h-12 items-center text-cta", t.text, className)} {...props}>
-      {/* Liquid layer: pill + disc share the goo filter. It's wider than the link (gap + disc) so the filter doesn't clip */}
+      {/* Label stays centred on the pill as it draws in */}
+      <span
+        className={cn(
+          "relative flex flex-1 items-center justify-center gap-2 px-7 text-center transition-[padding]",
+          spring,
+          "group-hover:pr-21 group-focus-visible:pr-21",
+          loading && "invisible",
+        )}
+      >
+        {children}
+      </span>
+      {spinner}
+
+      <span
+        aria-hidden="true"
+        className={cn(
+          "pointer-events-none absolute top-0 right-0 flex size-12 scale-50 items-center justify-center opacity-0 transition duration-500 ease-out-expo",
+          "group-hover:scale-100 group-hover:opacity-100 group-hover:delay-150 group-focus-visible:scale-100 group-focus-visible:opacity-100",
+        )}
+      >
+        {disc}
+      </span>
+    </>
+  ) : (
+    <>
+      {/* Liquid layer: pill + disc share the goo filter. It's wider than the button (gap + disc) so the filter doesn't clip */}
       <span
         aria-hidden="true"
         className="pointer-events-none absolute inset-y-0 left-0 w-[calc(100%+3.5rem)] filter-[url(#blob-button-goo)]"
@@ -106,14 +136,16 @@ export default function BlobButton({ tone = "accent", icon, block, className, ch
         {/* Tucked inside the pill's round end at rest */}
         <span
           className={cn(
-            "absolute top-0 right-0 size-12 -translate-x-14 rounded-full transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+            "absolute top-0 right-0 size-12 -translate-x-14 rounded-full transition-transform",
+            spring,
             revealed,
             t.fill,
           )}
         />
       </span>
 
-      <span className="relative px-7">{children}</span>
+      <span className={cn("relative flex items-center gap-2 px-7", loading && "invisible")}>{children}</span>
+      {spinner}
 
       {/* Icon rides in after the disc; only catches the pointer once visible, so the hover can cross the gap */}
       <span
@@ -125,8 +157,37 @@ export default function BlobButton({ tone = "accent", icon, block, className, ch
           revealed,
         )}
       >
-        {icon ?? <RiArrowRightLine className="size-4" />}
+        {disc}
       </span>
-    </Link>
+    </>
+  );
+
+  const classes = cn(
+    "group relative h-12 items-center text-cta",
+    block ? "flex w-full" : "inline-flex",
+    t.text,
+    inert,
+    className,
+  );
+
+  if (rest.href !== undefined) {
+    const { "aria-disabled": ariaDisabled, ...link } = rest as React.ComponentProps<typeof Link>;
+    return (
+      <Link
+        className={classes}
+        aria-disabled={loading || ariaDisabled || undefined}
+        aria-busy={loading || undefined}
+        {...link}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  const { type = "button", disabled, ...button } = rest as React.ButtonHTMLAttributes<HTMLButtonElement>;
+  return (
+    <button type={type} className={classes} disabled={disabled || loading} aria-busy={loading || undefined} {...button}>
+      {content}
+    </button>
   );
 }

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import BlobButton from "@/components/ui/BlobButton";
-import { ButtonLink } from "@/components/ui/Button";
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Sparkle from "@/components/ui/Sparkle";
 import { createMetadata } from "@/lib/seo";
@@ -38,13 +37,14 @@ export default function NotFound() {
           <p data-reveal className="max-w-md text-body-lg text-paper/80">
             The page you&apos;re looking for has moved or no longer exists.
           </p>
-          <div data-reveal className="mt-2 flex flex-wrap items-center justify-center gap-3">
+          {/* gap-x-16 leaves room for the first button's hover disc */}
+          <div data-reveal className="mt-2 flex flex-wrap items-center justify-center gap-x-16 gap-y-4">
             <BlobButton href="/" tone="light">
               Back home
             </BlobButton>
-            <ButtonLink href="/shop" variant="outline-light" size="lg">
+            <BlobButton href="/shop" tone="soft">
               Shop all
-            </ButtonLink>
+            </BlobButton>
           </div>
         </div>
         <FrameRule tone="dark" />

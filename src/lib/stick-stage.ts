@@ -45,7 +45,7 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
   resize();
   window.addEventListener("resize", resize);
 
-  const models: InstanceType<typeof THREE.Group>[] = [];
+  const models: InstanceType<typeof THREE.Object3D>[] = [];
   const loader = new THREE.TextureLoader();
 
   /** Adds a stick; only its printed label is fetched (a missing label leaves it unprinted) */
@@ -108,7 +108,13 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
     renderer.dispose();
   };
 
-  return { build, warm, fitScale, render, clear, dispose };
+  /** Adds another object to the scene (a hand to hold a stick, say), warmed and disposed with the sticks */
+  const add = (object: InstanceType<typeof THREE.Object3D>) => {
+    scene.add(object);
+    models.push(object);
+  };
+
+  return { THREE, build, add, warm, fitScale, render, clear, dispose };
 }
 
 export type StickStage = NonNullable<Awaited<ReturnType<typeof createStickStage>>>;

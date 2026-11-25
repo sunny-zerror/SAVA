@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { Button } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import type { CartLine } from "@/types";
 import { formatPrice } from "@/utils/format";
 import { mediaUrl } from "@/utils/media";
@@ -97,21 +97,23 @@ export default function OrderSummary({
                 value={code}
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
                 placeholder="Coupon code"
-                className="h-11 min-w-0 flex-1 rounded-full border border-line bg-paper px-5 text-input uppercase transition-[border-color,box-shadow] outline-none placeholder:normal-case focus:border-accent focus:ring-4 focus:ring-accent/15"
+                className="h-12 min-w-0 flex-1 rounded-full border border-line bg-paper px-5 text-input uppercase transition-[border-color,box-shadow] outline-none placeholder:normal-case focus:border-accent focus:ring-4 focus:ring-accent/15"
               />
-              <Button
-                type="button"
-                variant="ink"
-                loading={applying}
-                disabled={!code}
-                onClick={async () => {
-                  setApplying(true);
-                  if (await coupon.onApply(code)) setCode("");
-                  setApplying(false);
-                }}
-              >
-                Apply
-              </Button>
+              {/* block, at a set width: the hover disc stays inside the summary */}
+              <div className="w-40 shrink-0">
+                <BlobButton
+                  block
+                  loading={applying}
+                  disabled={!code}
+                  onClick={async () => {
+                    setApplying(true);
+                    if (await coupon.onApply(code)) setCode("");
+                    setApplying(false);
+                  }}
+                >
+                  Apply
+                </BlobButton>
+              </div>
             </div>
           )}
         </div>

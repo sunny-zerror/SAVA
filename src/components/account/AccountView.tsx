@@ -7,23 +7,13 @@ import AddressesTab from "@/components/account/AddressesTab";
 import OrdersTab from "@/components/account/OrdersTab";
 import OverviewTab from "@/components/account/OverviewTab";
 import ProfileTab from "@/components/account/ProfileTab";
-import { Button } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { FrameRule } from "@/components/ui/Frame";
 import Skeleton from "@/components/ui/Skeleton";
 import Sparkle from "@/components/ui/Sparkle";
-import { Tabs, tabPanelProps, type TabItem } from "@/components/ui/Tabs";
+import { Tabs, tabPanelProps } from "@/components/ui/Tabs";
+import { ACCOUNT_TABS, type AccountTab } from "@/config/account";
 import { useAuth } from "@/hooks/useAuth";
-
-export const ACCOUNT_TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "orders", label: "Orders" },
-  { id: "addresses", label: "Addresses" },
-  { id: "profile", label: "Profile" },
-] as const satisfies readonly TabItem<string>[];
-
-export type AccountTab = (typeof ACCOUNT_TABS)[number]["id"];
-
-export const isAccountTab = (value?: string): value is AccountTab => ACCOUNT_TABS.some((t) => t.id === value);
 
 /** Signed-in dashboard; the active tab lives in the URL (?tab=orders) so it can be linked to */
 export default function AccountView({ tab }: { tab: AccountTab }) {
@@ -67,10 +57,15 @@ export default function AccountView({ tab }: { tab: AccountTab }) {
           </h1>
           <p className="text-body-lg text-muted">{user.email}</p>
         </div>
-        <Button variant="outline" onClick={logout} className="self-start md:self-auto">
-          <RiLogoutBoxRLine aria-hidden="true" className="size-4" />
+        <BlobButton
+          tone="soft"
+          onClick={logout}
+          icon={<RiLogoutBoxRLine className="size-4" />}
+          // md:mr-4 keeps the hover disc inside the rail
+          className="self-start md:mr-4 md:self-auto"
+        >
           Sign out
-        </Button>
+        </BlobButton>
       </header>
       <FrameRule />
 

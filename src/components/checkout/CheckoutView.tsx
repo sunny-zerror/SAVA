@@ -1,18 +1,19 @@
 "use client";
 
 import { useMutation, useQuery } from "@apollo/client/react";
-import { RiLockLine, RiPlugLine, RiShoppingBag3Line } from "@remixicon/react";
+import { RiLockLine, RiShoppingBag3Line } from "@remixicon/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AddressFields, { readAddress } from "@/components/checkout/AddressFields";
 import OrderSummary from "@/components/checkout/OrderSummary";
-import { Button, ButtonLink } from "@/components/ui/Button";
+import BlobButton from "@/components/ui/BlobButton";
 import { Checkbox, TextField, formValues } from "@/components/ui/form";
 import Skeleton from "@/components/ui/Skeleton";
 import { CHECKOUT, GET_ADDRESSES } from "@/graphql";
 import { useCart } from "@/hooks/useCart";
 import { isApiConfigured } from "@/lib/env";
+import { addressesStore, cartOwner, localPlaceOrder } from "@/lib/local-shop";
 import { openNimbblCheckout } from "@/lib/payment";
 import { selectIsLoggedIn, useAuthStore } from "@/store/auth-store";
 import { toast } from "@/store/toast-store";
@@ -20,7 +21,8 @@ import type { Address } from "@/types";
 import { cn } from "@/utils/cn";
 import { errorMessage } from "@/utils/errors";
 
-export default function CheckoutView() {
+/** `heading`: the page's h1 block, which leads the left column (above the steps, or the empty state) */
+export default function CheckoutView({ heading }: { heading: React.ReactNode }) {
   const router = useRouter();
   const { cart, lines, loading, applyCoupon, removeCoupon } = useCart();
   const user = useAuthStore((s) => s.user);
@@ -32,9 +34,15 @@ export default function CheckoutView() {
 
   const { data: addressData } = useQuery(GET_ADDRESSES, {
     variables: { filters: { userId: user?._id }, limit: 20, sort: { primary: "DESC", createdAt: "DESC" } },
-    skip: !isLoggedIn || !user?._id,
+    skip: !isLoggedIn || !user?._id || !isApiConfigured,
   });
-  const saved = addressData?.getAddressByFilters.data ?? [];
+  // Without z-commerce: the addresses saved on this device (src/lib/local-shop.ts)
+  const localAddresses = addressesStore.useValue();
+  const saved = isApiConfigured
+    ? (addressData?.getAddressByFilters.data ?? [])
+    : isLoggedIn && user
+      ? (localAddresses[user._id] ?? [])
+      : [];
   const chosen: Address | undefined = saved.find((a) => a._id === savedId) ?? saved.find((a) => a.primary) ?? saved[0];
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -45,6 +53,14 @@ export default function CheckoutView() {
     const billingAddress = sameBilling
       ? { ...shippingAddress, primary: false }
       : { ...readAddress(v, "billing"), email: v.email, primary: false };
+
+    // Without z-commerce: a test order on this device, no payment taken
+    if (!isApiConfigured) {
+      const signedIn = isLoggedIn && user ? user._id : null;
+      const order = localPlaceOrder({ owner: cartOwner(signedIn), userId: signedIn, shippingAddress, billingAddress });
+      router.push(`/checkout/thank-you?orderId=${order._id}`);
+      return;
+    }
 
     setPaying(true);
     try {
@@ -74,108 +90,111 @@ export default function CheckoutView() {
     }
   }
 
-  if (!isApiConfigured) {
-    return (
-      <StatePanel
-        icon={<RiPlugLine className="size-6" />}
-        title="Checkout needs the store connection"
-        body="Add NEXT_PUBLIC_GRAPHQL_API_URL, NEXT_PUBLIC_BACKEND_ENDPOINT and NEXT_PUBLIC_DB_TOKEN to .env.local to take orders."
-      >
-        <ButtonLink href="/shop" variant="outline">
-          Back to shop
-        </ButtonLink>
-      </StatePanel>
-    );
-  }
+  // The heading over a state that isn't the checkout itself
+  const above = (body: React.ReactNode) => (
+    <div className="flex flex-col gap-10">
+      {heading}
+      {body}
+    </div>
+  );
 
   if (loading) {
     return (
-      <div className="grid gap-stack lg:grid-cols-[1fr_28rem]" aria-busy="true" aria-label="Loading checkout">
-        <Skeleton className="h-[32rem] rounded-3xl" />
+      <div className="grid items-start gap-stack lg:grid-cols-[1fr_28rem] xl:gap-16">
+        <div className="flex flex-col gap-10">
+          {heading}
+          <Skeleton className="h-128 rounded-3xl" aria-busy="true" aria-label="Loading checkout" />
+        </div>
         <Skeleton className="h-80 rounded-3xl" />
       </div>
     );
   }
 
   if (!cart || lines.length === 0) {
-    return (
+    return above(
       <StatePanel
         icon={<RiShoppingBag3Line className="size-6" />}
         title="Your bag is empty"
         body="Add a stick or two and come back to check out."
       >
-        <ButtonLink href="/shop">Continue shopping</ButtonLink>
-      </StatePanel>
+        <BlobButton href="/shop">Continue shopping</BlobButton>
+      </StatePanel>,
     );
   }
 
   const total = cart.discountedPrice || cart.totalprice;
 
   return (
-    // A task flow, so just one rise each for the steps and the summary
-    <form
-      data-reveal="stagger"
-      onSubmit={onSubmit}
-      className="grid items-start gap-stack lg:grid-cols-[1fr_28rem] xl:gap-16"
-    >
-      <div className="flex flex-col gap-grid">
-        <fieldset className={step}>
-          <legend className="sr-only">Contact</legend>
-          <StepTitle n={1} title="Contact">
-            {!isLoggedIn && (
-              <Link
-                href="/login?next=/checkout"
-                className="text-cta text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
-              >
-                Sign in
-              </Link>
-            )}
-          </StepTitle>
-          <TextField label="Email" name="email" type="email" autoComplete="email" defaultValue={user?.email} required />
-          <Checkbox name="newsletter" label="Email me with news and offers" />
-        </fieldset>
-
-        <fieldset className={step}>
-          <legend className="sr-only">Delivery address</legend>
-          <StepTitle n={2} title="Delivery address" />
-          {saved.length > 0 && (
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Saved addresses">
-              {saved.map((a) => (
-                <button
-                  key={a._id}
-                  type="button"
-                  onClick={() => setSavedId(a._id ?? null)}
-                  aria-pressed={a._id === chosen?._id}
-                  className="max-w-full truncate rounded-full border border-line px-4 py-2 text-caption transition-colors hover:border-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-paper"
+    // The heading leads the left column; a task flow, so just one rise each for the steps and the summary
+    <form onSubmit={onSubmit} className="grid items-start gap-stack lg:grid-cols-[1fr_28rem] xl:gap-16">
+      <div className="flex flex-col gap-10">
+        {heading}
+        <div data-reveal className="flex flex-col gap-grid">
+          <fieldset className={step}>
+            <legend className="sr-only">Contact</legend>
+            <StepTitle n={1} title="Contact">
+              {!isLoggedIn && (
+                <Link
+                  href="/login?next=/checkout"
+                  className="text-cta text-accent underline decoration-accent/30 underline-offset-4 hover:decoration-accent"
                 >
-                  {a.addressType || a.city} — {a.addressline1}
-                </button>
-              ))}
-            </div>
-          )}
-          <AddressFields
-            prefix="shipping"
-            defaults={
-              chosen ?? { firstname: user?.firstName, lastname: user?.lastName, phone: user?.phoneNumber ?? "" }
-            }
-          />
-        </fieldset>
+                  Sign in
+                </Link>
+              )}
+            </StepTitle>
+            <TextField
+              label="Email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              defaultValue={user?.email}
+              required
+            />
+            <Checkbox name="newsletter" label="Email me with news and offers" />
+          </fieldset>
 
-        <fieldset className={step}>
-          <legend className="sr-only">Billing address</legend>
-          <StepTitle n={3} title="Billing address" />
-          <Checkbox
-            checked={sameBilling}
-            onChange={(e) => setSameBilling(e.target.checked)}
-            label="Same as delivery address"
-          />
-          {!sameBilling && <AddressFields prefix="billing" />}
-        </fieldset>
+          <fieldset className={step}>
+            <legend className="sr-only">Delivery address</legend>
+            <StepTitle n={2} title="Delivery address" />
+            {saved.length > 0 && (
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Saved addresses">
+                {saved.map((a) => (
+                  <button
+                    key={a._id}
+                    type="button"
+                    onClick={() => setSavedId(a._id ?? null)}
+                    aria-pressed={a._id === chosen?._id}
+                    className="max-w-full truncate rounded-full border border-line px-4 py-2 text-caption transition-colors hover:border-accent aria-pressed:border-accent aria-pressed:bg-accent aria-pressed:text-paper"
+                  >
+                    {a.addressType || a.city} — {a.addressline1}
+                  </button>
+                ))}
+              </div>
+            )}
+            <AddressFields
+              prefix="shipping"
+              defaults={
+                chosen ?? { firstname: user?.firstName, lastname: user?.lastName, phone: user?.phoneNumber ?? "" }
+              }
+            />
+          </fieldset>
 
-        <PayButton paying={paying} className="hidden lg:flex" />
+          <fieldset className={step}>
+            <legend className="sr-only">Billing address</legend>
+            <StepTitle n={3} title="Billing address" />
+            <Checkbox
+              checked={sameBilling}
+              onChange={(e) => setSameBilling(e.target.checked)}
+              label="Same as delivery address"
+            />
+            {!sameBilling && <AddressFields prefix="billing" />}
+          </fieldset>
+
+          <PayButton paying={paying} className="hidden lg:flex" />
+        </div>
       </div>
 
-      <div className="flex flex-col gap-4 lg:sticky lg:top-[calc(var(--spacing-header)+1.5rem)]">
+      <div data-reveal className="flex flex-col gap-4 lg:sticky lg:top-[calc(var(--spacing-header)+1.5rem)]">
         <OrderSummary
           lines={lines}
           subtotal={cart.totalprice}
@@ -208,16 +227,19 @@ function StepTitle({ n, title, children }: { n: number; title: string; children?
 function PayButton({ paying, className }: { paying: boolean; className?: string }) {
   return (
     <div className={cn("flex-col gap-3", className)}>
-      <Button type="submit" size="lg" fullWidth loading={paying}>
-        <RiLockLine aria-hidden="true" className="size-4" />
-        Pay now
-      </Button>
-      <p className="text-center text-caption text-muted">Payments are processed securely by Nimbbl.</p>
+      <BlobButton type="submit" block loading={paying} icon={<RiLockLine className="size-4" />}>
+        {isApiConfigured ? "Pay now" : "Place test order"}
+      </BlobButton>
+      <p className="text-center text-caption text-muted">
+        {isApiConfigured
+          ? "Payments are processed securely by Nimbbl."
+          : "Test mode: the order is saved in this browser and no payment is taken."}
+      </p>
     </div>
   );
 }
 
-/** Centred card for the empty / not-connected states */
+/** Centred card for the empty bag */
 function StatePanel({
   icon,
   title,

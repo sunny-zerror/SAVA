@@ -1,13 +1,13 @@
 "use client";
 
 import { RiMenuLine, RiSearchLine, RiShoppingBag3Line } from "@remixicon/react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Logo from "@/components/layout/Logo";
 import MobileMenu from "@/components/layout/MobileMenu";
 import { useCart } from "@/hooks/useCart";
 import { useCartStore } from "@/store/cart-store";
+import { useSearchStore } from "@/store/search-store";
 import { cn } from "@/utils/cn";
 
 const action = "flex items-center gap-2.5 p-2 text-kicker transition-opacity hover:opacity-70";
@@ -15,9 +15,10 @@ const action = "flex items-center gap-2.5 p-2 text-kicker transition-opacity hov
 export default function Header() {
   const pathname = usePathname();
   // Over the home pages' and About's full-screen heroes the header sits transparent
-  const overlay = ["/", "/home", "/about"].includes(pathname);
+  const overlay = ["/", "/home", "/home1", "/about"].includes(pathname);
   const [menuOpen, setMenuOpen] = useState(false);
   const openCart = useCartStore((s) => s.open);
+  const openSearch = useSearchStore((s) => s.open);
   const { count } = useCart();
 
   // "Stuck" once the announcement bar has scrolled away and the header is pinned to the top
@@ -51,11 +52,8 @@ export default function Header() {
         data-site-header
         className={cn(
           "sticky top-0 z-40 mt-announcement border-b transition-[background-color,border-color,color] duration-300 [view-transition-class:site-chrome] [view-transition-name:site-header]",
-          stuck
-            ? "border-line bg-paper text-ink"
-            : overlay
-              ? "border-paper/20 text-paper"
-              : "border-transparent bg-paper text-ink",
+          // White with a hairline under it on every page, except over a full-screen hero until it's scrolled past
+          overlay && !stuck ? "border-paper/20 text-paper" : "border-line bg-paper text-ink",
         )}
       >
         <div className="container">
@@ -78,11 +76,11 @@ export default function Header() {
             <Logo />
 
             <div className="flex items-center justify-end gap-1 md:gap-5">
-              {/* No search page yet — the shop listing is the closest thing */}
-              <Link href="/shop" className={action}>
+              {/* Opens the search drawer (SearchDrawer, in SiteLayout) */}
+              <button onClick={openSearch} className={action}>
                 <RiSearchLine className="size-4" aria-hidden="true" />
                 <span className="max-md:sr-only">Search</span>
-              </Link>
+              </button>
               <button
                 onClick={openCart}
                 aria-label={`Open cart, ${count} items`}

@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@apollo/client/react";
 import { ADD_ITEM_TO_CART, APPLY_COUPON, GET_CART, REMOVE_COUPON, REMOVE_ITEM_FROM_CART } from "@/graphql";
 import { isApiConfigured } from "@/lib/env";
+import { cartOwner, cartsStore, localAddToCart, localRemoveFromCart, toLocalCart } from "@/lib/local-shop";
 import { selectIsLoggedIn, useAuthStore } from "@/store/auth-store";
 import { useCartStore } from "@/store/cart-store";
 import { toast } from "@/store/toast-store";
@@ -12,16 +13,11 @@ import { stripTypename } from "@/utils/product";
 
 const refetchCart = { refetchQueries: ["GetCart"], awaitRefetchQueries: true };
 
-function requireApi() {
-  if (isApiConfigured) return true;
-  toast.info("Demo mode — connect z-commerce in .env.local to use the cart.");
-  return false;
-}
-
 /*
- * The server-side cart. Signed-in shoppers are identified by their access token,
- * guests by the guestId from the cart store — z-commerce merges the guest cart
- * into the account when they log in.
+ * The shopper's bag. On z-commerce it's the server cart: signed-in shoppers are identified by their
+ * access token, guests by the guestId from the cart store, and z-commerce merges the guest cart into
+ * the account at login. Without z-commerce it's the local store's bag (src/lib/local-shop.ts), same
+ * shape, kept in this browser.
  */
 export function useCart() {
   const hydrated = useAuthStore((s) => s.hydrated);
@@ -31,22 +27,32 @@ export function useCart() {
   const guestId = useCartStore((s) => s.guestId);
 
   const owner = isLoggedIn && accessToken ? { token: accessToken } : guestId ? { guestId } : null;
+  const localOwner = cartOwner(isLoggedIn ? userId : null);
 
   const { data, loading } = useQuery(GET_CART, {
     variables: owner ?? {},
     skip: !hydrated || !owner || !isApiConfigured,
     fetchPolicy: "cache-and-network",
   });
+  const localCarts = cartsStore.useValue();
 
   const [addMutation, addState] = useMutation(ADD_ITEM_TO_CART, refetchCart);
   const [removeMutation, removeState] = useMutation(REMOVE_ITEM_FROM_CART, refetchCart);
   const [applyMutation, applyState] = useMutation(APPLY_COUPON, refetchCart);
   const [removeCouponMutation] = useMutation(REMOVE_COUPON, refetchCart);
 
-  const cart = data?.getCart ?? null;
+  const cart = isApiConfigured
+    ? (data?.getCart ?? null)
+    : hydrated
+      ? toLocalCart(localCarts[localOwner] ?? [], localOwner)
+      : null;
 
   async function addItem(item: { productId: string; categoryId?: string; variant: VariantDetail }) {
-    if (!requireApi()) return false;
+    if (!isApiConfigured) {
+      if (!item.variant.variantDetailId) return false;
+      localAddToCart(localOwner, item.productId, item.variant.variantDetailId);
+      return true;
+    }
     try {
       await addMutation({
         variables: {
@@ -67,7 +73,10 @@ export function useCart() {
   }
 
   async function removeItem(line: CartLine, completely = true) {
-    if (!requireApi()) return;
+    if (!isApiConfigured) {
+      localRemoveFromCart(localOwner, line.productId, line.variantDetail?.variantDetailId ?? "", completely);
+      return;
+    }
     try {
       await removeMutation({
         variables: {
@@ -90,7 +99,11 @@ export function useCart() {
   const decrement = (line: CartLine) => removeItem(line, line.qty <= 1);
 
   async function applyCoupon(couponCode: string) {
-    if (!requireApi()) return false;
+    // The local store has no offers, so every code is turned down as the store would
+    if (!isApiConfigured) {
+      toast.error("That coupon can't be used.");
+      return false;
+    }
     try {
       await applyMutation({ variables: { couponCode, ...(owner ?? {}) } });
       toast.success("Coupon applied");
@@ -102,6 +115,7 @@ export function useCart() {
   }
 
   async function removeCoupon() {
+    if (!isApiConfigured) return;
     try {
       await removeCouponMutation({ variables: { ...(owner ?? {}) } });
     } catch (error) {
@@ -114,7 +128,7 @@ export function useCart() {
     lines: cart?.cart ?? [],
     count: cart?.itemcount ?? 0,
     subtotal: cart?.totalprice ?? 0,
-    loading: !hydrated || (loading && !cart),
+    loading: !hydrated || (isApiConfigured && loading && !cart),
     busy: addState.loading || removeState.loading || applyState.loading,
     addItem,
     removeItem,

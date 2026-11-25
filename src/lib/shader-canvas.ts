@@ -55,6 +55,8 @@ export interface ShaderScene {
   leave?: () => void;
   /** Each drawn frame, before rendering; `ms` since the background started */
   frame?: (ms: number) => void;
+  /** On unmount, for anything else the scene made (textures) */
+  dispose?: () => void;
 }
 
 /**
@@ -139,6 +141,7 @@ export function mountShaderCanvas(
       intersection.disconnect();
       window.removeEventListener("pointermove", onMove);
       document.documentElement.removeEventListener("pointerleave", onLeave);
+      scene.dispose?.();
       geometry.dispose();
       material.dispose();
       renderer.dispose();

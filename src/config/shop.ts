@@ -19,3 +19,12 @@ export const productPickers = {
   /** The pack the page opens on (when the product has it); other options open on their first choice */
   defaultPack: "Pack of 02",
 };
+
+/*
+ * The header's search drawer. Before anything is typed it offers these terms (each finds products, posts
+ * or both — check they still do when the range changes); a search waits for minLength characters.
+ */
+export const searchConfig = {
+  minLength: 2,
+  popular: ["Sweat control", "Citrus Tide", "Kinetic", "Amber Wood", "Fragrance", "Sensitive skin"],
+};
