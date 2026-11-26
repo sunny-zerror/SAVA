@@ -2,7 +2,7 @@
 
 import { CombinedGraphQLErrors } from "@apollo/client";
 import { useApolloClient } from "@apollo/client/react";
-import { RiCloseLine } from "@remixicon/react";
+import { RiChatNewLine, RiCloseLine } from "@remixicon/react";
 import { useLenis } from "lenis/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "react";
@@ -56,6 +56,10 @@ const MESSAGE_MAX_LENGTH = 2000;
 const LEVEL_BUMP_MS = 1000;
 
 const BUSY = new Set<AssistantPhase>(["thinking", "replying"]);
+
+/** The round buttons top right: New chat and Close */
+const headerButton =
+  "relative center size-10 shrink-0 rounded-full bg-paper shadow-sm shadow-navy/5 transition-colors hover:bg-mist";
 /** Direct children of <body> left as they are while the page behind goes inert */
 const UNTOUCHED = new Set(["SCRIPT", "STYLE", "LINK", "TEMPLATE", "NOSCRIPT", "NEXT-ROUTE-ANNOUNCER"]);
 
@@ -103,9 +107,10 @@ interface AssistantOverlayProps {
  * runs it back into the launcher. While it's open the page behind is inert and still, Back closes it
  * (it adds one history entry), and links inside close it before they go.
  *
- * The conversation sits beside the orb (above it on phones): replies come from getAssistantReply on the
- * store's own data, and the conversation itself lives in the assistant store, in memory only. The
- * launcher loads this on demand, client-side only.
+ * The conversation sits beside the orb (above it on phones), the assistant's name under the orb: replies
+ * come from getAssistantReply on the store's own data, and the conversation itself lives in the
+ * assistant store, in memory only. Once the shopper has said something, New chat (top right, beside
+ * Close) starts it afresh. The launcher loads this on demand, client-side only.
  */
 export default function AssistantOverlay({ products, launcher }: AssistantOverlayProps) {
   const router = useRouter();
@@ -114,6 +119,7 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
 
   const isOpen = useAssistantStore((s) => s.isOpen);
   const phase = useAssistantStore((s) => s.phase);
+  const conversation = useAssistantStore((s) => s.conversation);
   const messages = useAssistantStore((s) => s.messages);
   const hasInteracted = useAssistantStore((s) => s.hasInteracted);
   const error = useAssistantStore((s) => s.error);
@@ -384,6 +390,19 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
     playReply(assistantCopy.welcome, ++replyToken.current);
   };
 
+  /** New chat: drops whatever was on its way, clears the conversation and welcomes them again */
+  const newConversation = () => {
+    stopEverything();
+    const state = useAssistantStore.getState();
+    state.reset();
+    state.setPhase("listening");
+    addWelcome();
+    bump();
+    // Its button goes with the old conversation: focus moves on, as on opening
+    if (window.matchMedia("(pointer: fine)").matches) input.current?.focus();
+    else panel.current?.focus({ preventScroll: true });
+  };
+
   // ---------- Opening and closing ------------------------------------------------
 
   // The timelines call back after later renders: they read the newest callbacks through here
@@ -586,16 +605,30 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
           // z-1: a layer of its own, so the input's glow sits over the stage's colour
           className="relative z-1 flex h-full flex-col outline-none"
         >
-          <div className="container flex h-header shrink-0 items-center justify-between gap-4">
-            <h2 id="assistant-title" className="flex items-center gap-2 text-kicker text-accent">
-              <Sparkle />
-              SAVA Assistant
-            </h2>
+          {/* Just its actions, top right: the name sits under the orb */}
+          <div className="container flex h-header shrink-0 items-center justify-end gap-2">
+            {hasInteracted && (
+              <button
+                type="button"
+                onClick={newConversation}
+                aria-label="Start a new chat"
+                className={cn(headerButton, "group/new animate-fade-up")}
+              >
+                <RiChatNewLine aria-hidden="true" className="size-5" />
+                {/* Its name, on hover and keyboard focus */}
+                <span
+                  aria-hidden="true"
+                  className="pointer-events-none absolute top-full right-1/2 mt-2 translate-x-1/2 rounded-full bg-ink px-3 py-1 text-micro whitespace-nowrap text-paper opacity-0 transition-opacity duration-300 group-hover/new:opacity-100 group-focus-visible/new:opacity-100"
+                >
+                  New chat
+                </span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => requestClose()}
               aria-label="Close the assistant"
-              className="group -mr-1 center size-10 shrink-0 rounded-full bg-paper shadow-sm shadow-navy/5 transition-colors hover:bg-mist"
+              className={cn(headerButton, "group -mr-1")}
             >
               <RiCloseLine
                 aria-hidden="true"
@@ -617,6 +650,7 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
               )}
             >
               <AssistantTranscript
+                key={conversation}
                 messages={messages}
                 thinking={phase === "thinking" ? thinking : null}
                 busy={busy}
@@ -669,14 +703,33 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
               </div>
             </div>
 
-            {/* The orb: right on wide screens; on phones above the chat, shrinking once it gets going */}
+            {/* The orb with its name beneath: right on wide screens; on phones above the chat, shrinking
+                (its name kept for screen readers only) once it gets going */}
             <div
               className={cn(
-                "aspect-square shrink-0 self-center transition-[width] duration-300 lg:w-[min(32.5rem,46vw,calc(100svh-10rem))]",
-                hasInteracted ? "max-lg:w-25" : "max-lg:my-auto max-lg:w-[min(20rem,80vw,42svh)]",
+                "flex shrink-0 flex-col items-center gap-6 self-center lg:gap-10",
+                !hasInteracted && "max-lg:my-auto",
               )}
             >
-              <AssistantOrb phase={phase} active={isOpen || closing} level={micLevel} />
+              <div
+                className={cn(
+                  "aspect-square transition-[width] duration-300 lg:w-[min(32.5rem,46vw,calc(100svh-15rem))]",
+                  hasInteracted ? "max-lg:w-25" : "max-lg:w-[min(20rem,80vw,36svh)]",
+                )}
+              >
+                <AssistantOrb phase={phase} active={isOpen || closing} level={micLevel} />
+              </div>
+              {/* Positioned, so it sits over the orb's corona rather than under it */}
+              <h2
+                id="assistant-title"
+                className={cn(
+                  "relative flex items-center gap-2 rounded-full bg-paper/70 px-4 py-2 text-kicker text-accent ring-1 ring-paper backdrop-blur-sm",
+                  hasInteracted && "max-lg:sr-only",
+                )}
+              >
+                <Sparkle />
+                SAVA Assistant
+              </h2>
             </div>
           </div>
         </div>

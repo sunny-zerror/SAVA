@@ -9,10 +9,11 @@ export const metadata: Metadata = createPageMetadata("/contact");
 
 export default function ContactPage() {
   return (
-    <Frame className="pb-section">
+    <Frame>
       <div className="grid lg:grid-cols-12">
-        {/* The heading leads the left column, above the ways to get in touch */}
-        <div className="flex flex-col gap-10 px-inset py-10 md:py-14 lg:col-span-5 lg:border-r lg:border-line">
+        {/* The heading leads the left column, above the ways to get in touch. The section's bottom space is
+            inside the columns, so the line between them runs down to the footer */}
+        <div className="flex flex-col gap-10 px-inset py-10 md:py-14 lg:col-span-5 lg:border-r lg:border-line lg:pb-section">
           <PageHeader
             eyebrow="Client services"
             title="We'd love to hear from you"
@@ -21,7 +22,7 @@ export default function ContactPage() {
           <ContactDetails />
         </div>
         <FrameRule className="lg:hidden" />
-        <div className="px-inset py-10 md:py-14 lg:col-span-7">
+        <div className="px-inset pt-10 pb-section md:pt-14 lg:col-span-7">
           <ContactForm />
         </div>
       </div>

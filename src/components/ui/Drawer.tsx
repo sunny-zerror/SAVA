@@ -127,7 +127,15 @@ export default function Drawer({
             />
           </button>
         </Row>
-        <div data-lenis-prevent className="min-h-0 scrollbar-thin flex-1 overflow-y-auto overscroll-contain">
+        <div
+          data-lenis-prevent
+          className={cn(
+            "min-h-0 flex-1 overflow-y-auto overscroll-contain",
+            // A top panel shows no scrollbar: it would narrow this band, shifting its rails off the
+            // header row's. Its full-width rules are clipped to the panel rather than scrolling sideways
+            top ? "no-scrollbar overflow-x-hidden" : "scrollbar-thin",
+          )}
+        >
           {/* A side panel's content pads itself; a top one's sits between the rails */}
           {top ? <Row top>{children}</Row> : children}
         </div>

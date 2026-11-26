@@ -20,6 +20,8 @@ interface AssistantState {
   /** The launcher's centre (px), where the ripple starts and ends */
   origin: { x: number; y: number } | null;
   phase: AssistantPhase;
+  /** Which conversation this is: a new one starts afresh (the transcript remounts on it) */
+  conversation: number;
   messages: AssistantMessage[];
   /** The shopper has sent something: the quick actions go and, on phones, the orb shrinks */
   hasInteracted: boolean;
@@ -34,6 +36,8 @@ interface AssistantState {
   /** Adds a message and returns its id */
   addMessage: (message: Omit<AssistantMessage, "id">) => string;
   markRevealed: (id: string) => void;
+  /** Clears the conversation for a new one (the overlay adds the welcome again) */
+  reset: () => void;
 }
 
 let lastId = 0;
@@ -48,6 +52,7 @@ export const useAssistantStore = create<AssistantState>()((set) => ({
   hasOpened: false,
   origin: null,
   phase: "idle",
+  conversation: 0,
   messages: [],
   hasInteracted: false,
   contactFlow: null,
@@ -69,5 +74,13 @@ export const useAssistantStore = create<AssistantState>()((set) => ({
   markRevealed: (id) =>
     set((s) => ({
       messages: s.messages.map((message) => (message.id === id ? { ...message, revealed: true } : message)),
+    })),
+  reset: () =>
+    set((s) => ({
+      conversation: s.conversation + 1,
+      messages: [],
+      hasInteracted: false,
+      contactFlow: null,
+      error: null,
     })),
 }));

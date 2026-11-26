@@ -3,26 +3,33 @@ import BlobButton from "@/components/ui/BlobButton";
 import { Frame } from "@/components/ui/Frame";
 import Sparkle from "@/components/ui/Sparkle";
 import { productContent } from "@/data/product-content";
-import { productHref } from "@/utils/url";
 import CabinetScene from "./CabinetScene";
 import CabinetScroll from "./CabinetScroll";
 import CabinetTraveller from "./CabinetTraveller";
-import { HAND } from "./cabinet-scene";
-
-const pct = ({ left, top, width, height }: { left: number; top: number; width: number; height: number }) => ({
-  left: `${left}%`,
-  top: `${top}%`,
-  width: `${width}%`,
-  height: `${height}%`,
-});
 
 const balanced = productContent["sava-balanced"];
+
+/** The scroll scene's last frame: a heading beside the stick, and what it is beside that */
+const HEADING = ["Isn't just", "a deodorant."];
+const DESCRIPTION = `Sava Balanced isn't just a deodorant. It's advanced sweat control and ${balanced.scent}, in one stick made for India's heat.`;
+
+/** Each word in a span of its own, for the scroll scene to fill in one after another (data-cabinet-word) */
+function Words({ text }: { text: string }) {
+  return text.split(" ").map((word, i) => (
+    <span key={i}>
+      {i > 0 && " "}
+      <span data-cabinet-word>{word}</span>
+    </span>
+  ));
+}
 
 /**
  * The /home1 opening: the bathroom cabinet on its blue panelled wall (CabinetScene), SAVA's sticks on
  * its shelves, and the heading on the wall beside it. Scrolling plays the scene in CabinetScroll: the
- * copy lifts away, the Balanced stick flips out of the cabinet into an open hand in the middle of the
- * screen (CabinetTraveller) as the room fades to white, and its name comes in around it.
+ * copy lifts away, the Balanced stick leaves its shelf for the middle of the screen, turning once about
+ * its upright axis (CabinetTraveller), as the room fades to show the sky-blue SAVA gradient behind the section
+ * (CabinetBackdrop); a heading fills in to its left and a few lines to its right. Past it the
+ * bestsellers scroll up over the same blue, and the stick comes down into the middle card.
  *
  * The scene scales by --s, screen px per pixel of the original photo: on large screens the photo fills
  * the height below the header, the cabinet's middle at 57% across so the copy has the wall to its left;
@@ -34,8 +41,10 @@ export default function CabinetHero() {
     <>
       <CabinetScroll
         aria-labelledby="home1-hero"
-        className="relative isolate -mt-[calc(var(--spacing-header)+var(--spacing-announcement))] overflow-hidden bg-paper text-paper [--cx:50%] [--s:calc(min(92vw,30rem)/569)] lg:h-svh lg:min-h-152 lg:[--cx:57%] lg:[--s:calc((max(100svh,38rem)-var(--spacing-header)-var(--spacing-announcement))/941)]"
+        className="relative isolate overflow-hidden text-paper [--cx:50%] [--s:calc(min(92vw,30rem)/569)] lg:h-svh lg:min-h-152 lg:[--cx:57%] lg:[--s:calc((max(100svh,38rem)-var(--spacing-header)-var(--spacing-announcement))/941)]"
       >
+        {/* The room's white, under the scene: the scroll scene fades it after the scene, down to the blue */}
+        <div aria-hidden="true" data-cabinet-room className="absolute inset-0 bg-paper" />
         <CabinetScene />
 
         {/* Shade under the header, and on large screens behind the copy, so white type reads on the blue */}
@@ -72,9 +81,6 @@ export default function CabinetHero() {
               <BlobButton href="/shop" tone="light" className="mt-8">
                 Shop the range
               </BlobButton>
-              <p className="mt-6 text-micro uppercase opacity-80 pointer-coarse:hidden">
-                Move across the cabinet to open it
-              </p>
               <p className="mt-6 hidden text-micro uppercase opacity-80 pointer-coarse:block">Tap a door to open it</p>
             </div>
 
@@ -83,64 +89,44 @@ export default function CabinetHero() {
           </Frame>
         </div>
 
-        {/* Where the scroll scene ends, in the section's last screenful (all of it on large screens):
-            the hand in the middle, the stick's name above it. Hidden until the scene brings it in */}
+        {/* Where the scroll scene ends, in the section's last screenful (all of it on large screens): the
+            stick turned to face us in the middle of the sky-blue field, a heading to its left and its lines to its
+            right, their words filling in as the scroll goes on. Hidden until the scene brings it in. It has
+            no background: the blue is CabinetBackdrop's, held still behind it as the page scrolls on */}
         <div
           data-cabinet-end
-          className="pointer-events-none invisible absolute inset-x-0 bottom-0 h-svh text-ink motion-reduce:hidden"
+          className="pointer-events-none invisible absolute inset-x-0 bottom-0 h-svh overflow-hidden motion-reduce:hidden"
         >
-          {/* Where the stick lands, just below the middle, and the 3D hand rises to hold it
-              (CabinetTraveller). Wider than the stick, so its height sets its size */}
+          {/* Where the stick lands, in the middle (CabinetTraveller); without WebGL its photo stands there */}
           <div
-            data-model-anchor="palm"
-            className="absolute top-[52%] left-1/2 h-[31svh] w-[25svh] -translate-x-1/2 -translate-y-1/2"
-          />
-          {/* Hovering here (the stick and the hand under it) lifts them */}
-          <div
-            data-cabinet-grip
-            aria-hidden="true"
-            className="pointer-events-auto absolute top-[28%] bottom-0 left-1/2 w-[min(60svh,80vw)] -translate-x-1/2"
-          />
-
-          {/* Without WebGL: the photo of the hand holding the stick, its stick's slot in the middle */}
-          <div
-            data-cabinet-hand
-            className="invisible absolute top-[55%] left-1/2 aspect-1460/1350 h-[min(76svh,calc(92vw*1350/1460))] translate-x-[-54.5%] translate-y-[-36.75%] model-ready:hidden"
+            data-model-anchor="spot"
+            className="absolute top-1/2 left-1/2 h-[40svh] w-[22svh] -translate-x-1/2 -translate-y-1/2 lg:h-[58svh] lg:w-[30svh]"
           >
             <Image
-              src="/images/home/features-hand.png"
-              alt="An open hand holding the SAVA Balanced stick"
+              src="/images/newhome/cabinet/stick-balanced.webp"
+              alt=""
               fill
-              sizes="(min-width: 64rem) 50vw, 92vw"
+              sizes="30svh"
+              className="object-contain model-ready:hidden"
             />
-            <span
-              aria-hidden="true"
-              className="absolute bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--color-ink)_45%,transparent),transparent)] blur-[3px]"
-              style={pct(HAND.shadow)}
-            />
-            <Image src="/images/home/features-stick.png" alt="" fill sizes="(min-width: 64rem) 50vw, 92vw" />
           </div>
 
-          <Frame className="flex h-svh flex-col justify-between pt-[calc(var(--spacing-header)+1.5rem)] pb-24">
-            <div data-cabinet-outro className="invisible px-inset text-center">
-              <h2 className="text-hero uppercase">Sava Balanced</h2>
-              <p className="mt-3 text-h5 text-accent">{balanced.scent}</p>
-            </div>
-            <div className="flex items-end justify-between gap-6 px-inset">
-              <div data-cabinet-outro className="pointer-events-auto invisible flex flex-col items-start gap-4">
-                <BlobButton href={productHref("sava-balanced")}>Shop Balanced</BlobButton>
-                <p className="text-micro text-muted uppercase pointer-coarse:hidden">Hover the hand</p>
-                <p className="hidden text-micro text-muted uppercase pointer-coarse:block">Tap the hand</p>
-              </div>
-              <p data-cabinet-outro className="invisible text-right text-h5 uppercase max-sm:hidden">
-                {balanced.tagline.split(". ").map((line) => (
-                  <span key={line} className="block">
-                    {line.replace(/\.$/, "")}.
-                  </span>
-                ))}
-                <span className="block">Own your movement.</span>
-              </p>
-            </div>
+          {/* Heading over the stick and lines under it on phones; to its left and right on large screens */}
+          <Frame
+            tone="dark"
+            className="grid h-svh grid-rows-[auto_1fr_auto] pt-[calc(var(--spacing-header)+var(--spacing-announcement)+1.5rem)] pb-14 lg:grid-cols-[1fr_32svh_1fr] lg:grid-rows-1 lg:items-center lg:py-0"
+          >
+            <h2 className="px-inset uppercase">
+              {HEADING.map((line) => (
+                <span key={line} className="block">
+                  <Words text={line} />
+                </span>
+              ))}
+            </h2>
+            <div aria-hidden="true" />
+            <p className="max-w-sm px-inset text-h5 lg:justify-self-end">
+              <Words text={DESCRIPTION} />
+            </p>
           </Frame>
         </div>
       </CabinetScroll>

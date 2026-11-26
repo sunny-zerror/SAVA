@@ -37,13 +37,14 @@ export default function AssistantBubble({ text, visible }: { text: string; visib
       ref={root}
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute right-0 bottom-[calc(100%+0.75rem)] w-max max-w-65 translate-y-1.5 assistant-bubble overflow-hidden rounded-2xl px-4 py-3 text-eyebrow text-paper opacity-0 shadow-lg shadow-navy/25 transition-[opacity,translate] duration-300",
+        "pointer-events-none absolute right-0 bottom-[calc(100%+0.75rem)] w-max translate-y-1.5 assistant-bubble overflow-hidden rounded-2xl px-4 py-3 text-eyebrow text-paper opacity-0 shadow-lg shadow-navy/25 transition-[opacity,translate] duration-300",
         visible && "translate-y-0 opacity-100",
       )}
     >
-      <p className="relative">
+      {/* One line throughout: the scrambling capitals run wider than the words and would wrap mid-decode */}
+      <p className="relative whitespace-nowrap">
         <span className="invisible">{text}</span>
-        <span ref={live} className="absolute inset-0" />
+        <span ref={live} className="absolute inset-0 overflow-hidden" />
       </p>
     </div>
   );

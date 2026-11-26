@@ -48,13 +48,17 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
   const models: InstanceType<typeof THREE.Object3D>[] = [];
   const loader = new THREE.TextureLoader();
 
+  /** A printed image (a label, a carton's face) as a texture, kept sharp at a glancing angle */
+  const loadTexture = async (url: string) => {
+    const texture = await loader.loadAsync(url);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return texture;
+  };
+
   /** Adds a stick; only its printed label is fetched (a missing label leaves it unprinted) */
   const build = async (variant: SavaStickVariant) => {
-    const label = await loader.loadAsync(stickLabelUrl(variant)).catch(() => undefined);
-    if (label) {
-      label.colorSpace = THREE.SRGBColorSpace;
-      label.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    }
+    const label = await loadTexture(stickLabelUrl(variant)).catch(() => undefined);
     const model = createSavaStick(THREE, variant, label);
     const box = new THREE.Box3().setFromObject(model);
     const size = box.getSize(new THREE.Vector3());
@@ -114,7 +118,7 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
     models.push(object);
   };
 
-  return { THREE, build, add, warm, fitScale, render, clear, dispose };
+  return { THREE, build, add, loadTexture, warm, fitScale, render, clear, dispose };
 }
 
 export type StickStage = NonNullable<Awaited<ReturnType<typeof createStickStage>>>;

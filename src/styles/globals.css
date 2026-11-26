@@ -80,6 +80,8 @@
   /* QuantityStepper: the new count rolls in from below as it rises, from above as it falls */
   --animate-count-up: count-up 0.4s var(--ease-out-expo) both;
   --animate-count-down: count-down 0.4s var(--ease-out-expo) both;
+  /* CabinetBackdrop: a glow swelling and settling from the corner it's anchored at (its transform-origin) */
+  --animate-glow-breathe: glow-breathe 9s ease-in-out infinite alternate;
 
   @keyframes count-up {
     from {
@@ -151,6 +153,12 @@
   @keyframes skeleton {
     to {
       transform: translateX(100%);
+    }
+  }
+
+  @keyframes glow-breathe {
+    to {
+      transform: scale(1.2);
     }
   }
 }
@@ -531,14 +539,8 @@
 /*
  * src/components/assistant/. The stage opens in a circle growing from the launcher (GSAP tweens
  * --assistant-r about --assistant-x / --assistant-y), with light bending on the circle's edge; the
- * speech bubble's light drifts; the input's ring turns; the screen's edges glow while dictating.
+ * speech bubble's light and the input's glow drift; the screen's edges glow while dictating.
  */
-@property --assistant-ring-angle {
-  syntax: "<angle>";
-  inherits: true;
-  initial-value: 0deg;
-}
-
 @property --assistant-glow-angle {
   syntax: "<angle>";
   inherits: true;
@@ -635,45 +637,6 @@
   animation: assistant-light-drift 14s ease-in-out infinite alternate;
 }
 
-/* The input's ring: a faint SAVA-blue border, two brighter arcs turning round it without end (once
-   every 8s), and a soft glow beneath */
-@utility assistant-ring {
-  --assistant-ring-base: color-mix(in srgb, var(--color-accent) 25%, transparent);
-  animation: assistant-ring-spin 8s linear infinite;
-  &::before,
-  &::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-  }
-  &::before {
-    padding: 1.5px;
-    background: conic-gradient(
-      from var(--assistant-ring-angle),
-      var(--assistant-ring-base) 0,
-      var(--color-accent) 8%,
-      var(--assistant-ring-base) 22%,
-      var(--assistant-ring-base) 48%,
-      color-mix(in srgb, var(--color-accent) 45%, var(--color-navy)) 60%,
-      var(--assistant-ring-base) 74%
-    );
-    -webkit-mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#000 0 0) content-box,
-      linear-gradient(#000 0 0);
-    mask-composite: exclude;
-  }
-  &::after {
-    z-index: -1;
-    box-shadow: 0 0 40px 10px color-mix(in srgb, var(--color-accent) 30%, transparent);
-  }
-}
-
 /* Round the screen's edges while the shopper dictates: a 3px border of turning SAVA blue and a glow
    fading in 56px from every edge. Paused unless data-visible */
 @utility assistant-glow {
@@ -724,12 +687,6 @@
   to {
     --assistant-light-x: 30%;
     --assistant-light-y: 35%;
-  }
-}
-
-@keyframes assistant-ring-spin {
-  to {
-    --assistant-ring-angle: 360deg;
   }
 }
 

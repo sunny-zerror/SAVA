@@ -1,9 +1,16 @@
 "use client";
 
-import { RiArrowDownLine, RiArrowRightLine, RiCheckLine, RiFileCopyLine } from "@remixicon/react";
+import {
+  RiArrowDownLine,
+  RiArrowLeftSLine,
+  RiArrowRightLine,
+  RiArrowRightSLine,
+  RiCheckLine,
+  RiFileCopyLine,
+} from "@remixicon/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import Price from "@/components/ui/Price";
 import Sparkle from "@/components/ui/Sparkle";
 import { revealDuration, type OfferLine, type OrderLine, type ReplyLink } from "@/lib/assistant/replies";
@@ -82,34 +89,116 @@ function RevealText({ text, animate, onRevealed }: { text: string; animate: bool
   return <span ref={ref} aria-hidden="true" className="block" />;
 }
 
+/** The carousel's arrows: over the cards, level with their photos, gone when there's nothing that way */
+const arrow =
+  "absolute top-20 z-1 center size-9 -translate-y-1/2 rounded-full bg-paper text-ink shadow-md ring-1 shadow-navy/10 ring-line transition-[opacity,color] duration-300 hover:text-accent disabled:pointer-events-none disabled:opacity-0";
+/** How far the row's edges fade where more cards wait (the row's scroll-pl-8 snaps cards clear of it) */
+const FADE = "2rem";
+
+/**
+ * Suggested products in a row that scrolls sideways (swipe, trackpad, or the arrows, a card at a
+ * time), snapping to each card. An arrow shows only while there are cards that way, and that edge
+ * of the row fades.
+ */
 function ProductCards({ products }: { products: SearchProduct[] }) {
+  const id = useId();
+  const row = useRef<HTMLUListElement>(null);
+  const back = useRef<HTMLButtonElement>(null);
+  const next = useRef<HTMLButtonElement>(null);
+  const [more, setMore] = useState({ back: false, next: false });
+
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return;
+    const measure = () => {
+      const end = el.scrollWidth - el.clientWidth;
+      const canBack = el.scrollLeft > 2;
+      const canNext = el.scrollLeft < end - 2;
+      // An arrow with focus that runs out of cards hands it to the other, rather than dropping it
+      if (!canBack && document.activeElement === back.current) next.current?.focus({ preventScroll: true });
+      if (!canNext && document.activeElement === next.current) back.current?.focus({ preventScroll: true });
+      setMore((current) =>
+        current.back === canBack && current.next === canNext ? current : { back: canBack, next: canNext },
+      );
+    };
+    measure();
+    el.addEventListener("scroll", measure, { passive: true });
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => {
+      el.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, []);
+
+  /** One card (and the gap after it) back or on */
+  const step = (direction: 1 | -1) => {
+    const el = row.current;
+    const first = el?.firstElementChild;
+    if (!el || !(first instanceof HTMLElement)) return;
+    const gap = Number.parseFloat(getComputedStyle(el).columnGap) || 0;
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollBy({ left: direction * (first.offsetWidth + gap), behavior: smooth ? "smooth" : "auto" });
+  };
+
+  const mask = `linear-gradient(90deg, transparent, #000 ${more.back ? FADE : "0px"}, #000 calc(100% - ${more.next ? FADE : "0px"}), transparent)`;
+
   return (
-    <ul className="grid w-full max-w-110 grid-cols-2 gap-2">
-      {products.map((product) => (
-        <li key={product.slug}>
-          <Link
-            href={productHref(product.slug)}
-            className={cn(card, "group/card flex h-full flex-col gap-2 p-2 hover:bg-paper")}
-          >
-            <div className="relative aspect-square overflow-hidden rounded-xl bg-surface">
-              <Image
-                src={product.image}
-                alt=""
-                fill
-                sizes="12rem"
-                // As on the listing card: the shot's white backdrop takes the tint
-                className="object-cover mix-blend-multiply transition-transform duration-700 ease-out-expo group-hover/card:scale-105"
-              />
-            </div>
-            <div className="flex flex-col gap-0.5 px-1 pb-1">
-              <p className="text-h6">{product.name}</p>
-              {product.scent && <p className="text-caption text-muted">{product.scent}</p>}
-              <Price price={product.price} compareAt={product.compareAt} className="text-caption font-medium" />
-            </div>
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <div className="relative w-full">
+      <ul
+        id={id}
+        ref={row}
+        style={{ maskImage: mask, WebkitMaskImage: mask }}
+        className="no-scrollbar flex snap-x snap-mandatory scroll-pl-8 gap-2 overflow-x-auto overscroll-x-contain"
+      >
+        {products.map((product) => (
+          <li key={product.slug} className="w-40 shrink-0 snap-start">
+            <Link
+              href={productHref(product.slug)}
+              className={cn(card, "group/card flex h-full flex-col gap-2 p-2 hover:bg-paper")}
+            >
+              <div className="relative aspect-square overflow-hidden rounded-xl bg-surface">
+                <Image
+                  src={product.image}
+                  alt=""
+                  fill
+                  sizes="10rem"
+                  // As on the listing card: the shot's white backdrop takes the tint
+                  className="object-cover mix-blend-multiply transition-transform duration-700 ease-out-expo group-hover/card:scale-105"
+                />
+              </div>
+              <div className="flex flex-col gap-0.5 px-1 pb-1">
+                <p className="text-h6">{product.name}</p>
+                {product.scent && <p className="text-caption text-muted">{product.scent}</p>}
+                <Price price={product.price} compareAt={product.compareAt} className="text-caption font-medium" />
+              </div>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <button
+        ref={back}
+        type="button"
+        aria-label="Previous products"
+        aria-controls={id}
+        disabled={!more.back}
+        onClick={() => step(-1)}
+        className={cn(arrow, "left-2")}
+      >
+        <RiArrowLeftSLine aria-hidden="true" className="size-5" />
+      </button>
+      <button
+        ref={next}
+        type="button"
+        aria-label="More products"
+        aria-controls={id}
+        disabled={!more.next}
+        onClick={() => step(1)}
+        className={cn(arrow, "right-2")}
+      >
+        <RiArrowRightSLine aria-hidden="true" className="size-5" />
+      </button>
+    </div>
   );
 }
 

@@ -1,21 +1,15 @@
 "use client";
 
-import { RiArrowRightLine, RiInstagramLine, RiLinkedinLine, RiTwitterXLine } from "@remixicon/react";
+import { RiArrowRightLine } from "@remixicon/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Drawer from "@/components/ui/Drawer";
+import SocialLinks from "@/components/ui/SocialLinks";
 import Sparkle from "@/components/ui/Sparkle";
-import { mainNav, socialNav } from "@/config/navigation";
+import { mainNav } from "@/config/navigation";
 import { useDrawerMotion } from "@/hooks/useDrawerMotion";
 import { selectIsLoggedIn, useAuthStore } from "@/store/auth-store";
 import { cn } from "@/utils/cn";
-
-/** An icon for each social link, by label (socialNav) */
-const socialIcons: Record<string, typeof RiInstagramLine> = {
-  Instagram: RiInstagramLine,
-  Linkedin: RiLinkedinLine,
-  "X (Twitter)": RiTwitterXLine,
-};
 
 /**
  * The site menu behind the header's MENU button — a left panel at every breakpoint. The links run
@@ -94,24 +88,7 @@ export default function MobileMenu({ open, onClose }: { open: boolean; onClose: 
           </ul>
         </nav>
 
-        <ul aria-label="Social" className="mt-auto flex items-center gap-3">
-          {socialNav.map((item) => {
-            const Icon = socialIcons[item.label];
-            return (
-              <li key={item.label} data-drawer-extra>
-                <a
-                  href={item.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={item.label}
-                  className="center size-11 rounded-full border border-line transition-colors duration-300 hover:border-ink hover:bg-ink hover:text-paper"
-                >
-                  {Icon ? <Icon aria-hidden="true" className="size-4.5" /> : item.label}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
+        <SocialLinks drawerExtra className="mt-auto" />
       </div>
     </Drawer>
   );

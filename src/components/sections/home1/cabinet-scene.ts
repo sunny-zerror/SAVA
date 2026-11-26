@@ -68,14 +68,11 @@ export const TOWEL = { src: "/images/newhome/cabinet/towel.png", x: 1176, y: 674
 
 export type Compartment = "left" | "right" | "cubby";
 type Range = "balanced" | "grounded" | "kinetic" | "renewed";
-type View = "front" | "angle";
-
-/** Where the stick is in each product shot (3840 × 2160, on white), in % — the reflection under it left out */
-export const SHOTS: Record<View, { x: number; y: number; w: number; h: number }> = {
-  front: { x: 38.1, y: 4.6, w: 23.8, h: 85.4 },
-  angle: { x: 38.6, y: 4.6, w: 22.2, h: 85 },
-};
-export const SHOT_SIZE = { width: 3840, height: 2160 };
+/**
+ * Each range's stick facing straight out, cut from its front product shot onto transparency
+ * (public/images/newhome/cabinet/stick-<range>.webp): its size in pixels, the same for all four
+ */
+export const STICK_IMAGE = { width: 355, height: 720 };
 
 const SCENTS: Record<Range, string> = {
   balanced: "Citrus Tide",
@@ -86,7 +83,6 @@ const SCENTS: Record<Range, string> = {
 
 export interface CabinetProduct {
   range: Range;
-  view: View;
   compartment: Compartment;
   /** The stick's centre across, and where its base stands, in the photo's pixels */
   x: number;
@@ -102,20 +98,20 @@ const CUBBY = 766;
 
 export const PRODUCTS: CabinetProduct[] = [
   // Behind the left door (its compartment is the right one, mirrored)
-  { range: "grounded", view: "front", compartment: "left", x: 642, base: UPPER },
-  { range: "renewed", view: "angle", compartment: "left", x: 732, base: UPPER },
-  { range: "kinetic", view: "front", compartment: "left", x: 646, base: LOWER },
-  { range: "balanced", view: "angle", compartment: "left", x: 736, base: LOWER },
+  { range: "grounded", compartment: "left", x: 642, base: UPPER },
+  { range: "renewed", compartment: "left", x: 732, base: UPPER },
+  { range: "kinetic", compartment: "left", x: 646, base: LOWER },
+  { range: "balanced", compartment: "left", x: 736, base: LOWER },
   // Behind the right door
-  { range: "balanced", view: "front", compartment: "right", x: 880, base: UPPER, hero: true },
-  { range: "kinetic", view: "angle", compartment: "right", x: 972, base: UPPER },
-  { range: "renewed", view: "front", compartment: "right", x: 876, base: LOWER },
-  { range: "grounded", view: "angle", compartment: "right", x: 968, base: LOWER },
+  { range: "balanced", compartment: "right", x: 880, base: UPPER, hero: true },
+  { range: "kinetic", compartment: "right", x: 972, base: UPPER },
+  { range: "renewed", compartment: "right", x: 876, base: LOWER },
+  { range: "grounded", compartment: "right", x: 968, base: LOWER },
   // The open cubby: the whole range
-  { range: "kinetic", view: "front", compartment: "cubby", x: 668, base: CUBBY },
-  { range: "balanced", view: "front", compartment: "cubby", x: 768, base: CUBBY },
-  { range: "renewed", view: "front", compartment: "cubby", x: 868, base: CUBBY },
-  { range: "grounded", view: "front", compartment: "cubby", x: 968, base: CUBBY },
+  { range: "kinetic", compartment: "cubby", x: 668, base: CUBBY },
+  { range: "balanced", compartment: "cubby", x: 768, base: CUBBY },
+  { range: "renewed", compartment: "cubby", x: 868, base: CUBBY },
+  { range: "grounded", compartment: "cubby", x: 968, base: CUBBY },
 ];
 
 /** Every stick stands this tall, in the photo's pixels (about 14cm against the cabinet) */
@@ -125,30 +121,17 @@ export const productInfo = (range: Range) => ({
   slug: `sava-${range}`,
   name: `Sava ${range[0].toUpperCase()}${range.slice(1)}`,
   scent: SCENTS[range],
-  src: (view: View) => `/images/products/${range}/sava-${range}-${view}.jpg`,
+  src: `/images/newhome/cabinet/stick-${range}.webp`,
 });
 
-/** A product's rect in the photo's pixels */
-export function productRect({ view, x, base }: CabinetProduct): Rect {
-  const shot = SHOTS[view];
-  const aspect = (shot.w * SHOT_SIZE.width) / (shot.h * SHOT_SIZE.height);
-  const w = STICK_HEIGHT * aspect;
-  return { x: x - w / 2, y: base - STICK_HEIGHT, w, h: STICK_HEIGHT };
+/** A catalogue product's stick on transparency, by slug ("sava-kinetic" → stick-kinetic.webp); null if it has none */
+export function stickCutoutFor(slug: string) {
+  const range = slug.replace(/^sava-/, "");
+  return range in SCENTS ? productInfo(range as Range).src : null;
 }
 
-/** CroppedImage's crop to show just the stick of a product shot */
-export const shotCrop = (view: View) => {
-  const { x, y, w, h } = SHOTS[view];
-  return { width: (100 / w) * 100, height: (100 / h) * 100, left: (-x / w) * 100, top: (-y / h) * 100 };
-};
-
-/*
- * The photo of the open hand holding the stick, as on the home page's features (public/images/home/features-*),
- * shown instead of the 3D hand where there's no WebGL: the hand and the stick in it, both 1460 × 1350, and
- * the shadow the stick casts on the palm, in % of that frame.
- */
-export const HAND = {
-  width: 1460,
-  height: 1350,
-  shadow: { left: 43, top: 59.5, width: 24, height: 4 },
-};
+/** A product's rect in the photo's pixels */
+export function productRect({ x, base }: CabinetProduct): Rect {
+  const w = (STICK_HEIGHT * STICK_IMAGE.width) / STICK_IMAGE.height;
+  return { x: x - w / 2, y: base - STICK_HEIGHT, w, h: STICK_HEIGHT };
+}

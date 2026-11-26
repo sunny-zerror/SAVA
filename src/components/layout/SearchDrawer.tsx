@@ -447,7 +447,12 @@ export default function SearchDrawer({ products, posts }: SearchDrawerProps) {
               </form>
             </div>
           </div>
-          <span aria-hidden="true" data-drawer-rule className="absolute inset-x-0 bottom-0 h-px bg-line" />
+          {/* Edge to edge, like the header row's line above it (from the band's centre out to the panel's) */}
+          <span
+            aria-hidden="true"
+            data-drawer-rule
+            className="absolute right-[calc(50%-50vw)] bottom-0 left-[calc(50%-50vw)] h-px bg-line"
+          />
         </div>
 
         <p role="status" className="sr-only">

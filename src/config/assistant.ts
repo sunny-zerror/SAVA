@@ -10,9 +10,9 @@ export const assistantConfig = {
   /** It never shows on these paths, or anything under them: checkout keeps the shopper on the order */
   hiddenPaths: ["/checkout"],
   /** The launcher's speech bubble on hover (and keyboard focus)… */
-  hoverBubble: "I'm the SAVA assistant. Click to chat with me.",
+  hoverBubble: "Hi there! How can I help you?",
   /** …and once a visit, a few seconds after the page has loaded, unless it's already been opened */
-  introBubble: "Hi! Looking for your scent, or help with an order? Ask me.",
+  introBubble: "Hello! How can I help you today?",
   introDelayMs: 5000,
   introShowMs: 5000,
   /** The orb dims and slows after this long without activity, and wakes on the next */

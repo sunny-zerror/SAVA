@@ -14,13 +14,11 @@ import {
   PLANT,
   PRODUCTS,
   SCENE,
-  SHOT_SIZE,
   TOWEL,
   place,
   productInfo,
   productRect,
   sceneCrop,
-  shotCrop,
   type CabinetProduct,
   type Compartment,
   type Rect,
@@ -28,8 +26,8 @@ import {
 
 /** The scene box's width on screen (CabinetHero sizes it), so every crop of it shares one file */
 const SCENE_SIZES = "(min-width: 64rem) calc((100vh - 7.75rem) * 3.27), min(497vw, 2592px)";
-/** A whole product shot, of which a stick is about a quarter of the width */
-const SHOT_SIZES = "(min-width: 64rem) 16vw, 44vw";
+/** A stick's width on screen: about 2% of the scene's */
+const STICK_SIZES = "(min-width: 64rem) calc((100vh - 7.75rem) * 0.07), min(10.2vw, 54px)";
 
 /** Room around the cutouts for them to move into, in the photo's pixels */
 const PLANT_ROOM = { l: 24, r: 24, t: 14, b: 0 };
@@ -529,16 +527,9 @@ function CabinetStick({ product, onFocus, onBlur }: CabinetStickProps) {
         aria-hidden="true"
         className="absolute bottom-0 left-1/2 h-[7%] w-[88%] -translate-x-1/2 translate-y-[40%] rounded-[50%] bg-ink/35 blur-[3px] transition-opacity duration-500 group-hover:opacity-50"
       />
-      {/* Multiplied over the shelf, so the shot's white backdrop disappears into it */}
-      <span className="absolute inset-0 mix-blend-multiply transition-transform duration-500 ease-out-expo group-hover:translate-y-[-5%] group-focus-visible:translate-y-[-5%]">
-        <CroppedImage
-          src={info.src(product.view)}
-          width={SHOT_SIZE.width}
-          height={SHOT_SIZE.height}
-          sizes={SHOT_SIZES}
-          crop={shotCrop(product.view)}
-          className="size-full"
-        />
+      {/* Facing straight out, cut out of its product shot: drawn as it is, at full brightness */}
+      <span className="absolute inset-0 transition-transform duration-500 ease-out-expo group-hover:translate-y-[-5%] group-focus-visible:translate-y-[-5%]">
+        <Image src={info.src} alt="" fill sizes={STICK_SIZES} className="object-contain" />
       </span>
       <span
         aria-hidden="true"

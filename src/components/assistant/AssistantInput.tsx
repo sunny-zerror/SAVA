@@ -33,8 +33,7 @@ interface AssistantInputProps {
 }
 
 /**
- * The assistant's input: a white pill with a thin border, round which two arcs of SAVA blue keep
- * turning, once every 8s. Inside: the mic (where dictation works), a field
+ * The assistant's input: a white pill, no outline. Inside: the mic (where dictation works), a field
  * that grows to six lines (past one, the buttons drop below the text), and Send, which becomes Stop
  * while a reply is on its way. Dictating, the row becomes the waveform with Cancel and Insert.
  */
@@ -113,7 +112,7 @@ export default function AssistantInput({
         event.preventDefault();
         submit();
       }}
-      className="group/input assistant-ring relative flex items-center gap-2 rounded-full bg-paper p-2 data-multiline:flex-wrap data-multiline:rounded-3xl"
+      className="group/input relative flex items-center gap-2 rounded-full bg-paper p-2 data-multiline:flex-wrap data-multiline:rounded-3xl"
     >
       {dictation.isDictating ? (
         <div className="flex min-w-0 flex-1 animate-fade-up items-center gap-2 pl-3">
