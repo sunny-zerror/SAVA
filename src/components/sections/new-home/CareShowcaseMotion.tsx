@@ -5,20 +5,37 @@ import { gsap, useGSAP } from "@/lib/gsap";
 
 const fontSize = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
 
+// The gallery's motion, taken from oryzo.ai's own: each photo's inner layer turns 10° and zooms 20%
+// as it slides in or out; each step holds still for its first and last 10% of scroll, easing between
+const INNER_ROTATION = -10;
+const INNER_SCALE = 1.2;
+const STEP = 1.4; // Timeline units per photo: about 0.75 of a screen, as there
+const sineInOut = gsap.parseEase("sine.inOut");
+const cubicInOut = gsap.parseEase("power2.inOut");
+/** `value` from a–b mapped to 0–1 (clamped), through `ease` */
+const fit = (value: number, a: number, b: number, ease?: (t: number) => number) => {
+  const t = gsap.utils.clamp(0, 1, (value - a) / (b - a));
+  return ease ? ease(t) : t;
+};
+/** The photo index for a linear scroll position: whole steps, each eased, with a hold at both ends */
+const stepped = (raw: number) => Math.floor(raw) + fit(raw % 1, 0.1, 0.9, sineInOut);
+
 /**
- * CareShowcase's <section>, pinned for five screens of scroll, scrubbed:
+ * CareShowcase's <section>, pinned for about six screens of scroll, scrubbed:
  *   1. the stick stands in the viewfinder (HeroStick lands it as the pin begins) while the huge line
  *      sweeps in from the right behind it, the label climbs to sit on the line and the ring turns
  *   2. the ring goes and the card opens from the viewfinder's size as the first photo fades in, the
  *      stick shrinking down into the photo's dashed circle (`--stick-fit`, 0–1, read by HeroStick);
  *      the huge line shrinks onto the heading and hands over to it as its lines rise, and the label
  *      climbs to sit above them
- *   3. the right-hand strip comes in
+ *   3. the strips fade in, the right-hand thumbnails sliding in from half a screen out, one after another
+ *      (played in time once reached, not scrubbed — as oryzo's)
  *   4. the photos step through the card as oryzo's do: each holds, then slides out left as the next
- *      slides in (an eased step per photo), while both strips shift one thumbnail in time — the
- *      next photo leaves the right strip at its inner edge, the last one steps out of the left
- *      strip's. The stick rides out with the first photo, fading (`--stick-out`) before it reaches the edge
- * With reduced motion nothing pins: the first photo holds the card, the strip set out beside it.
+ *      slides in, its inner layer turning and zooming as it goes; both strips shift one thumbnail in
+ *      time. A video plays from its start while its slide is in the card. The stick rides out with
+ *      the first photo, fading (`--stick-out`) before it reaches the edge. On the last photo the
+ *      left-hand thumbnails slide away, one after another
+ * With reduced motion nothing pins and nothing plays: the first photo holds the card, the strips set out beside it.
  */
 export default function CareShowcaseMotion({ children, ...props }: React.ComponentProps<"section">) {
   const root = useRef<HTMLElement>(null);
@@ -34,6 +51,11 @@ export default function CareShowcaseMotion({ children, ...props }: React.Compone
       const left = one('[data-care-track="left"]');
       const right = one('[data-care-track="right"]');
       const slides = q("[data-care-slide]") as HTMLElement[];
+      const inners = slides.map((el) => el.querySelector<HTMLElement>("[data-care-inner]"));
+      const videos = slides.map((el) => el.querySelector("video"));
+      const playing = videos.map(() => false);
+      const leftThumbs = Array.from(left.children) as HTMLElement[];
+      const rightThumbs = Array.from(right.children) as HTMLElement[];
       const last = slides.length - 1;
 
       // One thumbnail plus the gap after it, re-read on every refresh (resize)
@@ -43,19 +65,42 @@ export default function CareShowcaseMotion({ children, ...props }: React.Compone
         pitch = (thumb?.offsetWidth ?? 0) + (parseFloat(getComputedStyle(left).columnGap) || 0);
       };
 
-      // t: which photo has the card (fractional mid-step); intro: the strips' entrance, 0–1
-      const gallery = { t: 0, intro: 0 };
+      // raw: the scroll through the photos, linear (stepped() eases it); shown: the strips' fade;
+      // show / hide: the right thumbnails sliding in, the left ones sliding away; live: pinned on screen
+      const gallery = { raw: 0, shown: 0, show: 0, hide: 0, live: false };
+      // Thumbnail j of n slides by `ratio` with the ones before it a little ahead (as oryzo's)
+      const stagger = (ratio: number, j: number, n: number) => {
+        const d = n > 1 ? j / (n - 1) : 0;
+        return fit(ratio, d * 0.2, 0.8 + d * 0.2, cubicInOut);
+      };
       const layout = () => {
-        const shift = -gallery.t * pitch;
-        // Coming in, the right strip slides in from its side. The left one only ever moves with the photos:
-        // pulled left any further, its queued thumbnails would show before their photos have had the card
-        const enter = (1 - gallery.intro) * pitch * 0.6;
+        const index = stepped(gallery.raw);
+        const shift = -index * pitch;
+        const half = window.innerWidth / 2;
         // Each sets its whole horizontal offset. Reverting and re-running this (React's dev double mount,
         // Fast Refresh) can leave GSAP reading a photo's last position back as a pixel x, which then
         // added to its xPercent and held the card a photo behind the strips
-        gsap.set(left, { x: shift, xPercent: 0, opacity: gallery.intro });
-        gsap.set(right, { x: shift + enter, xPercent: 0, opacity: gallery.intro });
-        slides.forEach((el, i) => gsap.set(el, { x: 0, xPercent: gsap.utils.clamp(-100, 100, (i - gallery.t) * 100) }));
+        gsap.set(left, { x: shift, xPercent: 0, opacity: gallery.shown });
+        gsap.set(right, { x: shift, xPercent: 0, opacity: gallery.shown });
+        rightThumbs.forEach((el, j) => gsap.set(el, { x: (1 - stagger(gallery.show, j, rightThumbs.length)) * half }));
+        leftThumbs.forEach((el, j) => gsap.set(el, { x: -stagger(gallery.hide, j, leftThumbs.length) * half }));
+
+        slides.forEach((el, i) => {
+          gsap.set(el, { x: 0, xPercent: gsap.utils.clamp(-100, 100, (i - index) * 100) });
+          // -1 sliding in, 0 in the card, 1 sliding out (the last one stays)
+          const o = gsap.utils.clamp(-1, i === last ? 0 : 1, index - i);
+          gsap.set(inners[i], { rotation: o * INNER_ROTATION, scale: 1 + Math.abs(o) * (INNER_SCALE - 1) });
+
+          // A video plays from its start while its slide is in the card
+          const video = videos[i];
+          const on = gallery.live && Math.abs(index - i) < 1;
+          if (!video || on === playing[i]) return;
+          playing[i] = on;
+          if (on) {
+            video.currentTime = 0;
+            video.play().catch(() => {});
+          } else video.pause();
+        });
       };
       measure();
       layout();
@@ -94,16 +139,42 @@ export default function CareShowcaseMotion({ children, ...props }: React.Compone
         gsap.set(lines, { yPercent: 105 });
         gsap.set(section, { "--stick-fit": 0, "--stick-out": 0 });
 
+        // The thumbnails' slides play in time once their point in the scroll is reached, back when it's left
+        const show = gsap.to(gallery, { show: 1, duration: 1, ease: "none", paused: true, onUpdate: layout });
+        const hide = gsap.to(gallery, { hide: 1, duration: 1, ease: "none", paused: true, onUpdate: layout });
+        const STRIPS_AT = 2.8;
+        const STEPS_AT = 3.8;
+        const HIDE_AT = STEPS_AT + last * STEP - 0.2;
+        const cue = (tween: gsap.core.Tween) => {
+          let reached = false;
+          return (now: boolean) => {
+            if (now === reached) return;
+            reached = now;
+            if (now) tween.play();
+            else tween.reverse();
+          };
+        };
+        const cueShow = cue(show);
+        const cueHide = cue(hide);
+
         const tl = gsap
           .timeline({
             defaults: { ease: "none" },
+            onUpdate: () => {
+              cueShow(tl.time() >= STRIPS_AT);
+              cueHide(tl.time() >= HIDE_AT);
+            },
             scrollTrigger: {
               trigger: section,
               start: "top top",
-              end: "+=500%",
+              end: "+=610%",
               pin: true,
               scrub: 1,
               invalidateOnRefresh: true,
+              onToggle: (self) => {
+                gallery.live = self.isActive;
+                layout();
+              },
               onRefresh: () => {
                 measure();
                 layout();
@@ -156,21 +227,19 @@ export default function CareShowcaseMotion({ children, ...props }: React.Compone
           .to(big, { opacity: 0, duration: 0.25 }, 2.2)
           .to(kicker, { y: 0, duration: 1, ease: "power2.inOut" }, 1.6)
           .to(lines, { yPercent: 0, duration: 0.5, stagger: 0.1, ease: "power2.out" }, 2.35)
-          // 3. Strip in
-          .to(gallery, { intro: 1, duration: 0.8, ease: "power2.out", onUpdate: layout }, 2.8);
-
-        // 4. A step per photo: eased in and out, so each photo holds in the card before the next slides in
-        for (let i = 0; i < last; i++) {
-          tl.to(gallery, { t: i + 1, duration: 1, ease: "power3.inOut", onUpdate: layout }, 3.8 + i);
-        }
-        // The stick rides out with the first photo, gone by the time it reaches the card's edge
-        tl.to(section, { "--stick-out": 1, duration: 0.4 }, 3.95);
-        // Hold on the last photo before the pin lets go
-        tl.to({}, { duration: 0.5 });
+          // 3. Strips in (their thumbnails slide in by `show`, cued above)
+          .to(gallery, { shown: 1, duration: 0.4, onUpdate: layout }, STRIPS_AT - 0.2)
+          // 4. The photos: linear here, stepped() gives each step its holds and easing
+          .to(gallery, { raw: last, duration: last * STEP, onUpdate: layout }, STEPS_AT)
+          // The stick rides out with the first photo, gone by the time it reaches the card's edge
+          .to(section, { "--stick-out": 1, duration: 0.5 }, STEPS_AT + 0.2 * STEP)
+          // Hold on the last photo (its left strip sliding away) before the pin lets go
+          .to({}, { duration: 0.6 });
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gallery.intro = 1;
+        gallery.shown = 1;
+        gallery.show = 1;
         const settle = () => {
           measure();
           layout();

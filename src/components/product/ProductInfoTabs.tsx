@@ -98,10 +98,25 @@ export default function ProductInfoTabs({ product, content }: ProductInfoTabsPro
         <h2 id="product-details" className="sr-only">
           Product details
         </h2>
-        <ProductTabs tabs={tabs} label="Product details" />
+        <ProductTabs tabs={tabs} label="Product details" aside={<AboutImage />} />
         <FrameRule />
       </Frame>
     </section>
+  );
+}
+
+/** Left of every tab, so it stays put as the panels switch */
+function AboutImage() {
+  return (
+    <div data-reveal="fade" className="relative aspect-square overflow-hidden rounded-2xl bg-surface">
+      <Image
+        src={aboutImage.src}
+        alt={aboutImage.alt}
+        fill
+        sizes="(min-width: 48rem) 45vw, 100vw"
+        className="object-cover"
+      />
+    </div>
   );
 }
 
@@ -110,41 +125,29 @@ function About({ product, content }: ProductInfoTabsProps) {
   const about = product.description?.replace(/<[^>]+>/g, "");
 
   return (
-    <div className="grid gap-stack md:grid-cols-2 md:items-center lg:gap-16">
-      <div data-reveal="fade" className="relative aspect-square overflow-hidden rounded-2xl bg-surface">
-        <Image
-          src={aboutImage.src}
-          alt={aboutImage.alt}
-          fill
-          sizes="(min-width: 48rem) 45vw, 100vw"
-          className="object-cover"
-        />
-      </div>
-
-      <div className="flex flex-col gap-8">
-        {about && (
-          <div className="flex flex-col gap-3">
-            <h3 className="text-h5">About The Product</h3>
-            <p className="text-body text-muted">{about}</p>
-          </div>
-        )}
-        {content && (
-          <div className="grid gap-8 border-t border-line pt-8 sm:grid-cols-2">
-            <Points title="Recommended For" items={content.recommendedFor} />
-            <Points title="Suitable For" items={content.suitableFor} />
-          </div>
-        )}
-        <ul data-reveal="stagger" className="grid grid-cols-2 gap-6 pt-4 sm:grid-cols-4">
-          {features.map(({ icon: Icon, label }) => (
-            <li key={label} className="flex flex-col items-center gap-3 text-center">
-              <span className="center size-12 rounded-full bg-surface">
-                <Icon aria-hidden="true" className="size-5" />
-              </span>
-              <span className="text-caption text-muted">{label}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
+    <div className="flex flex-col gap-8">
+      {about && (
+        <div className="flex flex-col gap-3">
+          <h3 className="text-h5">About The Product</h3>
+          <p className="text-body text-muted">{about}</p>
+        </div>
+      )}
+      {content && (
+        <div className="grid gap-8 border-t border-line pt-8 sm:grid-cols-2">
+          <Points title="Recommended For" items={content.recommendedFor} />
+          <Points title="Suitable For" items={content.suitableFor} />
+        </div>
+      )}
+      <ul data-reveal="stagger" className="grid grid-cols-2 gap-6 pt-4 sm:grid-cols-4 md:grid-cols-2 xl:grid-cols-4">
+        {features.map(({ icon: Icon, label }) => (
+          <li key={label} className="flex flex-col items-center gap-3 text-center">
+            <span className="center size-12 rounded-full bg-surface">
+              <Icon aria-hidden="true" className="size-5" />
+            </span>
+            <span className="text-caption text-muted">{label}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -167,7 +170,7 @@ function Points({ title, items }: { title: string; items: string[] }) {
 
 function Ingredients() {
   return (
-    <div className="grid gap-stack md:grid-cols-2 lg:gap-16">
+    <div className="flex flex-col gap-8">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-3">
           <h3 className="text-h5">What&apos;s Inside</h3>
@@ -206,11 +209,13 @@ function Ingredients() {
 
 function Usage() {
   return (
-    <div className="flex flex-col gap-stack">
-      <ol data-reveal="stagger" className="grid gap-8 md:grid-cols-3">
+    <div className="flex flex-col gap-8">
+      <ol data-reveal="stagger" className="flex flex-col border-t border-line">
         {steps.map(({ title, text }, i) => (
-          <li key={title} className="flex flex-col gap-4 border-t border-line pt-6">
-            <span className="center size-10 rounded-full bg-accent text-cta text-paper tabular-nums">{i + 1}</span>
+          <li key={title} className="flex items-start gap-4 border-b border-line py-5">
+            <span className="center size-10 shrink-0 rounded-full bg-accent text-cta text-paper tabular-nums">
+              {i + 1}
+            </span>
             <div className="flex flex-col gap-1">
               <h3 className="text-h6">{title}</h3>
               <p className="text-caption text-muted">{text}</p>
@@ -230,7 +235,7 @@ function Usage() {
 function Faq() {
   return (
     <div data-reveal>
-      <FaqAccordion className="mx-auto flex max-w-3xl flex-col border-t border-line">
+      <FaqAccordion className="flex flex-col border-t border-line">
         {faqs.map((faq, i) => (
           // expanded: / group-expanded: (not open:) so the styles change as the item animates
           <details

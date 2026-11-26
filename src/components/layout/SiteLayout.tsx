@@ -4,7 +4,6 @@ import CartDrawer from "@/components/layout/CartDrawer";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import SearchDrawer from "@/components/layout/SearchDrawer";
-import PageCurtain from "@/components/layout/PageCurtain";
 import AppProviders from "@/components/providers/AppProviders";
 import { BlobButtonFilter } from "@/components/ui/BlobButton";
 import { getAllBlogPosts } from "@/services/blog";
@@ -34,8 +33,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       {/* The shopping assistant: bottom right, not at checkout */}
       <AssistantLauncher products={range} />
       <BlobButtonFilter />
-      {/* The page transition (template.tsx): a white curtain with a tagline */}
-      <PageCurtain />
     </AppProviders>
   );
 }

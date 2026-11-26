@@ -11,12 +11,19 @@ export interface ProductTab {
   content: React.ReactNode;
 }
 
+interface ProductTabsProps {
+  tabs: ProductTab[];
+  label: string;
+  /** Shown left of the panels (above them on mobile) and kept in place as the tabs switch */
+  aside?: React.ReactNode;
+}
+
 /**
  * The tab bar across the frame, a rule, then the panels. Every panel is rendered (so all the copy is
  * in the page for search); the inactive ones are hidden. Bar and panel rise in as they scroll into
  * view; a newly chosen panel's blocks then fade up in turn.
  */
-export default function ProductTabs({ tabs, label }: { tabs: ProductTab[]; label: string }) {
+export default function ProductTabs({ tabs, label, aside }: ProductTabsProps) {
   const [active, setActive] = useState(tabs[0]?.id ?? "");
   const root = useRef<HTMLDivElement>(null);
   const chosen = useRef(false);
@@ -50,17 +57,24 @@ export default function ProductTabs({ tabs, label }: { tabs: ProductTab[]; label
         <Tabs tabs={tabs} active={active} onChange={choose} label={label} stretch />
       </div>
       <FrameRule />
-      {tabs.map((tab) => (
-        <div
-          key={tab.id}
-          {...tabPanelProps(tab.id)}
-          data-reveal
-          hidden={tab.id !== active}
-          className="px-inset py-10 focus-visible:-outline-offset-2 md:py-14"
-        >
-          {tab.content}
+      <div
+        className={`grid gap-stack px-inset py-10 md:py-14 lg:gap-16 ${aside ? "md:grid-cols-2 md:items-start" : ""}`}
+      >
+        {aside}
+        <div>
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              {...tabPanelProps(tab.id)}
+              data-reveal
+              hidden={tab.id !== active}
+              className="focus-visible:outline-offset-4"
+            >
+              {tab.content}
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 }

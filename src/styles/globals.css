@@ -763,10 +763,8 @@
 
 /* ---------- Page transitions ---------------------------------------------- */
 /*
- * src/app/template.tsx: on a route change the white curtain (PageCurtain) covers the page, shows a
- * tagline and lifts off the new one; template.tsx holds the page snapshots still under it while it
- * covers. The cross-fade below (the outgoing page out, the incoming one in) is what shows without the
- * curtain. Everything else — the header, the footer — is the root snapshot, and switches without
+ * src/app/template.tsx: on a route change the outgoing page fades out and the incoming one fades in
+ * (below). Everything else — the header, the footer — is the root snapshot, and switches without
  * animating.
  */
 ::view-transition-old(root),

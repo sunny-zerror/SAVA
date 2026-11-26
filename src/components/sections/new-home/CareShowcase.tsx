@@ -4,7 +4,10 @@ import Sparkle from "@/components/ui/Sparkle";
 import CareShowcaseMotion from "./CareShowcaseMotion";
 
 interface Slide {
+  /** The photo — for a video slide, its poster (and the strips' thumbnail) */
   src: string;
+  /** A muted loop, played from its start while the slide has the card (Mixkit, free licence) */
+  video?: string;
   alt: string;
   /** Caption card over the photo; the first photo carries its own feature callouts instead */
   title?: string;
@@ -21,34 +24,37 @@ const SLIDES: Slide[] = [
     alt: "A raised underarm marked with a dashed circle, beside four callouts: dermatologist approved, no parabens or artificial dyes, stain-free on white clothes, gentle for everyday use",
   },
   {
-    src: "/images/about/confidence_img_1.png",
-    alt: "A neck beaded with sweat after a workout",
+    src: "/images/newhome/care/sweat.webp",
+    video: "/videos/care/sweat.mp4",
+    alt: "A woman beaded with sweat, mid-workout",
     title: "Advanced sweat control",
     text: "Stays fresh through every move, every commute, and everything in between.",
   },
   {
-    src: "/images/about/gym_img.png",
-    alt: "A man in a white hoodie running on a treadmill against a blue wall",
+    src: "/images/newhome/care/active.webp",
+    video: "/videos/care/active.mp4",
+    alt: "A runner on a forest path",
     title: "Made for active lifestyles",
     text: "Daily commutes, training sessions and long, warm days.",
-    // The runner and treadmill fill the photo's left half; centred, the crop cut him off at the card's edge
-    position: "5% 50%",
   },
   {
-    src: "/images/about/confidence_img_3.png",
-    alt: "A shoulder beaded with water, in a red sports top",
+    src: "/images/newhome/care/stain-free.webp",
+    video: "/videos/care/stain-free.mp4",
+    alt: "Washing blowing on a line outdoors",
     title: "Stain-free guarantee",
     text: "Tested on white cotton and delicate silks with zero residue transfer.",
   },
   {
-    src: "/images/about/confidence_img_2.png",
+    src: "/images/newhome/care/lab.webp",
+    video: "/videos/care/lab.mp4",
     alt: "A lab technician measuring out a formula",
     title: "ISO 22716 certified",
     text: "Made to cosmetic GMP standards with traceable batches.",
   },
   {
-    src: "/images/about/banner.png",
-    alt: "SAVA sticks laid out on dark fabric",
+    src: "/images/newhome/care/fragrance.webp",
+    video: "/videos/care/fragrance.mp4",
+    alt: "A finger pressing down on a fragrance bottle",
     title: "Refined fragrance",
     text: "Three signature scents: Silver Lining, Citrus Tide and Forest Air.",
   },
@@ -140,17 +146,41 @@ export default function CareShowcase() {
                 <div data-care-back className="absolute inset-0 bg-paper motion-safe:opacity-0" />
                 <div data-care-slides className="absolute inset-0 motion-safe:opacity-0">
                   {SLIDES.map((slide, i) => (
-                    <figure key={slide.src} data-care-slide className="absolute inset-0 bg-surface">
-                      <Image
-                        src={slide.src}
-                        alt={slide.alt}
-                        fill
-                        sizes="(min-width: 48rem) 42rem, 90vw"
-                        style={{ objectPosition: slide.position }}
-                        className="object-cover"
-                      />
+                    <div key={slide.src} data-care-slide className="absolute inset-0 overflow-hidden bg-surface">
+                      {/* Turned and zoomed by the motion as the slide comes in and goes out */}
+                      <figure data-care-inner className="absolute inset-0 will-change-transform">
+                        {slide.video ? (
+                          <video
+                            muted
+                            loop
+                            playsInline
+                            preload="none"
+                            poster={slide.src}
+                            aria-label={slide.alt}
+                            className="absolute inset-0 size-full object-cover"
+                          >
+                            <source src={slide.video} type="video/mp4" />
+                          </video>
+                        ) : (
+                          <Image
+                            src={slide.src}
+                            alt={slide.alt}
+                            fill
+                            sizes="(min-width: 48rem) 42rem, 90vw"
+                            style={{ objectPosition: slide.position }}
+                            className="object-cover"
+                          />
+                        )}
+                        {slide.title && (
+                          <figcaption className="absolute inset-x-3 bottom-3 rounded-2xl bg-paper/90 p-4 backdrop-blur-sm">
+                            <p className="text-h6">{slide.title}</p>
+                            <p className="mt-1 text-caption text-muted">{slide.text}</p>
+                          </figcaption>
+                        )}
+                      </figure>
                       {/* The first photo's dashed circle (48.2% across, 49.65% down, 26.1% of its width):
-                          where the stick settles as the card opens, riding out with the photo after */}
+                          where the stick settles as the card opens, riding out with the photo after. Outside
+                          the turning layer, so the stick doesn't swell with its zoom */}
                       {i === 0 && (
                         <div
                           data-model-anchor="circle"
@@ -158,13 +188,7 @@ export default function CareShowcase() {
                           className="absolute top-[39.9%] left-[35.15%] aspect-square w-[26.1%]"
                         />
                       )}
-                      {slide.title && (
-                        <figcaption className="absolute inset-x-3 bottom-3 rounded-2xl bg-paper/90 p-4 backdrop-blur-sm">
-                          <p className="text-h6">{slide.title}</p>
-                          <p className="mt-1 text-caption text-muted">{slide.text}</p>
-                        </figcaption>
-                      )}
-                    </figure>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -194,9 +218,10 @@ export default function CareShowcase() {
   );
 }
 
+/** Half-faded, as oryzo's, so the card keeps the eye */
 function Thumb({ src, position }: { src: string; position?: string }) {
   return (
-    <div className="relative h-(--thumb-h) w-(--thumb-w) shrink-0 overflow-hidden rounded-2xl bg-surface">
+    <div className="relative h-(--thumb-h) w-(--thumb-w) shrink-0 overflow-hidden rounded-2xl bg-surface opacity-50">
       <Image src={src} alt="" fill sizes="16rem" style={{ objectPosition: position }} className="object-cover" />
     </div>
   );
