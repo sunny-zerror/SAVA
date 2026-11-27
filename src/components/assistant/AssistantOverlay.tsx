@@ -9,7 +9,7 @@ import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from "re
 import { createPortal } from "react-dom";
 import AssistantInput, { type AssistantInputHandle } from "@/components/assistant/AssistantInput";
 import AssistantOrb from "@/components/assistant/AssistantOrb";
-import AssistantTranscript, { assistantChip } from "@/components/assistant/AssistantTranscript";
+import AssistantTranscript from "@/components/assistant/AssistantTranscript";
 import Sparkle from "@/components/ui/Sparkle";
 import { ASSISTANT_DIALOG_ID, assistantConfig } from "@/config/assistant";
 import { CREATE_CONTACT, GET_ORDERS, GET_PROMOTIONS } from "@/graphql";
@@ -57,9 +57,9 @@ const LEVEL_BUMP_MS = 1000;
 
 const BUSY = new Set<AssistantPhase>(["thinking", "replying"]);
 
-/** The round buttons top right: New chat and Close */
+/** The round buttons top right, New chat and Close: SAVA blue, navy on hover */
 const headerButton =
-  "relative center size-10 shrink-0 rounded-full bg-paper shadow-sm shadow-navy/5 transition-colors hover:bg-mist";
+  "relative center size-10 shrink-0 rounded-full bg-accent text-paper shadow-sm shadow-navy/10 transition-colors duration-300 hover:bg-navy focus-visible:bg-navy";
 /** Direct children of <body> left as they are while the page behind goes inert */
 const UNTOUCHED = new Set(["SCRIPT", "STYLE", "LINK", "TEMPLATE", "NOSCRIPT", "NEXT-ROUTE-ANNOUNCER"]);
 
@@ -398,7 +398,7 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
     state.setPhase("listening");
     addWelcome();
     bump();
-    // Its button goes with the old conversation: focus moves on, as on opening
+    // Focus moves on to the fresh chat, as on opening
     if (window.matchMedia("(pointer: fine)").matches) input.current?.focus();
     else panel.current?.focus({ preventScroll: true });
   };
@@ -603,16 +603,28 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
           onPointerDown={bump}
           onKeyDown={bump}
           // z-1: a layer of its own, so the input's glow sits over the stage's colour
-          className="relative z-1 flex h-full flex-col outline-none"
+          className="relative z-1 container flex h-full flex-col py-gutter outline-none"
         >
-          {/* Just its actions, top right: the name sits under the orb */}
-          <div className="container flex h-header shrink-0 items-center justify-end gap-2">
-            {hasInteracted && (
+          {/* Everything in one frame like the site's (Frame, FrameRule), the page gutter clear of the screen's
+              edges: a hairline all round with a dot at each corner */}
+          <div className="relative flex min-h-0 flex-1 flex-col border border-rule">
+            {["-top-1 -left-1", "-top-1 -right-1", "-bottom-1 -left-1", "-bottom-1 -right-1"].map((corner) => (
+              <span
+                key={corner}
+                aria-hidden="true"
+                className={cn("absolute z-1 size-1.75 rounded-full bg-mist", corner)}
+              />
+            ))}
+            {/* Just its actions, top right, as far in from the frame's top and side as the input is from its
+              foot: the name sits under the orb. On wide screens they float over the top, so the chat can run
+              the frame's full height */}
+            <div className="pointer-events-none flex shrink-0 items-center justify-end gap-2 px-inset pt-inset *:pointer-events-auto lg:absolute lg:inset-x-0 lg:top-0 lg:z-1">
+              {/* Always there, so a fresh start is one tap away */}
               <button
                 type="button"
                 onClick={newConversation}
                 aria-label="Start a new chat"
-                className={cn(headerButton, "group/new animate-fade-up")}
+                className={cn(headerButton, "group/new")}
               >
                 <RiChatNewLine aria-hidden="true" className="size-5" />
                 {/* Its name, on hover and keyboard focus */}
@@ -623,113 +635,87 @@ export default function AssistantOverlay({ products, launcher }: AssistantOverla
                   New chat
                 </span>
               </button>
-            )}
-            <button
-              type="button"
-              onClick={() => requestClose()}
-              aria-label="Close the assistant"
-              className={cn(headerButton, "group -mr-1")}
-            >
-              <RiCloseLine
-                aria-hidden="true"
-                className="size-5 transition-transform duration-500 ease-out-expo group-hover:rotate-90"
-              />
-            </button>
-          </div>
-          <p aria-live="polite" className="sr-only">
-            {dictation.isDictating ? "Listening" : ""}
-          </p>
-
-          <div className="container flex min-h-0 flex-1 flex-col-reverse gap-2 pb-5 lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:pb-8">
-            {/* The conversation: sized to its messages and centred beside the orb; on phones, under it,
-                taking the room the orb gives up once the chat gets going */}
-            <div
-              className={cn(
-                "flex min-h-0 w-full flex-col transition-[flex-grow] duration-300 lg:max-h-full lg:w-136",
-                hasInteracted && "max-lg:grow",
-              )}
-            >
-              <AssistantTranscript
-                key={conversation}
-                messages={messages}
-                thinking={phase === "thinking" ? thinking : null}
-                busy={busy}
-                onChip={sendMessage}
-                onRevealed={markRevealed}
-              />
-              {error && (
-                <div
-                  role="alert"
-                  className="mb-3 flex items-start gap-2.5 rounded-2xl border border-sale/20 bg-paper/80 px-4 py-3 text-caption text-sale"
-                >
-                  <p className="flex-1">{error}</p>
-                  <button
-                    type="button"
-                    onClick={() => setError(null)}
-                    aria-label="Dismiss"
-                    className="-my-1 -mr-2 center size-7 shrink-0 rounded-full transition-colors hover:bg-sale/10"
-                  >
-                    <RiCloseLine aria-hidden="true" className="size-4" />
-                  </button>
-                </div>
-              )}
-              <div className="flex flex-col gap-5">
-                {!hasInteracted && messages.length > 0 && (
-                  // One row that scrolls sideways on phones; centred and wrapping on wide screens
-                  <div className="flex gap-2 max-lg:-mx-gutter max-lg:no-scrollbar max-lg:overflow-x-auto max-lg:fade-edges-x max-lg:px-gutter max-lg:py-1 lg:flex-wrap lg:justify-center">
-                    {QUICK_ACTIONS.map((label, i) => (
-                      <button
-                        key={label}
-                        type="button"
-                        onClick={() => sendMessage(label)}
-                        // One after another, as the welcome finishes arriving
-                        style={{ animationDelay: `${1.2 + i * 0.06}s` }}
-                        className={cn(assistantChip, "animate-fade-up")}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-                <AssistantInput
-                  ref={input}
-                  busy={busy}
-                  onSubmit={sendMessage}
-                  onStop={interrupt}
-                  onDictate={startDictation}
-                  onActivity={bump}
-                  dictation={dictation}
+              <button
+                type="button"
+                onClick={() => requestClose()}
+                aria-label="Close the assistant"
+                className={cn(headerButton, "group")}
+              >
+                <RiCloseLine
+                  aria-hidden="true"
+                  className="size-5 transition-transform duration-500 ease-out-expo group-hover:rotate-90"
                 />
-              </div>
+              </button>
             </div>
+            <p aria-live="polite" className="sr-only">
+              {dictation.isDictating ? "Listening" : ""}
+            </p>
 
-            {/* The orb with its name beneath: right on wide screens; on phones above the chat, shrinking
-                (its name kept for screen readers only) once it gets going */}
-            <div
-              className={cn(
-                "flex shrink-0 flex-col items-center gap-6 self-center lg:gap-10",
-                !hasInteracted && "max-lg:my-auto",
-              )}
-            >
-              <div
-                className={cn(
-                  "aspect-square transition-[width] duration-300 lg:w-[min(32.5rem,46vw,calc(100svh-15rem))]",
-                  hasInteracted ? "max-lg:w-25" : "max-lg:w-[min(20rem,80vw,36svh)]",
-                )}
-              >
-                <AssistantOrb phase={phase} active={isOpen || closing} level={micLevel} />
+            <div className="flex min-h-0 flex-1 flex-col-reverse lg:flex-row lg:justify-between lg:gap-10 lg:pr-inset">
+              {/* The chat: the input at the frame's foot, the conversation starting centred above it and growing
+                up from there. Wide screens: the frame's full height, left of the orb; phones: the room under it */}
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col lg:w-152 lg:flex-initial">
+                <AssistantTranscript
+                  key={conversation}
+                  messages={messages}
+                  thinking={phase === "thinking" ? thinking : null}
+                  busy={busy}
+                  onChip={sendMessage}
+                  onRevealed={markRevealed}
+                  starters={!hasInteracted && messages.length > 0 ? QUICK_ACTIONS : undefined}
+                />
+                <div className="flex flex-col gap-3 px-inset pb-inset">
+                  {error && (
+                    <div
+                      role="alert"
+                      className="flex items-start gap-2.5 rounded-2xl border border-sale/20 bg-paper/80 px-4 py-3 text-caption text-sale"
+                    >
+                      <p className="flex-1">{error}</p>
+                      <button
+                        type="button"
+                        onClick={() => setError(null)}
+                        aria-label="Dismiss"
+                        className="-my-1 -mr-2 center size-7 shrink-0 rounded-full transition-colors hover:bg-sale/10"
+                      >
+                        <RiCloseLine aria-hidden="true" className="size-4" />
+                      </button>
+                    </div>
+                  )}
+                  <AssistantInput
+                    ref={input}
+                    busy={busy}
+                    onSubmit={sendMessage}
+                    onStop={interrupt}
+                    onDictate={startDictation}
+                    onActivity={bump}
+                    dictation={dictation}
+                  />
+                </div>
               </div>
-              {/* Positioned, so it sits over the orb's corona rather than under it */}
-              <h2
-                id="assistant-title"
-                className={cn(
-                  "relative flex items-center gap-2 rounded-full bg-paper/70 px-4 py-2 text-kicker text-accent ring-1 ring-paper backdrop-blur-sm",
-                  hasInteracted && "max-lg:sr-only",
-                )}
-              >
-                <Sparkle />
-                SAVA Assistant
-              </h2>
+
+              {/* The orb with its name beneath: right on wide screens; on phones above the chat, shrinking
+                (its name kept for screen readers only) once it gets going */}
+              <div className="flex shrink-0 flex-col items-center gap-6 self-center lg:gap-10">
+                <div
+                  className={cn(
+                    "aspect-square transition-[width] duration-300 lg:w-[min(32.5rem,46vw,calc(100svh-15rem))]",
+                    hasInteracted ? "max-lg:w-25" : "max-lg:w-[min(20rem,80vw,36svh)]",
+                  )}
+                >
+                  <AssistantOrb phase={phase} active={isOpen || closing} level={micLevel} />
+                </div>
+                {/* Positioned, so it sits over the orb's corona rather than under it */}
+                <h2
+                  id="assistant-title"
+                  className={cn(
+                    "relative flex items-center gap-2 rounded-full bg-paper/70 px-4 py-2 text-kicker text-accent ring-1 ring-paper backdrop-blur-sm",
+                    hasInteracted && "max-lg:sr-only",
+                  )}
+                >
+                  <Sparkle />
+                  SAVA Assistant
+                </h2>
+              </div>
             </div>
           </div>
         </div>

@@ -31,14 +31,11 @@ export default async function HomeHero() {
       <HomeIntro />
       <HeroMotion
         aria-labelledby="home-hero"
-        className="relative isolate -mt-[calc(var(--spacing-header)+var(--spacing-announcement))] overflow-hidden bg-gradient-brand text-paper"
+        className="relative isolate -mt-header overflow-hidden bg-gradient-brand text-paper"
       >
         <HeroCanvas className="absolute inset-0 -z-10 size-full" />
 
-        <Frame
-          tone="dark"
-          className="flex h-svh min-h-fit flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))]"
-        >
+        <Frame tone="dark" className="flex h-svh min-h-fit flex-col pt-header">
           <div className="flex flex-1 flex-col items-center justify-between gap-6 py-6">
             <div
               data-model-anchor="hero"

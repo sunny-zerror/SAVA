@@ -3,7 +3,7 @@ import { SESSION_COOKIE } from "@/utils/session-cookie";
 
 /*
  * Route guard (Next 16 "proxy", formerly middleware). Signed-out visitors are sent
- * from /account to /login and back afterwards; signed-in ones skip the auth pages.
+ * from /account to /login and back afterwards; signed-in ones skip the sign-in page.
  * The cookie is only a hint — the account page still checks the real session.
  */
 export function proxy(request: NextRequest) {
@@ -16,7 +16,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if ((pathname === "/login" || pathname === "/signup") && signedIn) {
+  if (pathname === "/login" && signedIn) {
     return NextResponse.redirect(new URL("/account", request.url));
   }
 
@@ -24,5 +24,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/account/:path*", "/login", "/signup"],
+  matcher: ["/account/:path*", "/login"],
 };

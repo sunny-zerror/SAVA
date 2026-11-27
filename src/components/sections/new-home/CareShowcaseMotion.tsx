@@ -11,7 +11,7 @@ const fontSize = (el: Element) => parseFloat(getComputedStyle(el).fontSize);
  *   1. the stick stands in the viewfinder (HeroStick lands it as the pin begins) while the huge line
  *      sweeps in from the right behind it, the label climbs to sit on the line and the ring turns
  *   2. the ring goes and the card opens from the viewfinder's size as the first photo fades in, the
- *      stick shrinking down into the photo's dashed circle (`--stick-fit`, 0–1, read by HeroStick);
+ *      stick shrinking down into its place in the photo (`--stick-fit`, 0–1, read by HeroStick and CabinetTraveller);
  *      the huge line shrinks onto the heading and hands over to it as its lines rise, and the label
  *      climbs to sit above them
  *   3. the strips fade in, the right-hand thumbnails sliding in from half a screen out, one after another
@@ -105,7 +105,7 @@ export default function CareShowcaseMotion({ children, ...props }: React.Compone
           )
           .to(reticle, { rotation: 30, duration: 1.6 }, 0)
           // 2. The card opens as the photo fades in (white first, so the line passes behind it), and the
-          //    stick shrinks down into the photo's circle as it goes
+          //    stick shrinks down into its place in the photo as it goes
           .to(reticle, { opacity: 0, scale: 1.12, duration: 0.5 }, 1.4)
           .to(section, { "--stick-fit": 1, duration: 1.1, ease: "power2.inOut" }, 1.5)
           .to(q("[data-care-back]"), { opacity: 1, duration: 0.2 }, 1.5)

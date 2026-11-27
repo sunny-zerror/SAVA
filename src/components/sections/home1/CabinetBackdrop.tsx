@@ -8,7 +8,7 @@
  */
 export default function CabinetBackdrop({ children }: { children: React.ReactNode }) {
   return (
-    <div className="-mt-[calc(var(--spacing-header)+var(--spacing-announcement))]">
+    <div className="-mt-header">
       <div
         aria-hidden="true"
         className="pointer-events-none sticky top-0 -mb-[100svh] h-svh overflow-hidden bg-accent bg-gradient-brand"

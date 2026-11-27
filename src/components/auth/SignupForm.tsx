@@ -9,7 +9,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { toast } from "@/store/toast-store";
 import { errorMessage } from "@/utils/errors";
 
-export default function SignupForm() {
+export default function SignupForm({ next }: { next: string }) {
   const router = useRouter();
   const { signup } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -38,7 +38,7 @@ export default function SignupForm() {
         emailSubscribedStatus: v.newsletter ? "SUBSCRIBED" : "NEVER_SUBSCRIBED",
       });
       toast.success(`Welcome to SAVA, ${user.firstName}! Your account is ready.`);
-      router.replace("/account");
+      router.replace(next);
     } catch (err) {
       toast.error(errorMessage(err, "Couldn't create your account."));
       setLoading(false);

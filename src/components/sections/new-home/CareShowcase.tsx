@@ -1,6 +1,6 @@
 import { Frame, FrameRule } from "@/components/ui/Frame";
 import Sparkle from "@/components/ui/Sparkle";
-import { CARE_FILMS, MAIN_FEATURE } from "@/data/care-slides";
+import { CARE_FILMS, MAIN_FEATURE, type CareSlide } from "@/data/care-slides";
 import CareGallery from "./CareGallery";
 import CareShowcaseMotion from "./CareShowcaseMotion";
 
@@ -11,15 +11,37 @@ const LINES = ["Protection", "Meets Care"];
  * "Protection Meets Care": pinned for a long scroll (CareShowcaseMotion), after the oryzo.ai
  * "So portable, it's wearable" scene. The travelling 3D stick (HeroStick) lands in a viewfinder ring
  * while the heading sweeps past behind it as one huge line; the line shrinks into the heading, the
- * card opens round the stick (80% of the screen, like oryzo's frame) and the stick settles into the
- * first photo's dashed circle. Then the photos step through the card one at a time — the stick riding
- * out with the first — the next ones queued in a strip on the right and the ones gone by in a strip
- * on the left, each strip clipped short of the card (CareGallery). Sizes are CSS variables, so the
- * motion reads them back rather than hard-coding them. With reduced motion it's the finished layout.
+ * card opens round the stick (80% of the screen, like oryzo's frame) and the stick settles into its
+ * place in the first photo ([data-model-anchor="photo"]). Then the photos step through the card one at
+ * a time — the stick riding out with the first — the next ones queued in a strip on the right and the
+ * ones gone by in a strip on the left, each strip clipped short of the card (CareGallery). Sizes are CSS
+ * variables, so the motion reads them back rather than hard-coding them. With reduced motion it's the
+ * finished layout.
+ *
+ * On /home and /home1 alike (there CabinetTraveller lands the stick), each with photos of its own.
  */
-export default function CareShowcase() {
+interface CareShowcaseProps {
+  /**
+   * The first photo, and what's laid in it (CareGallery's renderFirst, turning and zooming with it),
+   * holding the stick's place: [data-model-anchor="photo"] in the card. By default the main photo, the
+   * stick settling into its dashed circle
+   */
+  first?: { slide: CareSlide; render: (where: "card" | "thumb") => React.ReactNode };
+  /** The photos (and films) after the first: /home's films by default */
+  after?: CareSlide[];
+  /** Half-fade the strips' thumbnails (the default); false shows them whole */
+  fadeThumbs?: boolean;
+  /** Keep the header transparent until this section reaches it, then white (Header's data-header-solid) */
+  solidHeader?: boolean;
+}
+
+export default function CareShowcase({ first, after = CARE_FILMS, fadeThumbs, solidHeader }: CareShowcaseProps) {
   return (
-    <CareShowcaseMotion aria-labelledby="care-heading" className="relative isolate overflow-hidden bg-paper">
+    <CareShowcaseMotion
+      aria-labelledby="care-heading"
+      data-header-solid={solidHeader || undefined}
+      className="relative isolate overflow-hidden bg-paper"
+    >
       <Frame>
         <FrameRule />
 
@@ -35,16 +57,20 @@ export default function CareShowcase() {
 
           {/* Everything that centres on the card: in the space under the header (on phones, under the heading) */}
           <CareGallery
-            slides={[MAIN_FEATURE, ...CARE_FILMS]}
-            // The first photo's dashed circle (48.2% across, 49.65% down, 26.1% of its width): where the
+            slides={[first?.slide ?? MAIN_FEATURE, ...after]}
+            renderFirst={first?.render}
+            fadeThumbs={fadeThumbs}
+            // The main photo's dashed circle (48.2% across, 49.65% down, 26.1% of its width): where the
             // stick settles as the card opens, riding out with the photo after. Outside the turning
             // layer, so the stick doesn't swell with its zoom
             firstOver={
-              <div
-                data-model-anchor="circle"
-                data-model-fit="0.85"
-                className="absolute top-[39.9%] left-[35.15%] aspect-square w-[26.1%]"
-              />
+              first ? undefined : (
+                <div
+                  data-model-anchor="photo"
+                  data-model-fit="0.85"
+                  className="absolute top-[39.9%] left-[35.15%] aspect-square w-[26.1%]"
+                />
+              )
             }
             className="top-[calc(var(--spacing-header)+8rem)] [--care-s:calc(var(--care-h)*0.6)] md:top-(--spacing-header)"
           >

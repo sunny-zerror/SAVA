@@ -21,8 +21,9 @@ export default function Header() {
   const openSearch = useSearchStore((s) => s.open);
   const { count } = useCart();
 
-  // "Stuck" once the announcement bar has scrolled away and the header is pinned to the top
-  // (mt-announcement: the bar is absolute, so the header keeps its place below it)
+  // "Stuck" once the page has scrolled and the header is pinned to the top. A page can keep it
+  // transparent for longer: with a [data-header-solid] section (/home1's care showcase), it stays clear
+  // over everything above that section and turns white as the section reaches it
   const ref = useRef<HTMLElement>(null);
   const [stuck, setStuck] = useState(false);
   useEffect(() => {
@@ -30,8 +31,9 @@ export default function Header() {
     const update = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const top = ref.current?.getBoundingClientRect().top ?? 1;
-        setStuck(window.scrollY > 0 && top <= 0);
+        const header = ref.current?.getBoundingClientRect();
+        const solidFrom = document.querySelector("[data-header-solid]")?.getBoundingClientRect();
+        setStuck(solidFrom && header ? solidFrom.top <= header.bottom : window.scrollY > 0 && (header?.top ?? 1) <= 0);
       });
     };
     update();
@@ -42,7 +44,7 @@ export default function Header() {
       window.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);
     };
-  }, []);
+  }, [pathname]);
 
   return (
     <>
@@ -51,7 +53,7 @@ export default function Header() {
         // The home intro drops the header in once the curtain clears
         data-site-header
         className={cn(
-          "sticky top-0 z-40 mt-announcement border-b transition-[background-color,border-color,color] duration-300 [view-transition-class:site-chrome] [view-transition-name:site-header]",
+          "sticky top-0 z-40 border-b transition-[background-color,border-color,color] duration-300 [view-transition-class:site-chrome] [view-transition-name:site-header]",
           // White with a hairline under it on every page, except over a full-screen hero until it's scrolled past
           overlay && !stuck ? "border-paper/20 text-paper" : "border-line bg-paper text-ink",
         )}

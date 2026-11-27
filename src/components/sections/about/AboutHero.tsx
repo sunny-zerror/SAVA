@@ -32,7 +32,7 @@ export default async function AboutHero() {
     <section
       aria-labelledby="about-hero"
       data-reveal-sequence
-      className="relative isolate -mt-[calc(var(--spacing-header)+var(--spacing-announcement))] overflow-hidden bg-accent text-paper"
+      className="relative isolate -mt-header overflow-hidden bg-accent text-paper"
     >
       <Image
         src="/images/about/about_hero_banner.jpg"

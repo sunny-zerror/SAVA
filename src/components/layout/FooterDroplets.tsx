@@ -222,6 +222,10 @@ function paint(points: Point[], r: number, dpr: number, paper: string, ink: stri
  * while new beads slowly form. Built as the footer nears the screen and animated only while it's on it.
  * Reduced motion: still beads. Pass the layer's position in className.
  *
+ * Elsewhere the water can run on its own (`interactive={false}`): the pointer leaves it alone, and with
+ * `stream` set, drops keep running in over the top edge and all the way down, without end, in place of
+ * a bead breaking away now and then.
+ *
  * Kept cheap by drawing as little as possible each frame: beads at rest sit on a back canvas that's
  * only repainted a tile at a time where something changed; the front canvas carries just what's moving
  * (nudged and forming beads, drops, streaks) and is left alone while nothing is. Beads share a small
@@ -233,9 +237,22 @@ interface FooterDropletsProps {
   density?: number;
   /** How strongly each is shaded, against the usual (1): higher stands out more on a busy background */
   strength?: number;
+  /** The pointer nudges the beads near it, and heavy ones it brushes break away (the footer's). Off, the water runs on its own */
+  interactive?: boolean;
+  /** Drops a second running in over the top edge and on down to the bottom, without end; 0 for the footer's heavy beads breaking away now and then */
+  stream?: number;
+  /** How fast drops run, against the usual (1) */
+  pace?: number;
 }
 
-export default function FooterDroplets({ className, density: amount = 1, strength = 1 }: FooterDropletsProps) {
+export default function FooterDroplets({
+  className,
+  density: amount = 1,
+  strength = 1,
+  interactive = true,
+  stream = 0,
+  pace = 1,
+}: FooterDropletsProps) {
   const backRef = useRef<HTMLCanvasElement>(null);
   const frontRef = useRef<HTMLCanvasElement>(null);
 
@@ -384,6 +401,25 @@ export default function FooterDroplets({ className, density: amount = 1, strengt
       drops.push({ x: b.x, y: b.y, r, speed: 0, seed: rand(0, TAU), since: 0, drawnAt: r, trail: [], ...dropShape(r) });
     };
 
+    /** A drop coming in over the top edge, already running */
+    const streamDrop = () => {
+      const r = rand(3.6, 6);
+      const speed = (0.18 + r * 0.07) * pace * 0.7;
+      drops.push({
+        x: rand(0, width),
+        y: -r * 2,
+        r,
+        speed,
+        seed: rand(0, TAU),
+        since: 0,
+        drawnAt: r,
+        trail: [],
+        ...dropShape(r),
+      });
+    };
+    // Streaming, enough can be on their way down at once to keep it coming
+    const maxDrops = (stream ? MAX_DROPS * 2 : MAX_DROPS) * amount;
+
     const clearAll = () => {
       beads.clear();
       moving.clear();
@@ -496,10 +532,16 @@ export default function FooterDroplets({ className, density: amount = 1, strengt
     const tick = (time: number, deltaMs: number) => {
       const dt = Math.min(deltaMs / 16.67, 3);
 
-      // Every few seconds a heavy bead breaks away on its own
-      if (time > nextDrip) {
+      if (stream) {
+        // Drops keep running in from the top, one after another
+        if (time > nextDrip) {
+          nextDrip = time + rand(0.4, 1.6) / stream;
+          if (drops.length < maxDrops) streamDrop();
+        }
+      } else if (time > nextDrip) {
+        // Every few seconds a heavy bead breaks away on its own
         nextDrip = time + rand(2, 4.5) / amount;
-        if (drops.length < MAX_DROPS * amount) {
+        if (drops.length < maxDrops) {
           const heavy = [...beads].filter((b) => b.r > 3.6 && b.y < height - 60);
           if (heavy.length) startDrop(heavy[Math.floor(Math.random() * heavy.length)]);
         }
@@ -537,8 +579,8 @@ export default function FooterDroplets({ className, density: amount = 1, strengt
       const specks: Point[] = [];
       for (const d of drops) {
         // Slow, heavier drops a little faster, hesitating now and then before running on
-        const pace = (0.18 + d.r * 0.07) * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 1.1 + d.seed)));
-        d.speed += (pace - d.speed) * 0.05 * dt;
+        const run = (0.18 + d.r * 0.07) * (0.35 + 0.65 * (0.5 + 0.5 * Math.sin(time * 1.1 + d.seed))) * pace;
+        d.speed += (run - d.speed) * 0.05 * dt;
         const dy = d.speed * dt;
         d.y += dy;
         // The faintest wander as it finds its way down
@@ -607,7 +649,7 @@ export default function FooterDroplets({ className, density: amount = 1, strengt
         wake(b);
         if (b.r > 4 && f > 0.4 && Math.random() < 0.03 * f) breaking.push(b);
       });
-      for (const b of breaking) if (drops.length < MAX_DROPS * amount) startDrop(b);
+      for (const b of breaking) if (drops.length < maxDrops) startDrop(b);
     };
     const onLeave = () => {
       last.set = false;
@@ -630,7 +672,7 @@ export default function FooterDroplets({ className, density: amount = 1, strengt
       { rootMargin: "300px 0px" },
     );
     visibility.observe(host);
-    if (!still) {
+    if (!still && interactive) {
       host.addEventListener("pointermove", onMove);
       host.addEventListener("pointerleave", onLeave);
     }
@@ -643,7 +685,7 @@ export default function FooterDroplets({ className, density: amount = 1, strengt
       host.removeEventListener("pointermove", onMove);
       host.removeEventListener("pointerleave", onLeave);
     };
-  }, [amount, strength]);
+  }, [amount, strength, interactive, stream, pace]);
 
   return (
     <div aria-hidden="true" className={className}>

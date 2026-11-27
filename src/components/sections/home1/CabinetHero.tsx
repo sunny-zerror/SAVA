@@ -41,7 +41,7 @@ export default function CabinetHero() {
     <>
       <CabinetScroll
         aria-labelledby="home1-hero"
-        className="relative isolate overflow-hidden text-paper [--cx:50%] [--s:calc(min(92vw,30rem)/569)] lg:h-svh lg:min-h-152 lg:[--cx:57%] lg:[--s:calc((max(100svh,38rem)-var(--spacing-header)-var(--spacing-announcement))/941)]"
+        className="relative isolate overflow-hidden text-paper [--cx:50%] [--s:calc(min(92vw,30rem)/569)] lg:h-svh lg:min-h-152 lg:[--cx:57%] lg:[--s:calc((max(100svh,38rem)-var(--spacing-header))/941)]"
       >
         {/* The room's white, under the scene: the scroll scene fades it after the scene, down to the blue */}
         <div aria-hidden="true" data-cabinet-room className="absolute inset-0 bg-paper" />
@@ -60,19 +60,12 @@ export default function CabinetHero() {
         />
 
         <div className="relative lg:pointer-events-none lg:absolute lg:inset-0">
-          <Frame
-            tone="dark"
-            className="flex flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))] lg:h-svh lg:min-h-152 lg:justify-center"
-          >
+          <Frame tone="dark" className="flex flex-col pt-header lg:h-svh lg:min-h-152 lg:justify-center">
             <div
               data-cabinet-copy
-              className="max-w-md px-inset pt-8 pb-10 lg:pointer-events-auto lg:max-w-xs lg:py-0 xl:max-w-md"
+              className="max-w-md px-inset pt-8 pb-10 lg:pointer-events-auto lg:max-w-xs lg:py-0 xl:max-w-lg"
             >
-              <p className="flex items-center gap-2 text-kicker">
-                <Sparkle />
-                The Sava cabinet
-              </p>
-              <h1 id="home1-hero" className="mt-5 uppercase">
+              <h1 id="home1-hero" className="mt-5 font-bold uppercase">
                 Own your movement
               </h1>
               <p className="mt-5 text-body-lg">
@@ -103,7 +96,7 @@ export default function CabinetHero() {
             className="absolute top-1/2 left-1/2 h-[40svh] w-[22svh] -translate-x-1/2 -translate-y-1/2 lg:h-[58svh] lg:w-[30svh]"
           >
             <Image
-              src="/images/newhome/cabinet/stick-balanced.webp"
+              src="/images/newhome/sticks/sava-balanced-3d.webp"
               alt=""
               fill
               sizes="30svh"
@@ -114,7 +107,7 @@ export default function CabinetHero() {
           {/* Heading over the stick and lines under it on phones; to its left and right on large screens */}
           <Frame
             tone="dark"
-            className="grid h-svh grid-rows-[auto_1fr_auto] pt-[calc(var(--spacing-header)+var(--spacing-announcement)+1.5rem)] pb-14 lg:grid-cols-[1fr_32svh_1fr] lg:grid-rows-1 lg:items-center lg:py-0"
+            className="grid h-svh grid-rows-[auto_1fr_auto] pt-[calc(var(--spacing-header)+1.5rem)] pb-14 lg:grid-cols-[1fr_32svh_1fr] lg:grid-rows-1 lg:items-center lg:py-0"
           >
             <h2 className="px-inset uppercase">
               {HEADING.map((line) => (

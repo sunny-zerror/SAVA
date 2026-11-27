@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef } from "react";
+import FooterDroplets from "@/components/layout/FooterDroplets";
 import CroppedImage from "@/components/ui/CroppedImage";
 import { gsap, useGSAP } from "@/lib/gsap";
 import { cn } from "@/utils/cn";
@@ -25,9 +26,16 @@ import {
 } from "./cabinet-scene";
 
 /** The scene box's width on screen (CabinetHero sizes it), so every crop of it shares one file */
-const SCENE_SIZES = "(min-width: 64rem) calc((100vh - 7.75rem) * 3.27), min(497vw, 2592px)";
+const SCENE_SIZES = "(min-width: 64rem) calc((100vh - 4.75rem) * 3.27), min(497vw, 2592px)";
 /** A stick's width on screen: about 2% of the scene's */
-const STICK_SIZES = "(min-width: 64rem) calc((100vh - 7.75rem) * 0.07), min(10.2vw, 54px)";
+const STICK_SIZES = "(min-width: 64rem) calc((100vh - 4.75rem) * 0.07), min(10.2vw, 54px)";
+
+/**
+ * The scene's box: sized and placed by CabinetHero's --s (screen px per photo px) and --cx (where the
+ * cabinet's middle sits). The wall and the cabinet each have one, the water on the wall between them
+ */
+const SCENE_BOX =
+  "absolute bottom-0 left-[calc(var(--cx)-var(--s)*1604)] h-[calc(var(--s)*1841)] w-[calc(var(--s)*3072)]";
 
 /** Room around the cutouts for them to move into, in the photo's pixels */
 const PLANT_ROOM = { l: 24, r: 24, t: 14, b: 0 };
@@ -253,11 +261,9 @@ export default function CabinetScene() {
             const near = (x: number, y: number, reach: number) =>
               pointer.active ? Math.exp(-((pointer.x - x) ** 2 + (pointer.y - y) ** 2) / (2 * reach * reach)) : 0;
 
-            // Doors: towards the pointer's side, else back to rest. A focused stick's door opens for it,
-            // and the right door opens to let the hero stick out once the scroll scene sends it off
+            // Doors: towards the pointer's side, else back to rest. A focused stick's door opens for it
             const u = (pointer.x - CABINET.centre) / CABINET.halfWidth;
-            const leaving = (Number(section.style.getPropertyValue("--stick-move")) || 0) > 0;
-            const opened = focused.current ?? (leaving ? "right" : null);
+            const opened = focused.current;
             const targets =
               opened === "left"
                 ? [DOOR.open, 0]
@@ -334,110 +340,133 @@ export default function CabinetScene() {
       <CabinetStick key={i} product={p} onFocus={onFocus(compartment)} onBlur={onBlur} />
     ));
 
+  // Three layers, each faded out by the scroll scene (data-cabinet-fade, CabinetScroll)
   return (
-    // Sized and placed by CabinetHero's --s (screen px per photo px) and --cx (where the cabinet's middle sits);
-    // faded out by the scroll scene (data-cabinet-fade, CabinetScroll)
-    <div
-      ref={root}
-      data-cabinet-fade
-      className="absolute bottom-0 left-[calc(var(--cx)-var(--s)*1604)] h-[calc(var(--s)*1841)] w-[calc(var(--s)*3072)]"
-    >
-      <Image src={SCENE.src} alt="" fill priority sizes={SCENE_SIZES} className="pointer-events-none object-cover" />
-
-      {/* Behind the left door: the right compartment, mirrored */}
-      <div aria-hidden="true" className="pointer-events-none absolute" style={place(CABINET.leftDoor)}>
-        <CroppedImage
-          src={SCENE.src}
-          width={SCENE.width}
-          height={SCENE.height}
-          sizes={SCENE_SIZES}
-          crop={sceneCrop(CABINET.rightDoor)}
-          className="size-full -scale-x-100"
-        />
+    <>
+      {/* The wall */}
+      <div aria-hidden="true" data-cabinet-fade className={cn(SCENE_BOX, "pointer-events-none")}>
+        <Image src={SCENE.wall} alt="" fill priority sizes={SCENE_SIZES} className="object-cover" />
       </div>
 
-      {/* The sticks — behind the doors they can't be clicked while the door is shut */}
-      <div ref={leftShelves} className="pointer-events-none absolute inset-0 data-shut:*:pointer-events-none!">
-        {shelves("left")}
-      </div>
-      <div ref={rightShelves} className="pointer-events-none absolute inset-0 data-shut:*:pointer-events-none!">
-        {shelves("right")}
-      </div>
-      <div className="pointer-events-none absolute inset-0">{shelves("cubby")}</div>
-
-      {/* The upper shelves' front edges, in front of the sticks standing on them */}
-      <div aria-hidden="true" className="pointer-events-none absolute" style={place(CABINET.shelfLip)}>
-        <CroppedImage
-          src={SCENE.src}
-          width={SCENE.width}
-          height={SCENE.height}
-          sizes={SCENE_SIZES}
-          crop={sceneCrop(CABINET.shelfLip)}
-          className="size-full"
-        />
-      </div>
+      {/* Water on the wall, shaded as on the footer, running on its own: beads sit on it, and drops keep
+          running in from the top and on down to the bottom, without end, taking up the beads in their
+          path. The pointer leaves it alone. Under the cabinet, so only the wall wears it; it covers the
+          section. On phones, where the copy sits over the wall above the cabinet, it's a third as strong
+          behind the copy */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute"
-        style={place({ ...CABINET.shelfLip, x: CABINET.leftDoor.x, w: CABINET.leftDoor.w })}
+        data-cabinet-fade
+        className="pointer-events-none absolute inset-0 max-lg:mask-[linear-gradient(to_bottom,rgb(0_0_0/0.35)_38%,#000_50%)]"
       >
-        <CroppedImage
-          src={SCENE.src}
-          width={SCENE.width}
-          height={SCENE.height}
-          sizes={SCENE_SIZES}
-          crop={sceneCrop(CABINET.shelfLip)}
-          className="size-full -scale-x-100"
+        <FooterDroplets
+          density={1.4}
+          strength={1.5}
+          interactive={false}
+          stream={1.2}
+          pace={2}
+          className="absolute inset-0 size-full"
         />
       </div>
 
-      {/* The doors, in the photo's own perspective */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          perspective: `calc(var(--s) * ${CAMERA.distance})`,
-          perspectiveOrigin: `${pct(CAMERA.x + SCENE.x, SCENE.width)} ${pct(CAMERA.y + SCENE.y, SCENE.height)}`,
-        }}
-      >
-        <Door ref={leftDoor} side="left" />
-        <Door ref={rightDoor} side="right" />
-      </div>
+      {/* The cabinet, and all that moves on it */}
+      <div ref={root} data-cabinet-fade className={SCENE_BOX}>
+        <Image src={SCENE.src} alt="" fill priority sizes={SCENE_SIZES} className="pointer-events-none object-cover" />
 
-      {/* The leaves and the towel: still images until their canvases take over */}
-      <Image
-        ref={plantStill}
-        src={PLANT.src}
-        alt=""
-        width={PLANT.w}
-        height={PLANT.h}
-        sizes="16vw"
-        className="pointer-events-none absolute max-w-none"
-        style={place(PLANT)}
-      />
-      <canvas
-        ref={plantCanvas}
-        aria-hidden="true"
-        className="pointer-events-none absolute"
-        style={place(expand(PLANT, PLANT_ROOM))}
-      />
-      <Image
-        ref={towelStill}
-        src={TOWEL.src}
-        alt=""
-        width={TOWEL.w}
-        height={TOWEL.h}
-        sizes="16vw"
-        className="pointer-events-none absolute max-w-none drop-shadow-lg drop-shadow-navy/20"
-        style={place(TOWEL)}
-      />
-      <canvas
-        ref={towelCanvas}
-        aria-hidden="true"
-        className="pointer-events-none absolute drop-shadow-lg drop-shadow-navy/20"
-        style={place(expand(TOWEL, TOWEL_ROOM))}
-      />
-    </div>
+        {/* Behind the left door: the right compartment, mirrored */}
+        <div aria-hidden="true" className="pointer-events-none absolute" style={place(CABINET.leftDoor)}>
+          <CroppedImage
+            src={SCENE.src}
+            width={SCENE.width}
+            height={SCENE.height}
+            sizes={SCENE_SIZES}
+            crop={sceneCrop(CABINET.rightDoor)}
+            className="size-full -scale-x-100"
+          />
+        </div>
+
+        {/* The sticks — behind the doors they can't be clicked while the door is shut */}
+        <div ref={leftShelves} className="pointer-events-none absolute inset-0 data-shut:*:pointer-events-none!">
+          {shelves("left")}
+        </div>
+        <div ref={rightShelves} className="pointer-events-none absolute inset-0 data-shut:*:pointer-events-none!">
+          {shelves("right")}
+        </div>
+        <div className="pointer-events-none absolute inset-0">{shelves("cubby")}</div>
+
+        {/* The upper shelves' front edges, in front of the sticks standing on them */}
+        <div aria-hidden="true" className="pointer-events-none absolute" style={place(CABINET.shelfLip)}>
+          <CroppedImage
+            src={SCENE.src}
+            width={SCENE.width}
+            height={SCENE.height}
+            sizes={SCENE_SIZES}
+            crop={sceneCrop(CABINET.shelfLip)}
+            className="size-full"
+          />
+        </div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute"
+          style={place({ ...CABINET.shelfLip, x: CABINET.leftDoor.x, w: CABINET.leftDoor.w })}
+        >
+          <CroppedImage
+            src={SCENE.src}
+            width={SCENE.width}
+            height={SCENE.height}
+            sizes={SCENE_SIZES}
+            crop={sceneCrop(CABINET.shelfLip)}
+            className="size-full -scale-x-100"
+          />
+        </div>
+
+        {/* The doors, in the photo's own perspective */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0"
+          style={{
+            perspective: `calc(var(--s) * ${CAMERA.distance})`,
+            perspectiveOrigin: `${pct(CAMERA.x + SCENE.x, SCENE.width)} ${pct(CAMERA.y + SCENE.y, SCENE.height)}`,
+          }}
+        >
+          <Door ref={leftDoor} side="left" />
+          <Door ref={rightDoor} side="right" />
+        </div>
+
+        {/* The leaves and the towel: still images until their canvases take over */}
+        <Image
+          ref={plantStill}
+          src={PLANT.src}
+          alt=""
+          width={PLANT.w}
+          height={PLANT.h}
+          sizes="16vw"
+          className="pointer-events-none absolute max-w-none"
+          style={place(PLANT)}
+        />
+        <canvas
+          ref={plantCanvas}
+          aria-hidden="true"
+          className="pointer-events-none absolute"
+          style={place(expand(PLANT, PLANT_ROOM))}
+        />
+        <Image
+          ref={towelStill}
+          src={TOWEL.src}
+          alt=""
+          width={TOWEL.w}
+          height={TOWEL.h}
+          sizes="16vw"
+          className="pointer-events-none absolute max-w-none drop-shadow-lg drop-shadow-navy/20"
+          style={place(TOWEL)}
+        />
+        <canvas
+          ref={towelCanvas}
+          aria-hidden="true"
+          className="pointer-events-none absolute drop-shadow-lg drop-shadow-navy/20"
+          style={place(expand(TOWEL, TOWEL_ROOM))}
+        />
+      </div>
+    </>
   );
 }
 

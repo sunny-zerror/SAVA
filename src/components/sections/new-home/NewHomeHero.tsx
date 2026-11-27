@@ -27,10 +27,7 @@ const RULES = ["left-1/3", "left-2/3"];
 export default function NewHomeHero() {
   return (
     <>
-      <HeroScroll
-        aria-labelledby="new-home-hero"
-        className="relative isolate -mt-[calc(var(--spacing-header)+var(--spacing-announcement))] bg-paper"
-      >
+      <HeroScroll aria-labelledby="new-home-hero" className="relative isolate -mt-header bg-paper">
         <div data-hero-photo className="relative overflow-hidden text-paper">
           <div className="absolute top-1/2 left-1/2 -z-10 aspect-[1774/887] w-[max(100%,calc(100svh*1774/887))] -translate-x-1/2 -translate-y-1/2 max-md:portrait:-translate-x-[71.1%]">
             <Image
@@ -69,10 +66,7 @@ export default function NewHomeHero() {
           />
 
           {/* The frame's rails run the full height, up through the transparent header, as on "/" */}
-          <Frame
-            tone="dark"
-            className="flex h-svh min-h-fit flex-col pt-[calc(var(--spacing-header)+var(--spacing-announcement))]"
-          >
+          <Frame tone="dark" className="flex h-svh min-h-fit flex-col pt-header">
             {/* Vertically centred in the space below the header, inset from the rail like the header's menu */}
             <div data-hero-heading className="flex flex-1 flex-col justify-center px-inset">
               {/* Lines rise in once the page has settled (data-heading-effect, src/lib/global.ts) */}
@@ -114,7 +108,7 @@ export default function NewHomeHero() {
                 />
               ))}
 
-              <div className="flex h-full flex-col items-center justify-center gap-8 px-inset pt-[calc(var(--spacing-header)+var(--spacing-announcement))] pb-10 text-center md:grid md:grid-cols-3 md:gap-0 md:px-0 md:text-left">
+              <div className="flex h-full flex-col items-center justify-center gap-8 px-inset pt-header pb-10 text-center md:grid md:grid-cols-3 md:gap-0 md:px-0 md:text-left">
                 <p data-story-text="left" className="max-w-sm text-body uppercase motion-safe:opacity-0 md:px-inset">
                   SAVA brings together advanced sweat-control technology and refined fragrance to create a new standard
                   in everyday personal care.

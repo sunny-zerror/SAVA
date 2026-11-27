@@ -21,7 +21,7 @@ export const MAIN_FEATURE: CareSlide = {
   alt: "A raised underarm marked with a dashed circle, beside four callouts: dermatologist approved, no parabens or artificial dyes, stain-free on white clothes, gentle for everyday use",
 };
 
-/** The films after the first photo, on /home and /home1 alike */
+/** /home's films after the main photo */
 export const CARE_FILMS: CareSlide[] = [
   {
     src: "/images/newhome/care/sweat.webp",
@@ -62,11 +62,11 @@ export const CARE_FILMS: CareSlide[] = [
 
 /**
  * /home1's first photo: a bathroom shelf (1086 × 1448, near enough the card's shape) with a gap on its
- * lower shelf, between the toothbrushes and the towels, where the packed carton comes to stand
+ * lower shelf, between the toothbrushes and the towels, where the stick comes to stand (CabinetCare)
  */
 export const SHELF_FEATURE: CareSlide = {
   src: "/images/newhome/feature_img.png",
-  alt: "A sunlit bathroom shelf with a trailing plant, toothbrushes, folded towels and a perfume bottle, a Sava Balanced carton standing among them",
+  alt: "A sunlit bathroom shelf with a trailing plant, toothbrushes, folded towels and a perfume bottle, a Sava Balanced stick standing among them",
 };
 
 /**
@@ -78,7 +78,6 @@ export const SHELF_FEATURE: CareSlide = {
 export const CARE_POSTERS: CareSlide[] = [
   {
     src: "/images/newhome/care2/img1.jpg",
-    video: "/images/newhome/care2/vid1.mp4",
     alt: "A man lifting weights in a dim, blue-lit gym. Poster: they know you're nervous before the room does — your palms are snitches",
   },
   {
@@ -89,7 +88,6 @@ export const CARE_POSTERS: CareSlide[] = [
   },
   {
     src: "/images/newhome/care2/img3.jpg",
-    video: "/images/newhome/care2/vid3.mp4",
     alt: "An athlete working battle ropes in a dark gym. Poster: sweat is a system, not a failure",
   },
   {
@@ -100,7 +98,6 @@ export const CARE_POSTERS: CareSlide[] = [
   },
   {
     src: "/images/newhome/care2/img5.jpg",
-    video: "/images/newhome/care2/vid5.mp4",
     alt: "Two iced coffees picked up from a café table. Poster: your coffee might be making things sweatier",
     position: "100% 50%",
   },

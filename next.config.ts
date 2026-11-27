@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  // Sign up lives on the sign-in page now (its "Create account" side); old links keep working
+  async redirects() {
+    return [{ source: "/signup", destination: "/login?mode=signup", permanent: true }];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     // Every <Image> encodes at 90 instead of Next's default 75, which left photos soft. Images without a

@@ -2,14 +2,28 @@
  * The /home1 bathroom cabinet, laid out in the pixels of the original photo
  * (public/images/newhome/hero_bg_1.png, 1672 × 941).
  *
- * The scene image (newhome/cabinet/scene.jpg) is that photo with what the page animates painted out —
- * the open door, the towel, the plant's leaves — set into more of the same wall: 800px to its left,
- * 600px to its right and 900px above, so it can fill any screen. towel.png and plant.png are the towel
- * and the leaves, cut out of the photo at its own scale. Everything below is in the photo's pixels;
- * `place` turns a rect into % of the scene box.
+ * The scene is two layers in one box, the photo set into it with room around: 800px to its left, 600px
+ * to its right and 900px above, so it can fill any screen. Behind, the wall (newhome/cabinet/wall.jpg):
+ * newhome/hero_only_bg.png — the photo's wall in SAVA blue, board for board — carried on to fill the box.
+ * In front, the cabinet (newhome/cabinet/cabinet.webp) on transparency, with what the page animates taken
+ * out: the open door, the towel, the plant's leaves. Both are built from their sources by
+ * scripts/cabinet-layers.mjs (the cabinet is keyed out of newhome/cabinet/scene.jpg, the photo extended
+ * on its old teal wall); rerun it when either changes. towel.webp and plant.webp are the towel and the
+ * leaves, cut out of the photo at its own scale (from towel.png and plant.png, the teal at their edges
+ * keyed away by the same script). Everything below is in the photo's pixels; `place` turns a rect into
+ * % of the scene box.
  */
 
-export const SCENE = { src: "/images/newhome/cabinet/scene.jpg", width: 3072, height: 1841, x: 800, y: 900 };
+export const SCENE = {
+  /** The cabinet: the front layer, and what the doors and shelf edges are cut from */
+  src: "/images/newhome/cabinet/cabinet.webp",
+  /** The wall behind it */
+  wall: "/images/newhome/cabinet/wall.jpg",
+  width: 3072,
+  height: 1841,
+  x: 800,
+  y: 900,
+};
 
 export interface Rect {
   x: number;
@@ -55,7 +69,7 @@ export const DOOR = { open: 108, max: 116, rest: { left: 0, right: 104 } };
 
 /** The leaves, cut out above the vase; they bend from where the stems leave its mouth */
 export const PLANT = {
-  src: "/images/newhome/cabinet/plant.png",
+  src: "/images/newhome/cabinet/plant.webp",
   x: 673,
   y: 22,
   w: 187,
@@ -64,19 +78,21 @@ export const PLANT = {
 };
 
 /** The towel, hanging over the ring's bar along its top `pin` rows */
-export const TOWEL = { src: "/images/newhome/cabinet/towel.png", x: 1176, y: 674, w: 160, h: 243, pin: 16 };
+export const TOWEL = { src: "/images/newhome/cabinet/towel.webp", x: 1176, y: 674, w: 160, h: 243, pin: 16 };
 
 export type Compartment = "left" | "right" | "cubby";
-type Range = "balanced" | "grounded" | "kinetic" | "renewed";
+/** The ranges the cabinet stocks: the bestsellers' three, the ones with a 3D stick (Grounded has none yet) */
+type Range = "balanced" | "kinetic" | "renewed";
 /**
- * Each range's stick facing straight out, cut from its front product shot onto transparency
- * (public/images/newhome/cabinet/stick-<range>.webp): its size in pixels, the same for all four
+ * Each range's stick facing straight out on transparency (public/images/newhome/sticks/sava-<range>-3d.webp):
+ * renders of the 3D stick itself (src/lib/sava-stick.ts, drawn by src/lib/stick-stage.ts as the bestsellers'
+ * are, filling the image's height), so a stick on a shelf and its 3D twin look the same and the hero stick
+ * swaps to its 3D self unseen as it leaves. Their size in pixels, the same for each
  */
-export const STICK_IMAGE = { width: 355, height: 720 };
+export const STICK_IMAGE = { width: 784, height: 1440 };
 
 const SCENTS: Record<Range, string> = {
   balanced: "Citrus Tide",
-  grounded: "Amber Wood",
   kinetic: "Silver Lining",
   renewed: "Forest Air",
 };
@@ -96,22 +112,23 @@ const UPPER = 395;
 const LOWER = 574;
 const CUBBY = 766;
 
+/** Stocked with the bestsellers' three (CabinetBestsellers): each compartment holds all three */
 export const PRODUCTS: CabinetProduct[] = [
   // Behind the left door (its compartment is the right one, mirrored)
-  { range: "grounded", compartment: "left", x: 642, base: UPPER },
+  { range: "kinetic", compartment: "left", x: 642, base: UPPER },
   { range: "renewed", compartment: "left", x: 732, base: UPPER },
-  { range: "kinetic", compartment: "left", x: 646, base: LOWER },
-  { range: "balanced", compartment: "left", x: 736, base: LOWER },
+  { range: "balanced", compartment: "left", x: 646, base: LOWER },
+  { range: "kinetic", compartment: "left", x: 736, base: LOWER },
   // Behind the right door
-  { range: "balanced", compartment: "right", x: 880, base: UPPER, hero: true },
+  { range: "balanced", compartment: "right", x: 880, base: UPPER },
   { range: "kinetic", compartment: "right", x: 972, base: UPPER },
   { range: "renewed", compartment: "right", x: 876, base: LOWER },
-  { range: "grounded", compartment: "right", x: 968, base: LOWER },
-  // The open cubby: the whole range
-  { range: "kinetic", compartment: "cubby", x: 668, base: CUBBY },
-  { range: "balanced", compartment: "cubby", x: 768, base: CUBBY },
-  { range: "renewed", compartment: "cubby", x: 868, base: CUBBY },
-  { range: "grounded", compartment: "cubby", x: 968, base: CUBBY },
+  { range: "balanced", compartment: "right", x: 968, base: LOWER },
+  // The open cubby: the range, in the bestsellers' order, Balanced in the middle — the hero, which leaves
+  // its shelf for the bestsellers as the page scrolls, no door in its way
+  { range: "kinetic", compartment: "cubby", x: 703, base: CUBBY },
+  { range: "balanced", compartment: "cubby", x: 818, base: CUBBY, hero: true },
+  { range: "renewed", compartment: "cubby", x: 933, base: CUBBY },
 ];
 
 /** Every stick stands this tall, in the photo's pixels (about 14cm against the cabinet) */
@@ -121,10 +138,10 @@ export const productInfo = (range: Range) => ({
   slug: `sava-${range}`,
   name: `Sava ${range[0].toUpperCase()}${range.slice(1)}`,
   scent: SCENTS[range],
-  src: `/images/newhome/cabinet/stick-${range}.webp`,
+  src: `/images/newhome/sticks/sava-${range}-3d.webp`,
 });
 
-/** A catalogue product's stick on transparency, by slug ("sava-kinetic" → stick-kinetic.webp); null if it has none */
+/** A catalogue product's stick on transparency, by slug ("sava-kinetic" → sticks/sava-kinetic-3d.webp); null if it has none */
 export function stickCutoutFor(slug: string) {
   const range = slug.replace(/^sava-/, "");
   return range in SCENTS ? productInfo(range as Range).src : null;

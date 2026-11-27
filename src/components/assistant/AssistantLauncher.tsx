@@ -4,9 +4,8 @@ import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import AssistantBubble from "@/components/assistant/AssistantBubble";
-import Sparkle from "@/components/ui/Sparkle";
 import { ASSISTANT_DIALOG_ID, assistantConfig, isAssistantHidden } from "@/config/assistant";
-import { paintAssistantGradient, readAssistantPalette } from "@/lib/assistant/painter";
+import { paintAssistantGradient, readLauncherColors } from "@/lib/assistant/painter";
 import { gsap } from "@/lib/gsap";
 import { useAssistantStore } from "@/store/assistant-store";
 import type { SearchProduct } from "@/types";
@@ -53,8 +52,8 @@ function afterPageLoad(callback: () => void) {
 }
 
 /**
- * The shopping assistant's button, at the bottom right of every page but checkout: a SAVA-blue disc
- * with light moving inside it (the canvas starts after the page's load, at half the frame rate, and
+ * The shopping assistant's button, at the bottom right of every page but checkout: a glowing bubble,
+ * light moving inside it and burning white where it gathers (the canvas starts after the page's load, at half the frame rate, and
  * rests while the assistant covers it). Hovering shows a speech bubble, and once a visit it says hello
  * by itself. The assistant itself (AssistantOverlay) is fetched on the first hover, focus or click, so
  * it adds nothing to a page's first load.
@@ -91,7 +90,7 @@ export default function AssistantLauncher({ products }: { products: SearchProduc
     const el = canvas.current;
     const ctx = el?.getContext("2d");
     if (hidden || !el || !ctx) return;
-    const colors = readAssistantPalette();
+    const colors = readLauncherColors();
     const startedAt = performance.now();
     let size = 0;
     let skip = false;
@@ -103,7 +102,8 @@ export default function AssistantLauncher({ products }: { products: SearchProduc
       el.width = el.height = Math.round(size * scale);
       ctx.setTransform(scale, 0, 0, scale, 0, 0);
     };
-    const paint = () => paintAssistantGradient(ctx, colors, size, size, (performance.now() - startedAt) / 1000 + 1.5);
+    const paint = () =>
+      paintAssistantGradient(ctx, colors, size, size, (performance.now() - startedAt) / 1000 + 1.5, { bright: true });
     // Half the frame rate, and nothing while the assistant covers the button
     const tick = () => {
       skip = !skip;
@@ -188,7 +188,8 @@ export default function AssistantLauncher({ products }: { products: SearchProduc
             }
           }}
           onBlur={() => setHovered(false)}
-          className="group relative block size-11 rounded-full bg-navy shadow-lg shadow-navy/25 md:size-13"
+          // A navy hairline keeps its edge where the white light meets a white page
+          className="group relative block size-11 rounded-full bg-navy ring-1 ring-navy/15 md:size-13"
         >
           {/* A glow that grows beneath it on hover */}
           <span
@@ -196,9 +197,9 @@ export default function AssistantLauncher({ products }: { products: SearchProduc
             className="absolute inset-0 -z-10 scale-60 rounded-full bg-accent opacity-0 blur-md transition duration-400 group-hover:scale-100 group-hover:opacity-100 group-focus-visible:scale-100 group-focus-visible:opacity-100"
           />
           <span aria-hidden="true" className="absolute inset-0 overflow-hidden rounded-full">
-            <canvas ref={canvas} className="block size-full" />
+            {/* A touch more colour and contrast, so the light reads as a glowing bubble */}
+            <canvas ref={canvas} className="block size-full contrast-105 saturate-120" />
           </span>
-          <Sparkle className="absolute inset-0 m-auto size-3.5 text-paper md:size-4" />
         </button>
       </div>
       {mounted && <AssistantOverlay products={products} launcher={button} />}

@@ -12,7 +12,7 @@ export const assistantConfig = {
   /** The launcher's speech bubble on hover (and keyboard focus)… */
   hoverBubble: "Hi there! How can I help you?",
   /** …and once a visit, a few seconds after the page has loaded, unless it's already been opened */
-  introBubble: "Hello! How can I help you today?",
+  introBubble: "Hi! I'm your personal shopping assistant. I'm here to help you explore SAVA.",
   introDelayMs: 5000,
   introShowMs: 5000,
   /** The orb dims and slows after this long without activity, and wakes on the next */

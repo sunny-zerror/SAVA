@@ -15,3 +15,10 @@ export function absoluteUrl(path = "/"): string {
 export const productHref = (slug: string) => `/shop/${slug}`;
 
 export const blogHref = (slug: string) => `/blogs/${slug}`;
+
+/** The sign-in page, opened on its "Create account" side */
+export const signupHref = "/login?mode=signup";
+
+/** Only allow same-site redirect targets like "/account?tab=orders" */
+export const safeNext = (next?: string | string[]) =>
+  typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/account";

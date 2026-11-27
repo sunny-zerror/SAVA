@@ -42,7 +42,8 @@ export default function HomeDifference() {
     <DifferenceMotion aria-labelledby="home-difference" className="relative isolate bg-surface">
       <div aria-hidden="true" className="absolute inset-0 -z-10 bg-grain opacity-12" />
 
-      <Frame className="py-section">
+      {/* Opens on its rule, right where the tint starts: no empty band above it */}
+      <Frame className="pb-section">
         <FrameRule />
         <SectionHeading
           id="home-difference"

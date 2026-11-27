@@ -21,7 +21,7 @@
   --color-line: #efeeed; /* hairlines, borders */
   --color-rule: #dcd9d8; /* the frame's rails and rules — a stronger line, so the frame reads clearly */
   --color-surface: #f4f7fb; /* cards, skeletons, tinted sections */
-  --color-accent: #709fcb; /* SAVA blue — labels, buttons, announcement bar */
+  --color-accent: #709fcb; /* SAVA blue — labels, buttons */
   --color-mist: #d8e3ff; /* frame rail dots */
   --color-mint: #ace2ae; /* highlights on dark: badge drop, top rating bar */
   --color-navy: #021b5b; /* deep end of the brand gradients */
@@ -37,7 +37,6 @@
   --spacing-gutter: 1rem; /* page side padding — where the frame rails sit */
   --spacing-inset: 1.25rem; /* content padding inside the frame rails */
   --spacing-header: 4rem; /* header height — use pt-header under a fixed header */
-  --spacing-announcement: 2.5rem; /* announcement bar height */
 
   /* Layout */
   --container-site: 95rem; /* max content width */
@@ -54,7 +53,6 @@
     --spacing-gutter: 2.25rem;
     --spacing-inset: 2.625rem;
     --spacing-header: 4.75rem;
-    --spacing-announcement: 3rem;
   }
 }
 
@@ -65,6 +63,7 @@
 @theme inline {
   --font-primary: var(--ff-primary, "Helvetica Neue", Helvetica, Arial, sans-serif); /* display, headings */
   --font-secondary: var(--ff-secondary, "Helvetica Neue", Helvetica, Arial, sans-serif); /* text, UI */
+  --font-mono: var(--ff-mono, ui-monospace, "SF Mono", Menlo, Consolas, monospace); /* the assistant's bubble */
 }
 
 @theme {
@@ -332,6 +331,8 @@
  *   text-eyebrow   smaller uppercase label: badges, field-group labels
  *   text-cta       buttons and action links            Inter 500
  *   text-input     form fields — never under 16px, so phones don't zoom on focus
+ *   text-mono      IBM Plex Mono caps, 10px: the assistant's speech bubble (even widths, so its
+ *                  letters can decode in place without the line jittering)
  *
  * Numbers that line up (prices, counts, totals) also take tabular-nums.
  */
@@ -473,6 +474,15 @@
   letter-spacing: -0.011em;
 }
 
+@utility text-mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: max(10px, 0.625rem);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
 /* ---------- Brand surfaces ------------------------------------------------- */
 /* Fading white → sky fill for display type on the dark gradient */
 @utility text-gradient-sky {
@@ -547,16 +557,41 @@
   initial-value: 0deg;
 }
 
-@property --assistant-light-x {
-  syntax: "<percentage>";
+/* The launcher's bubble: four pools of light whose colours and centre morph (assistant-bubble) */
+@property --bubble-c1 {
+  syntax: "<color>";
   inherits: false;
-  initial-value: 65%;
+  initial-value: rgb(128 169 211 / 0.85);
 }
 
-@property --assistant-light-y {
+@property --bubble-c2 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: rgb(112 159 203 / 0.55);
+}
+
+@property --bubble-c3 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: rgb(164 193 229 / 0.3);
+}
+
+@property --bubble-c4 {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: rgb(57 93 147 / 0.25);
+}
+
+@property --bubble-x {
   syntax: "<percentage>";
   inherits: false;
-  initial-value: 70%;
+  initial-value: 55%;
+}
+
+@property --bubble-y {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 60%;
 }
 
 /* The stage: SAVA blue pooling round the orb (right on wide screens, top on phones), inside the
@@ -623,18 +658,18 @@
   );
 }
 
-/* The launcher's speech bubble: navy, lit by a pool of SAVA blue that drifts across it */
+/* The launcher's speech bubble: SAVA blue deepened a quarter towards navy (so white text holds), four
+   pools of lighter and deeper blue slowly shifting colour and drifting over it, and the colour
+   lifted (saturate) to the launcher's glow */
 @utility assistant-bubble {
-  background-color: var(--color-navy);
+  background-color: color-mix(in srgb, var(--color-accent) 75%, var(--color-navy));
+  filter: saturate(1.3);
   background-image:
-    radial-gradient(
-      circle at var(--assistant-light-x) var(--assistant-light-y),
-      color-mix(in srgb, var(--color-accent) 65%, transparent),
-      transparent 65%
-    ),
-    radial-gradient(circle at 12% 18%, color-mix(in srgb, var(--color-mist) 28%, transparent), transparent 55%),
-    radial-gradient(circle at 96% 96%, color-mix(in srgb, var(--color-accent) 40%, transparent), transparent 55%);
-  animation: assistant-light-drift 14s ease-in-out infinite alternate;
+    radial-gradient(circle at var(--bubble-x) var(--bubble-y), var(--bubble-c1), transparent 65%),
+    radial-gradient(circle at 20% 30%, var(--bubble-c2), transparent 55%),
+    radial-gradient(circle at 90% 85%, var(--bubble-c3), transparent 55%),
+    radial-gradient(circle at 10% 90%, var(--bubble-c4), transparent 50%);
+  animation: assistant-bubble-morph 14s ease-in-out infinite alternate;
 }
 
 /* Round the screen's edges while the shopper dictates: a 3px border of turning SAVA blue and a glow
@@ -683,10 +718,14 @@
   }
 }
 
-@keyframes assistant-light-drift {
+@keyframes assistant-bubble-morph {
   to {
-    --assistant-light-x: 30%;
-    --assistant-light-y: 35%;
+    --bubble-c1: rgb(101 146 192 / 0.75);
+    --bubble-c2: rgb(143 179 219 / 0.5);
+    --bubble-c3: rgb(122 166 208 / 0.4);
+    --bubble-c4: rgb(46 80 136 / 0.3);
+    --bubble-x: 45%;
+    --bubble-y: 50%;
   }
 }
 
@@ -734,7 +773,7 @@
   pointer-events: none;
 }
 
-/* Header, announcement bar, drawers, the footer's stick: their own groups above the page, shown
+/* Header, drawers, the footer's stick: their own groups above the page, shown
    live (the old snapshot hidden), so the fading page never covers them */
 ::view-transition-group(.site-chrome) {
   animation: none;

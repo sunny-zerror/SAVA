@@ -21,7 +21,7 @@ import { cn } from "@/utils/cn";
 import { blogHref, productHref } from "@/utils/url";
 
 /** A suggestion to tap: a frosted pill on the assistant's light stage */
-export const assistantChip =
+const assistantChip =
   "inline-flex h-9 shrink-0 items-center rounded-full bg-paper/70 px-4 text-caption whitespace-nowrap text-ink ring-1 ring-paper backdrop-blur-sm transition-colors duration-300 hover:bg-paper hover:text-accent";
 
 /** A frosted card under a reply: a product, a post, an order, an offer */
@@ -388,12 +388,16 @@ interface AssistantTranscriptProps {
   busy: boolean;
   onChip: (text: string) => void;
   onRevealed: (id: string) => void;
+  /** Suggestions under the welcome until the chat gets going (the quick actions) */
+  starters?: readonly string[];
 }
 
 /**
  * The conversation: the shopper's messages on the right in SAVA blue, the assistant's on the left,
- * frosted, with whatever a reply carries beneath it. New messages come into view unless the shopper
- * has scrolled up, when "Scroll to latest" appears instead. The ends fade rather than cut off.
+ * frosted, with whatever a reply carries beneath it. It starts centred in its space and grows from
+ * there, upward as well as down, until it fills it; then it scrolls, new messages coming into view
+ * unless the shopper has scrolled up, when "Scroll to latest" appears instead. The ends fade rather
+ * than cut off.
  */
 export default function AssistantTranscript({
   messages,
@@ -401,6 +405,7 @@ export default function AssistantTranscript({
   busy,
   onChip,
   onRevealed,
+  starters,
 }: AssistantTranscriptProps) {
   const scroller = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
@@ -450,10 +455,10 @@ export default function AssistantTranscript({
         role="log"
         aria-label="Conversation"
         onScroll={onScroll}
-        // before:flex-1: the messages gather at the bottom, as in any chat
-        className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain fade-edges-y py-6 before:flex-1"
+        className="no-scrollbar flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain fade-edges-y px-inset py-6"
       >
-        <div ref={list} className="flex flex-col gap-3">
+        {/* my-auto centres it while it's shorter than the space; taller, it simply scrolls from the top */}
+        <div ref={list} className="my-auto flex flex-col gap-3">
           {messages.map((message, i) => (
             <Message
               key={message.id}
@@ -469,6 +474,23 @@ export default function AssistantTranscript({
               <Sparkle className="animate-pulse text-accent" />
               {thinking}
             </p>
+          )}
+          {starters && (
+            // One row that scrolls sideways on phones (out to the frame), wrapping on wide screens
+            <div className="flex gap-2 max-lg:-mx-inset max-lg:no-scrollbar max-lg:overflow-x-auto max-lg:fade-edges-x max-lg:px-inset max-lg:py-1 lg:flex-wrap">
+              {starters.map((label, i) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={() => onChip(label)}
+                  // One after another, as the welcome finishes arriving
+                  style={{ animationDelay: `${1.2 + i * 0.06}s` }}
+                  className={cn(assistantChip, "animate-fade-up")}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>

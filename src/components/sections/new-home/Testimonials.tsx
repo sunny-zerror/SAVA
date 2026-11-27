@@ -46,7 +46,7 @@ const STORIES: Story[] = [
     place: "top-[57%] md:left-[7%]",
   },
   {
-    image: "/images/products/shared/sava-story-runner.png",
+    image: "/images/newhome/testimonial/img5.png",
     alt: "A woman reaching for a SAVA stick on a shower shelf",
     quote: "Part of my morning now, straight after the shower. Still fresh when I get home.",
     name: "Priya R., Pune",
@@ -116,8 +116,8 @@ export default function Testimonials() {
                   story.flip ? "-mr-[12%]" : "-ml-[12%]",
                 )}
               >
-                <blockquote className="text-body uppercase">{story.quote}</blockquote>
-                <figcaption className="mt-3 text-caption text-muted">{story.name}</figcaption>
+                <blockquote className="text-body">{story.quote}</blockquote>
+                <figcaption className="mt-10 text-caption text-muted">{story.name}</figcaption>
               </figure>
             </li>
           ))}

@@ -1,6 +1,5 @@
 import { RiMailLine, RiMapPin2Line, RiPhoneLine, RiTimeLine, type RemixiconComponentType } from "@remixicon/react";
 import SocialLinks from "@/components/ui/SocialLinks";
-import Sparkle from "@/components/ui/Sparkle";
 import { siteConfig } from "@/config/site";
 
 interface Row {
@@ -59,11 +58,7 @@ export default function ContactDetails() {
       )}
 
       {/* The social links in a row, as at the foot of the menu */}
-      <div data-reveal className="flex flex-col gap-4">
-        <p className="flex items-center gap-2 text-kicker text-accent">
-          <Sparkle />
-          Follow {siteConfig.name}
-        </p>
+      <div data-reveal>
         <SocialLinks />
       </div>
     </div>

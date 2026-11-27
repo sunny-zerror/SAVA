@@ -1,9 +1,10 @@
+import type { Material, Mesh } from "three";
 import { createSavaStick, type SavaStickVariant, stickLabelUrl } from "@/lib/sava-stick";
 import { turntable } from "@/lib/turntable";
 
 /*
  * Shared setup for the fixed, full-viewport canvases that draw SAVA sticks over the page (HomeModel,
- * HeroStick): three.js loaded on demand, a transparent renderer in neutral tone mapping, soft
+ * HeroStick, CabinetTraveller): three.js loaded on demand, a transparent renderer in neutral tone mapping, soft
  * studio light tuned to match the product photos, and an orthographic camera in CSS pixels (y up)
  * so page rects map straight onto the scene. `build` adds a stick, centred, wrapped as
  * tilt (z, plus tip on x) → spin (y) so it turns on its own axis.
@@ -48,7 +49,7 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
   const models: InstanceType<typeof THREE.Object3D>[] = [];
   const loader = new THREE.TextureLoader();
 
-  /** A printed image (a label, a carton's face) as a texture, kept sharp at a glancing angle */
+  /** A stick's printed label as a texture, kept sharp at a glancing angle */
   const loadTexture = async (url: string) => {
     const texture = await loader.loadAsync(url);
     texture.colorSpace = THREE.SRGBColorSpace;
@@ -112,14 +113,26 @@ export async function createStickStage(canvas: HTMLCanvasElement) {
     renderer.dispose();
   };
 
-  /** Adds another object to the scene (a hand to hold a stick, say), warmed and disposed with the sticks */
-  const add = (object: InstanceType<typeof THREE.Object3D>) => {
-    scene.add(object);
-    models.push(object);
-  };
-
-  return { THREE, build, add, loadTexture, warm, fitScale, render, clear, dispose };
+  return { THREE, build, warm, fitScale, render, clear, dispose };
 }
 
 export type StickStage = NonNullable<Awaited<ReturnType<typeof createStickStage>>>;
 export type Stick = Awaited<ReturnType<StickStage["build"]>>;
+
+/**
+ * Lets a stick fade. Its materials blend from the start, so call it before `warm` compiles the shaders
+ * (the fade then never stalls a frame on a recompile); at full opacity it draws just as before.
+ */
+export function stickFader(stick: Stick) {
+  const materials = new Set<Material>();
+  stick.model.traverse((object) => {
+    if ((object as Mesh).isMesh) for (const material of [(object as Mesh).material].flat()) materials.add(material);
+  });
+  materials.forEach((material) => (material.transparent = true));
+  let current = 1;
+  return (opacity: number) => {
+    if (opacity === current) return;
+    current = opacity;
+    materials.forEach((material) => (material.opacity = opacity));
+  };
+}

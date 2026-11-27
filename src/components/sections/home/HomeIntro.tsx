@@ -9,7 +9,7 @@ import { afterPageEnter, pageEntering } from "@/lib/page-transition";
 /**
  * The home page intro, once per page load: the SAVA wordmark fades in from left to right on white,
  * holds, fades out the same way, then the curtain wipes up to reveal the hero. As it clears it
- * signals finishIntro() — the headline rises, the 3D stick arrives — then the announcement bar and the header drop in.
+ * signals finishIntro() — the headline rises, the 3D stick arrives — then the header drops in.
  *
  * Server-rendered so it covers the page from the first paint. Without JS a CSS fallback clears it;
  * with reduced motion it's never shown.
@@ -30,16 +30,15 @@ export default function HomeIntro() {
         finishIntro();
       });
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        const announcement = document.querySelector<HTMLElement>("[data-site-announcement]");
         const header = document.querySelector<HTMLElement>("[data-site-header]");
         window.scrollTo(0, 0);
         document.documentElement.style.overflow = "hidden";
-        // Arriving by a page transition, the chrome (shown live above the fade) eases out with the
+        // Arriving by a page transition, the header (shown live above the fade) eases out with the
         // old page rather than vanishing at once; on a first load it simply starts hidden
         if (pageEntering()) {
-          gsap.to([announcement, header], { yPercent: -100, autoAlpha: 0, duration: 0.28, ease: "power2.in" });
+          gsap.to(header, { yPercent: -100, autoAlpha: 0, duration: 0.28, ease: "power2.in" });
         } else {
-          gsap.set([announcement, header], { yPercent: -100, autoAlpha: 0 });
+          gsap.set(header, { yPercent: -100, autoAlpha: 0 });
         }
         gsap.set(el, { animation: "none" }); // JS is running — the CSS fallback isn't needed
         // While WebGL warms up behind the curtain the main thread can stall; with lag smoothing a stall
@@ -61,9 +60,8 @@ export default function HomeIntro() {
           .to(el, { clipPath: "inset(0% 0% 100% 0%)", duration: 1.1, ease: "expo.inOut" }, "-=0.2")
           // The hero is in view as the wipe eases out: headline (then stick) go
           .call(finishIntro, [], "-=0.15")
-          // Top chrome last: announcement bar first, the header following it down
-          .to(announcement, { yPercent: 0, autoAlpha: 1, duration: 0.9, ease: "expo.out" }, "+=0.9")
-          .to(header, { yPercent: 0, autoAlpha: 1, duration: 1, ease: "expo.out" }, "<0.3");
+          // The header last, dropping in once the hero has settled
+          .to(header, { yPercent: 0, autoAlpha: 1, duration: 1, ease: "expo.out" }, "+=0.9");
 
         // Played once the page has fully faded in (straight away on a first load), so the sweep is
         // seen from its start. Only after the timeline is built: playing it empty would complete it

@@ -76,4 +76,4 @@ export const siteRoutes: SiteRoute[] = [
 ];
 
 /** Session-only pages: kept out of the index and the sitemap */
-export const privatePaths = ["/account", "/checkout", "/login", "/signup"];
+export const privatePaths = ["/account", "/checkout", "/login"];

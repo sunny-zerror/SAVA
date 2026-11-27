@@ -2,8 +2,8 @@
  * The shopping assistant's replies: scripted, from the store's own copy and data. Keyword rules pick
  * one intent per message, checked in a fixed order. Product questions go through the site search
  * (/api/search) and the range SiteLayout already loads; orders and offers through the shopper's own
- * session. Every answer quotes copy the site already shows (the home FAQ in src/data/faqs.ts, the bag,
- * the announcement bar, the contact page), so when that copy changes, change it here too.
+ * session. Every answer quotes copy the site already shows (the home FAQ in src/data/faqs.ts, the bag and
+ * the contact page), so when that copy changes, change it here too.
  *
  * getAssistantReply(text, context) is the one way in: an AI model can answer behind it later, with
  * the same reply shape, without the chat changing.
@@ -14,6 +14,7 @@ import { faqAnswer } from "@/data/faqs";
 import { productContent } from "@/data/product-content";
 import type { Order, Promotion, SearchPost, SearchProduct, SearchResults, User } from "@/types";
 import { formatDate, formatPrice, humanize } from "@/utils/format";
+import { signupHref } from "@/utils/url";
 
 // ---------- Shapes -----------------------------------------------------------
 
@@ -241,7 +242,7 @@ const NAVIGATION = [
   { words: "bag|cart|basket|checkout|check out", label: "your bag" },
   { words: "sweat school|blogs?|journal|articles?", href: "/blogs", label: "Sweat School" },
   { words: "about(?: us| page)?|(?:your |our )?story", href: "/about", label: "our story" },
-  { words: "sign ?up|register|create (?:an |my )?account", href: "/signup", label: "sign up" },
+  { words: "sign ?up|register|create (?:an |my )?account", href: signupHref, label: "sign up" },
   { words: "sign ?in|log ?in|login", href: "/login", label: "sign in" },
   { words: "account|profile", href: "/account", label: "your account" },
   { words: "contact(?: page| form| us)?", href: "/contact", label: "the contact page" },
@@ -772,7 +773,7 @@ export async function getAssistantReply(
             },
           )
         : reply("account", assistantCopy.accountGuest, {
-            links: [SIGN_IN_LINK, { label: "Create an account", href: "/signup" }],
+            links: [SIGN_IN_LINK, { label: "Create an account", href: signupHref }],
           });
     case "contact":
       return reply("contact", assistantCopy.contact, { links: [CONTACT_LINK], chips: ["Leave a message"] });

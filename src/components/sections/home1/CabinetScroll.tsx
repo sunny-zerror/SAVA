@@ -7,9 +7,8 @@ import { gsap, useGSAP } from "@/lib/gsap";
  * The /home1 hero's <section>, pinned for a scrubbed scroll scene once its bottom reaches the bottom
  * of the screen (at once on large screens, where it's a screen tall):
  *   1. the copy beside the cabinet lifts away
- *   2. the hero stick leaves its shelf for the middle of the screen, turning once about its upright
- *      axis — CabinetTraveller follows `--stick-move` (0–1), tweened here on the section; the right
- *      door swings open to let it out (CabinetScene)
+ *   2. the hero stick leaves the open cubby's shelf for the middle of the screen, turning once about
+ *      its upright axis — CabinetTraveller follows `--stick-move` (0–1), tweened here on the section
  *   3. while it's in the air the cabinet, its wall and the room's white fade away, down to the sky-blue
  *      gradient held behind the section (CabinetBackdrop)
  *   4. the heading to its left and the lines to its right fill in word by word, ghosted until then,
@@ -34,7 +33,7 @@ export default function CabinetScroll({ children, ...props }: React.ComponentPro
             scrollTrigger: {
               trigger: section,
               start: "bottom bottom",
-              end: "+=220%",
+              end: "+=350%",
               pin: true,
               scrub: 1,
               invalidateOnRefresh: true,

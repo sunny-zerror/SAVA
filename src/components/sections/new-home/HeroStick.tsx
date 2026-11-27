@@ -1,34 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { Material, Mesh } from "three";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { onIntroDone } from "@/lib/intro";
 import { type SavaStickVariant, STICK_VARIANTS } from "@/lib/sava-stick";
-import { createStickStage, type Stick } from "@/lib/stick-stage";
+import { createStickStage, type Stick, stickFader } from "@/lib/stick-stage";
 import { lerp } from "@/lib/turntable";
 
 const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2);
 const isVariant = (value: string | undefined): value is SavaStickVariant => !!value && value in STICK_VARIANTS;
 const fitOf = (el: HTMLElement | null) => Number(el?.dataset.modelFit ?? 1);
-
-/**
- * Lets a stick fade. Its materials blend from the start (set before the shaders compile, so the fade
- * never stalls a frame on a recompile); at full opacity it draws just as before.
- */
-function fader(stick: Stick) {
-  const materials = new Set<Material>();
-  stick.model.traverse((object) => {
-    if ((object as Mesh).isMesh) for (const material of [(object as Mesh).material].flat()) materials.add(material);
-  });
-  materials.forEach((material) => (material.transparent = true));
-  let current = 1;
-  return (opacity: number) => {
-    if (opacity === current) return;
-    current = opacity;
-    materials.forEach((material) => (material.opacity = opacity));
-  };
-}
 
 /**
  * The 3D SAVA sticks on /home, drawn by one fixed transparent canvas into slots measured every frame
@@ -39,7 +20,7 @@ function fader(stick: Stick) {
  *     `--stick-move` on the section; then, as the page scrolls, it follows it into the middle
  *     bestseller card ([data-model-anchor="bestseller"], whose data-model-variant it wears) and on into
  *     the care showcase's viewfinder ([data-model-anchor="care"]), landing as that section pins. As its
- *     card opens it settles into the first photo's dashed circle ([data-model-anchor="circle"]) by
+ *     card opens it settles into the first photo's dashed circle ([data-model-anchor="photo"]) by
  *     `--stick-fit` on that section (CareShowcaseMotion), rides out with that photo and fades by
  *     `--stick-out` there.
  *   – The other bestseller cards ([data-model-static]) hold sticks of their own.
@@ -68,7 +49,7 @@ export default function HeroStick() {
       const story = document.querySelector<HTMLElement>('[data-model-anchor="story"]');
       const card = document.querySelector<HTMLElement>('[data-model-anchor="bestseller"]');
       const care = document.querySelector<HTMLElement>('[data-model-anchor="care"]');
-      const circle = document.querySelector<HTMLElement>('[data-model-anchor="circle"]');
+      const circle = document.querySelector<HTMLElement>('[data-model-anchor="photo"]');
       const hero = slot.closest("section");
       const careSection = care?.closest("section") ?? null;
       const shadow = slot.querySelector<HTMLElement>("[data-stick-shadow]");
@@ -87,7 +68,7 @@ export default function HeroStick() {
         stage.dispose();
         return;
       }
-      const fade = fader(traveller);
+      const fade = stickFader(traveller);
       await stage.warm();
       const fixed = statics.map((el, i) => ({ el, stick: others[i] as Stick }));
 

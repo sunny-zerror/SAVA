@@ -1,5 +1,4 @@
 import AssistantLauncher from "@/components/assistant/AssistantLauncher";
-import AnnouncementBar from "@/components/layout/AnnouncementBar";
 import CartDrawer from "@/components/layout/CartDrawer";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -24,7 +23,6 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       >
         Skip to content
       </a>
-      <AnnouncementBar />
       <Header />
       <main id="main">{children}</main>
       <Footer />

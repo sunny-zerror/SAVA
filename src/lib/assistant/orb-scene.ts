@@ -10,13 +10,27 @@ import {
 
 /*
  * The assistant's orb in three.js, ported from emotion-agency.com's voice orb (its orb, bloom and
- * phase table, with their numbers): one quad drawn by a raymarching shader (orb-shaders.ts), then a
+ * phase table, with their numbers — but SAVA's colours: each phase's are mixed from the brand tokens in
+ * globals.css, so re-skinning the site re-skins it): one quad drawn by a raymarching shader (orb-shaders.ts), then a
  * bloom — bright pass, blur across and down at a quarter size, composite. It fills its canvas, which
  * sits half as large again as the orb's box so the corona and glow have room. Light theme, as on a
  * light page there: an inked core (uInk 1) and a faint bloom.
  */
 
 type Hex = string;
+
+/** A brand colour token (--color-*, globals.css), or two mixed: [from, to, how much of `to`] */
+type Token = "accent" | "navy" | "mist" | "paper" | "muted";
+type Mix = Token | readonly [Token, Token, number];
+
+const TOKENS: Record<Token, Hex> = {
+  accent: "#709fcb",
+  navy: "#021b5b",
+  mist: "#d8e3ff",
+  paper: "#ffffff",
+  muted: "#5c5c58",
+};
+
 interface PhaseLook {
   flow: number;
   speed: number;
@@ -25,11 +39,22 @@ interface PhaseLook {
   glow: number;
   loading: number;
   waves: number;
-  palette: readonly [Hex, Hex, Hex, Hex];
-  hot: Hex;
+  /** The body's four colours: three deep, one bright (uPal) */
+  palette: readonly [Mix, Mix, Mix, Mix];
+  /** The rim light and highlights (uColorHot) */
+  hot: Mix;
 }
 
-const BASE = ["#661f7f", "#6200b3", "#578fff", "#250eaa"] as const;
+/** At rest: SAVA blue deepening towards navy, the bright one SAVA blue itself */
+const BASE = [
+  ["accent", "navy", 0.5],
+  ["accent", "navy", 0.65],
+  "accent",
+  ["accent", "navy", 0.85],
+] as const satisfies PhaseLook["palette"];
+const BASE_HOT: Mix = ["accent", "navy", 0.45];
+/** The comet that circles while it thinks (uColorAccent) */
+const COMET: Mix = ["accent", "navy", 0.2];
 
 /** Each phase's look and pace */
 export const ORB_PHASES = {
@@ -42,7 +67,7 @@ export const ORB_PHASES = {
     loading: 0,
     waves: 0,
     palette: BASE,
-    hot: "#572886",
+    hot: BASE_HOT,
   },
   entering: {
     flow: 0.7,
@@ -53,7 +78,7 @@ export const ORB_PHASES = {
     loading: 0,
     waves: 0,
     palette: BASE,
-    hot: "#572886",
+    hot: BASE_HOT,
   },
   listening: {
     flow: 0.5,
@@ -64,7 +89,7 @@ export const ORB_PHASES = {
     loading: 0,
     waves: 0,
     palette: BASE,
-    hot: "#572886",
+    hot: BASE_HOT,
   },
   thinking: {
     flow: 1.4,
@@ -74,8 +99,9 @@ export const ORB_PHASES = {
     glow: 1.1,
     loading: 1,
     waves: 0,
-    palette: ["#b07cff", "#9c6bff", "#6c9cff", "#c08cff"],
-    hot: "#efe8ff",
+    // Lighter while it thinks
+    palette: [["accent", "mist", 0.35], "accent", ["accent", "paper", 0.2], ["accent", "mist", 0.55]],
+    hot: ["mist", "paper", 0.4],
   },
   speaking: {
     flow: 1.2,
@@ -85,8 +111,9 @@ export const ORB_PHASES = {
     glow: 1.15,
     loading: 0,
     waves: 1,
-    palette: ["#ff4fd8", "#9c6bff", "#54c8ff", "#ff8ad0"],
-    hot: "#fff0fa",
+    // Brightest while it speaks
+    palette: [["accent", "mist", 0.5], ["accent", "navy", 0.2], ["accent", "paper", 0.35], "mist"],
+    hot: ["mist", "paper", 0.6],
   },
   sleeping: {
     flow: 0.12,
@@ -96,8 +123,14 @@ export const ORB_PHASES = {
     glow: 0.4,
     loading: 0,
     waves: 0,
-    palette: ["#8a7ab0", "#7a6aa0", "#8a8ab8", "#9a8ab8"],
-    hot: "#b8c0e0",
+    // Greyed while it sleeps
+    palette: [
+      ["accent", "muted", 0.4],
+      ["accent", "muted", 0.5],
+      ["accent", "muted", 0.3],
+      ["accent", "muted", 0.35],
+    ],
+    hot: ["mist", "muted", 0.3],
   },
   exiting: {
     flow: 0.6,
@@ -108,7 +141,7 @@ export const ORB_PHASES = {
     loading: 0,
     waves: 0,
     palette: BASE,
-    hot: "#572886",
+    hot: BASE_HOT,
   },
 } satisfies Record<string, PhaseLook>;
 
@@ -137,8 +170,19 @@ export async function createOrbScene(canvas: HTMLCanvasElement) {
   const renderScale = coarse ? 0.6 : 0.7;
 
   // ---------- The orb ----------
-  const pal = BASE.map((hex) => new THREE.Color(hex));
-  const colorHot = new THREE.Color("#572886");
+  // The brand's colours, read from the tokens; a mix is taken between two of them
+  const styles = getComputedStyle(document.documentElement);
+  const brand = Object.fromEntries(
+    (Object.keys(TOKENS) as Token[]).map((token) => [
+      token,
+      new THREE.Color(styles.getPropertyValue(`--color-${token}`).trim() || TOKENS[token]),
+    ]),
+  ) as Record<Token, InstanceType<typeof THREE.Color>>;
+  const resolve = (mix: Mix) =>
+    typeof mix === "string" ? brand[mix].clone() : brand[mix[0]].clone().lerp(brand[mix[1]], mix[2]);
+
+  const pal = BASE.map(resolve);
+  const colorHot = resolve(BASE_HOT);
   const voiceHist = new Float32Array(VOICE_HIST);
   const material = new THREE.ShaderMaterial({
     uniforms: {
@@ -158,7 +202,7 @@ export async function createOrbScene(canvas: HTMLCanvasElement) {
       uHistDt: { value: HIST_DT },
       uPal: { value: pal },
       uColorHot: { value: colorHot },
-      uColorAccent: { value: new THREE.Color("#9047ff") },
+      uColorAccent: { value: resolve(COMET) },
       uVoiceHist: { value: voiceHist },
       uPointer: { value: new THREE.Vector2() },
     },
@@ -274,7 +318,7 @@ export async function createOrbScene(canvas: HTMLCanvasElement) {
         loading: next.loading,
       };
       const colors = [...pal, colorHot];
-      const targets = [...next.palette, next.hot].map((hex) => new THREE.Color(hex));
+      const targets = [...next.palette, next.hot].map(resolve);
       lookTween?.kill();
       paletteTween?.kill();
       if (instant) {

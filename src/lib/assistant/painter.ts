@@ -1,15 +1,20 @@
 /*
  * The shopping assistant's visuals: the moving gradient inside the launcher and the orb, and the
  * size of the opening ripple. One painter draws both: four soft
- * blobs drifting on layered sines and two sine waves, blended additively. Its colours come from the
- * design tokens in globals.css (SAVA blue, navy, mist, paper), so re-skinning the site re-skins it too.
+ * blobs drifting on layered sines and two sine waves, blended additively — softly in the orb, brightly
+ * in the launcher. Its colours come from the design tokens in globals.css (SAVA blue, navy, mist,
+ * paper), so re-skinning the site re-skins it too.
  */
 
 type Rgb = readonly [number, number, number];
 
-export interface AssistantPalette {
+/** What the moving gradient is painted in */
+export interface GradientColors {
   blobs: readonly Rgb[];
   waves: readonly Rgb[];
+}
+
+export interface AssistantPalette extends GradientColors {
   /** The orb's body, from its lit side to its deep side, and the halo round it */
   orbLight: Rgb;
   orbDeep: Rgb;
@@ -43,18 +48,29 @@ function toRgb(color: string, ctx: CanvasRenderingContext2D | null): Rgb {
   return [r, g, b];
 }
 
-let palette: AssistantPalette | null = null;
+let tokens: { accent: Rgb; navy: Rgb; mist: Rgb } | null = null;
 
-/** The painter's colours, read once from the tokens (globals.css) */
-export function readAssistantPalette(): AssistantPalette {
-  if (palette) return palette;
+/** The brand colours the painter mixes from, read once from the tokens (globals.css) */
+function readTokens() {
+  if (tokens) return tokens;
   const ctx = document.createElement("canvas").getContext("2d");
   const styles = getComputedStyle(document.documentElement);
   const token = (name: string, fallback: string) =>
     ctx ? toRgb(styles.getPropertyValue(name).trim() || fallback, ctx) : toRgb(fallback, null);
-  const accent = token("--color-accent", "#709fcb");
-  const navy = token("--color-navy", "#021b5b");
-  const mist = token("--color-mist", "#d8e3ff");
+  tokens = {
+    accent: token("--color-accent", "#709fcb"),
+    navy: token("--color-navy", "#021b5b"),
+    mist: token("--color-mist", "#d8e3ff"),
+  };
+  return tokens;
+}
+
+let palette: AssistantPalette | null = null;
+
+/** The painter's colours for the assistant's stage and orb */
+export function readAssistantPalette(): AssistantPalette {
+  if (palette) return palette;
+  const { accent, navy, mist } = readTokens();
   // Navy for depth, SAVA blue, and mist for the light that gathers where the blobs cross
   palette = {
     blobs: [mix(accent, navy, 0.35), accent, mist, navy],
@@ -64,6 +80,23 @@ export function readAssistantPalette(): AssistantPalette {
     halo: accent,
   };
   return palette;
+}
+
+let launcher: GradientColors | null = null;
+
+/**
+ * The launcher's colours: lighter than the stage's, painted bright (paintAssistantGradient's `bright`)
+ * over the button's navy, so the button glows like a bubble — a white-hot core where the light
+ * crosses, mid and sky blues towards its rim
+ */
+export function readLauncherColors(): GradientColors {
+  if (launcher) return launcher;
+  const { accent, navy, mist } = readTokens();
+  launcher = {
+    blobs: [mix(accent, navy, 0.15), mist, accent, mix(accent, mist, 0.45)],
+    waves: [mix(accent, mist, 0.2), mix(accent, mist, 0.4)],
+  };
+  return launcher;
 }
 
 // ---------- Drift ------------------------------------------------------------
@@ -106,18 +139,30 @@ function waveY(wave: (typeof WAVES)[number], x: number, time: number, height: nu
 const rgba = ([r, g, b]: Rgb, alpha: number) => `rgba(${r}, ${g}, ${b}, ${Math.max(0, Math.min(1, alpha))})`;
 
 /**
+ * How strongly it's painted: a blob's alpha at its centre, 35% and 70% of its radius, and a scale on
+ * the waves' opacity. Soft for the stage and orb, so where blobs cross the light builds to mist; bright
+ * for the launcher, where it burns to white.
+ */
+const STRENGTH = {
+  soft: { blob: [0.39, 0.23, 0.07], wave: 1 },
+  bright: { blob: [0.77, 0.47, 0.13], wave: 1.8 },
+};
+
+/**
  * The gradient over a `width` × `height` area at `time` (seconds). `intensity` (0–1) dims it;
- * `clear: false` paints over what's already there (the orb's body).
+ * `clear: false` paints over what's already there (the orb's body); `bright` paints it at the
+ * launcher's strength (STRENGTH).
  */
 export function paintAssistantGradient(
   ctx: CanvasRenderingContext2D,
-  colors: AssistantPalette,
+  colors: GradientColors,
   width: number,
   height: number,
   time: number,
-  { intensity = 1, clear = true } = {},
+  { intensity = 1, clear = true, bright = false } = {},
 ) {
   if (clear) ctx.clearRect(0, 0, width, height);
+  const strength = bright ? STRENGTH.bright : STRENGTH.soft;
   const previous = ctx.globalCompositeOperation;
   ctx.globalCompositeOperation = "lighter";
 
@@ -128,10 +173,9 @@ export function paintAssistantGradient(
     const cy = y * height;
     const radius = Math.max(1, r * Math.max(width, height));
     const fill = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius);
-    // Soft enough that where they cross, the light builds to mist rather than burning out to white
-    fill.addColorStop(0, rgba(color, 0.39 * intensity));
-    fill.addColorStop(0.35, rgba(color, 0.23 * intensity));
-    fill.addColorStop(0.7, rgba(color, 0.07 * intensity));
+    fill.addColorStop(0, rgba(color, strength.blob[0] * intensity));
+    fill.addColorStop(0.35, rgba(color, strength.blob[1] * intensity));
+    fill.addColorStop(0.7, rgba(color, strength.blob[2] * intensity));
     fill.addColorStop(1, rgba(color, 0));
     ctx.fillStyle = fill;
     ctx.fillRect(0, 0, width, height);
@@ -153,7 +197,7 @@ export function paintAssistantGradient(
     const start = wave.direction === 1 ? Math.min(...samples) : Math.max(...samples);
     const end = start + wave.direction * height * 0.6;
     const fill = ctx.createLinearGradient(0, start, 0, end);
-    const alpha = wave.opacity * intensity;
+    const alpha = wave.opacity * strength.wave * intensity;
     fill.addColorStop(0, rgba(color, alpha));
     fill.addColorStop(0.4, rgba(color, alpha * 0.55));
     fill.addColorStop(1, rgba(color, 0));

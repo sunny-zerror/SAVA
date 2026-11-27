@@ -41,7 +41,10 @@ export default function ContactForm() {
 
   if (sent) {
     return (
-      <div role="status" className="flex flex-col items-start gap-5 rounded-3xl bg-surface p-8 md:p-12">
+      <div
+        role="status"
+        className="flex flex-col items-start justify-center gap-5 rounded-3xl bg-surface p-8 md:p-12 lg:flex-1"
+      >
         <span aria-hidden="true" className="center size-14 rounded-full bg-success text-paper">
           <RiCheckLine className="size-6" />
         </span>
@@ -55,17 +58,21 @@ export default function ContactForm() {
   }
 
   return (
-    // The form rises in as one block, not field by field
-    <form data-reveal onSubmit={onSubmit} aria-labelledby="contact-form" className="grid gap-5 md:grid-cols-2">
-      <h2 id="contact-form" className="text-h3 md:col-span-2">
+    // The form rises in as one block, not field by field. 20px between fields, 28px from the heading
+    // and to the button. On wide screens it fills its column: the message box takes the room left over,
+    // so the button lines up with the foot of the column beside it
+    <form data-reveal onSubmit={onSubmit} aria-labelledby="contact-form" className="flex flex-col gap-7 lg:flex-1">
+      <h2 id="contact-form" className="text-h3">
         Send us a message
       </h2>
-      <TextField label="Name" name="name" autoComplete="name" required />
-      <TextField label="Email" name="email" type="email" autoComplete="email" required />
-      <TextField label="Phone (optional)" name="phoneNumber" type="tel" autoComplete="tel" />
-      <TextField label="Subject" name="subject" required />
-      <TextArea label="Message" name="message" required className="md:col-span-2" />
-      <BlobButton type="submit" loading={loading} className="mt-2 justify-self-start md:col-span-2">
+      <div className="grid gap-5 md:grid-cols-2 lg:flex-1 lg:grid-rows-[auto_auto_1fr]">
+        <TextField label="Name" name="name" autoComplete="name" required />
+        <TextField label="Email" name="email" type="email" autoComplete="email" required />
+        <TextField label="Phone (optional)" name="phoneNumber" type="tel" autoComplete="tel" />
+        <TextField label="Subject" name="subject" required />
+        <TextArea label="Message" name="message" rows={4} required className="md:col-span-2 lg:[&_textarea]:flex-1" />
+      </div>
+      <BlobButton type="submit" loading={loading} className="self-start">
         Send message
       </BlobButton>
     </form>

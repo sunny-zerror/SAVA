@@ -1,4 +1,4 @@
-import { Inter, Inter_Tight } from "next/font/google";
+import { IBM_Plex_Mono, Inter, Inter_Tight } from "next/font/google";
 
 /*
  * Brand fonts, self-hosted by next/font: identical on every OS (no Arial fallback on Windows) and
@@ -13,4 +13,13 @@ import { Inter, Inter_Tight } from "next/font/google";
 const primary = Inter_Tight({ subsets: ["latin", "latin-ext"], variable: "--ff-primary", display: "swap" });
 const secondary = Inter({ subsets: ["latin", "latin-ext"], variable: "--ff-secondary", display: "swap" });
 
-export const fontVariables = `${primary.variable} ${secondary.variable}`;
+// Only the assistant's speech bubble (text-mono) is set in it, and only once it shows: not preloaded
+const mono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: "500",
+  variable: "--ff-mono",
+  display: "swap",
+  preload: false,
+});
+
+export const fontVariables = `${primary.variable} ${secondary.variable} ${mono.variable}`;
